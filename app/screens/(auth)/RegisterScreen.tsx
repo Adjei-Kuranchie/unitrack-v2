@@ -1,18 +1,22 @@
+import { Feather } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';
+import { router } from 'expo-router';
+
 import React, { useState } from 'react';
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-  ScrollView,
+  View,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import { useAuthStore } from '~/store/authStore';
-import { router } from 'expo-router';
 
 export default function RegisterScreen() {
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -49,7 +53,7 @@ export default function RegisterScreen() {
     const { error: registrationError } = useAuthStore.getState();
     if (!registrationError) {
       Alert.alert('Success', 'Account created successfully! Please sign in.', [
-        { text: 'OK', onPress: () => router.replace('/screens/(auth)/SignInscreen') },
+        { text: 'OK', onPress: () => router.replace('/screens/(auth)/SignInScreen') },
       ]);
     }
   };
@@ -61,14 +65,14 @@ export default function RegisterScreen() {
   }, [error]);
 
   return (
-    <ScrollView className="flex-1 bg-white">
+    <ScrollView className="flex-1 bg-white pt-12">
       <View className="px-6 py-8">
         <View className="mb-8">
           <Text className="mb-2 text-center text-3xl font-bold text-blue-600">Create Account</Text>
           <Text className="text-center text-gray-600">Join UniTrack today</Text>
         </View>
 
-        <View className="space-y-4">
+        <View className="flex flex-col gap-4 space-y-8">
           <View>
             <Text className="mb-2 font-medium text-gray-700">Username</Text>
             <TextInput
@@ -83,14 +87,21 @@ export default function RegisterScreen() {
 
           <View>
             <Text className="mb-2 font-medium text-gray-700">Password</Text>
-            <TextInput
-              className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
-              placeholder="Create a password"
-              value={formData.password}
-              onChangeText={(text) => setFormData({ ...formData, password: text })}
-              secureTextEntry
-              editable={!isLoading}
-            />
+            <View className="relative">
+              <TextInput
+                className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
+                placeholder="Create a password"
+                value={formData.password}
+                onChangeText={(text) => setFormData({ ...formData, password: text })}
+                secureTextEntry={!showPassword}
+                editable={!isLoading}
+              />
+              <Pressable
+                onPress={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-3">
+                <Feather name={showPassword ? 'eye-off' : 'eye'} size={20} color="gray" />
+              </Pressable>
+            </View>
           </View>
 
           <View>
@@ -152,7 +163,10 @@ export default function RegisterScreen() {
             )}
           </TouchableOpacity>
 
-          <TouchableOpacity className="mt-4" onPress={() => router.back()} disabled={isLoading}>
+          <TouchableOpacity
+            className="mt-4"
+            onPress={() => router.replace('/screens/(auth)/SignInScreen')}
+            disabled={isLoading}>
             <Text className="text-center text-blue-600">Already have an account? Sign in</Text>
           </TouchableOpacity>
         </View>

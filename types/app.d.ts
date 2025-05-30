@@ -18,16 +18,17 @@ interface AttendanceRecord {
   timestamp: string;
 }
 
-interface AppState {
+interface ApiState {
   courses: Course[];
   sessions: Session[];
   attendance: AttendanceRecord[];
+  users: any[];
   isLoading: boolean;
   error: string | null;
 
   // Course actions
   fetchCourses: () => Promise<void>;
-  addCourse: (courseData: Omit<Course, 'id'>) => Promise<void>;
+  addCourse: (course: Omit<Course, 'id'>) => Promise<void>;
 
   // Session actions
   fetchSessions: () => Promise<void>;
@@ -37,7 +38,11 @@ interface AppState {
   fetchAttendance: () => Promise<void>;
   markAttendance: (sessionId: number, studentId: string) => Promise<void>;
 
+  // User actions
+  fetchUsers: () => Promise<void>;
+  updateUser: (userData: any) => Promise<void>;
+  deleteUser: (userId: number) => Promise<void>;
+
   clearError: () => void;
 }
-
-export { AppState };
+export { ApiState };

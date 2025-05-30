@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-import { useAuthStore } from '~/store/authStore';
 import { router } from 'expo-router';
+import React, { useState } from 'react';
+import { ActivityIndicator, Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useAuthStore } from '~/store/authStore';
 
 export default function SignInScreen() {
   const [username, setUsername] = useState('');
@@ -19,7 +19,7 @@ export default function SignInScreen() {
     // Check if sign in was successful
     const { user } = useAuthStore.getState();
     if (user) {
-      router.replace('/(tabs)');
+      router.replace('/screens/(tabs)/index');
     }
   };
 
@@ -36,7 +36,7 @@ export default function SignInScreen() {
         <Text className="text-center text-gray-600">Sign in to your account</Text>
       </View>
 
-      <View className="space-y-4">
+      <View className="flex flex-col gap-4 space-y-4">
         <View>
           <Text className="mb-2 font-medium text-gray-700">Username</Text>
           <TextInput
@@ -74,9 +74,11 @@ export default function SignInScreen() {
 
         <TouchableOpacity
           className="mt-4"
-          onPress={() => router.push('/register')}
+          onPress={() => router.push('/screens/(auth)/RegisterScreen')}
           disabled={isLoading}>
-          <Text className="text-center text-blue-600">Don't have an account? Register here</Text>
+          <Text className="text-center text-blue-600">
+            Don&apos;t have an account? Register here
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
