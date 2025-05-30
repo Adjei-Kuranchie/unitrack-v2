@@ -49,7 +49,7 @@ export default function RegisterScreen() {
     const { error: registrationError } = useAuthStore.getState();
     if (!registrationError) {
       Alert.alert('Success', 'Account created successfully! Please sign in.', [
-        { text: 'OK', onPress: () => router.replace('/SignInscreen') },
+        { text: 'OK', onPress: () => router.replace('/screens/(auth)/SignInscreen') },
       ]);
     }
   };
