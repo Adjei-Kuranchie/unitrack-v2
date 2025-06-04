@@ -96,9 +96,10 @@ export default function RegisterScreen() {
                 secureTextEntry={!showPassword}
                 editable={!isLoading}
               />
+
               <Pressable
                 onPress={() => setShowPassword((prev) => !prev)}
-                className="absolute right-3 top-3">
+                className="absolute right-2 h-12 w-12 items-center justify-center rounded-full ">
                 <Feather name={showPassword ? 'eye-off' : 'eye'} size={20} color="gray" />
               </Pressable>
             </View>

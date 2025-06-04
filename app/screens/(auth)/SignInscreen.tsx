@@ -1,11 +1,21 @@
+import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useAuthStore } from '~/store/authStore';
 
 export default function SignInScreen() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const { signIn, isLoading, error, clearError } = useAuthStore();
 
   const handleSignIn = async () => {
@@ -19,7 +29,7 @@ export default function SignInScreen() {
     // Check if sign in was successful
     const { user } = useAuthStore.getState();
     if (user) {
-      router.replace('/screens/(tabs)/index');
+      router.replace('/screens/(tabs)');
     }
   };
 
@@ -51,14 +61,21 @@ export default function SignInScreen() {
 
         <View>
           <Text className="mb-2 font-medium text-gray-700">Password</Text>
-          <TextInput
-            className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
-            placeholder="Enter your password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            editable={!isLoading}
-          />
+          <View className="relative">
+            <TextInput
+              className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
+              placeholder="Enter your password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              editable={!isLoading}
+            />
+            <Pressable
+              onPress={() => setShowPassword((prev) => !prev)}
+              className="absolute right-2 h-12 w-12 items-center justify-center rounded-full ">
+              <Feather name={showPassword ? 'eye-off' : 'eye'} size={20} color="gray" />
+            </Pressable>
+          </View>
         </View>
 
         <TouchableOpacity
