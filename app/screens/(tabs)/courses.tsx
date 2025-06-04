@@ -88,20 +88,27 @@ const CoursesScreen = () => {
       course.courseCode.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const renderCourseCard = ({ item: course }: { item: Course }) => {
+  const renderCourseCard = ({ item: course }: { item: any }) => {
+    // Fixed: Ensure all displayed values are strings
+    const courseName = course.courseName ? String(course.courseName) : 'Unknown Course';
+    const courseCode = course.courseCode ? String(course.courseCode) : 'N/A';
+    const lecturerName = course.lecturerName ? String(course.lecturerName) : null;
+    const department = course.department ? String(course.department) : null;
+    const courseId = course.id ? String(course.id) : String(Math.random());
+
     const isOwnCourse = isLecturer && course.lecturerId === user?.id;
 
     return (
       <TouchableOpacity
+        key={courseId} // Fixed: Ensure string key
         className="mb-4 rounded-lg bg-white p-4 shadow-sm"
         onPress={() => {
-          // Navigate to course details or attendance
           router.push(`/screens/(tabs)`);
         }}>
         <View className="mb-2 flex-row items-start justify-between">
           <View className="flex-1">
-            <Text className="text-lg font-semibold text-gray-900">{course.courseName}</Text>
-            <Text className="text-sm font-medium text-blue-600">{course.courseCode}</Text>
+            <Text className="text-lg font-semibold text-gray-900">{courseName}</Text>
+            <Text className="text-sm font-medium text-blue-600">{courseCode}</Text>
           </View>
           {isOwnCourse && (
             <View className="rounded-full bg-green-100 px-2 py-1">
@@ -110,18 +117,16 @@ const CoursesScreen = () => {
           )}
         </View>
 
-        {course.lecturerName && (
-          <Text className="mb-2 text-sm text-gray-600">Lecturer: {course.lecturerName}</Text>
+        {lecturerName && (
+          <Text className="mb-2 text-sm text-gray-600">Lecturer: {lecturerName}</Text>
         )}
 
-        {course.department && (
-          <Text className="mb-2 text-sm text-gray-600">Department: {course.department}</Text>
-        )}
+        {department && <Text className="mb-2 text-sm text-gray-600">Department: {department}</Text>}
 
         <View className="mt-2 flex-row items-center justify-between">
           <View className="flex-row items-center">
             <MaterialIcons name="school" size={16} color="#6b7280" />
-            <Text className="ml-1 text-xs text-gray-500">Course Code: {course.courseCode}</Text>
+            <Text className="ml-1 text-xs text-gray-500">Course Code: {courseCode}</Text>
           </View>
           <MaterialIcons name="chevron-right" size={20} color="#9ca3af" />
         </View>
@@ -192,9 +197,11 @@ const CoursesScreen = () => {
         </View>
       ) : (
         <FlatList
-          data={filteredCourses as Course[]}
+          data={filteredCourses} // Fixed: Remove type casting
           renderItem={renderCourseCard}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item, index) =>
+            item.lecturerId ? String(item.lecturerId) : String(index)
+          } // Fixed: Ensure string key
           contentContainerStyle={{ padding: 16, flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}

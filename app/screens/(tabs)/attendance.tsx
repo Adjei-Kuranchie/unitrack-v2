@@ -4,6 +4,7 @@ import Constants from 'expo-constants';
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { formatDate, formatTime } from '~/lib/utils';
 import { useApiStore } from '~/store/apiStore';
 import { useAuthStore } from '~/store/authStore';
 
@@ -111,12 +112,47 @@ const AttendanceScreen = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
-  };
+  const renderAttendanceRecord = (record: any, index: number) => {
+    // Ensure we have valid string/number values for display
+    const recordId = record.id ? String(record.id) : String(index);
+    const sessionId = record.sessionId ? String(record.sessionId) : 'N/A';
+    const studentId = record.studentId ? String(record.studentId) : null;
+    const timestamp = record.timestamp || new Date().toISOString();
 
-  const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return (
+      <View
+        key={recordId} // Fixed: Use string key instead of potentially undefined object
+        className="border-b border-gray-100 py-4 last:border-b-0">
+        <View className="mb-2 flex-row items-center justify-between">
+          <View className="flex-row items-center">
+            <Ionicons name="calendar" size={16} color="#6b7280" />
+            <Text className="ml-2 text-sm text-gray-600">{formatDate(timestamp)}</Text>
+          </View>
+          <View className="flex-row items-center">
+            <Ionicons name="time" size={16} color="#6b7280" />
+            <Text className="ml-2 text-sm text-gray-600">{formatTime(timestamp)}</Text>
+          </View>
+        </View>
+
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center">
+            <Ionicons name="school" size={16} color="#6b7280" />
+            <Text className="ml-2 text-sm text-gray-700">Session {sessionId}</Text>
+          </View>
+          <View className="flex-row items-center">
+            <Ionicons name="checkmark-circle" size={16} color="#10b981" />
+            <Text className="ml-2 text-sm font-medium text-green-600">Present</Text>
+          </View>
+        </View>
+
+        {studentId && (
+          <View className="mt-2 flex-row items-center">
+            <Ionicons name="person" size={16} color="#6b7280" />
+            <Text className="ml-2 text-xs text-gray-500">Student ID: {studentId}</Text>
+          </View>
+        )}
+      </View>
+    );
   };
 
   return (
@@ -231,49 +267,8 @@ const AttendanceScreen = () => {
               <Ionicons name="hourglass" size={24} color="#3b82f6" />
               <Text className="ml-2 text-gray-600">Loading attendance records...</Text>
             </View>
-          ) : attendance.length > 0 ? (
-            <View>
-              {attendance.map((record, index) => (
-                <View
-                  key={record.id || index}
-                  className="border-b border-gray-100 py-4 last:border-b-0">
-                  <View className="mb-2 flex-row items-center justify-between">
-                    <View className="flex-row items-center">
-                      <Ionicons name="calendar" size={16} color="#6b7280" />
-                      <Text className="ml-2 text-sm text-gray-600">
-                        {formatDate(record.timestamp)}
-                      </Text>
-                    </View>
-                    <View className="flex-row items-center">
-                      <Ionicons name="time" size={16} color="#6b7280" />
-                      <Text className="ml-2 text-sm text-gray-600">
-                        {formatTime(record.timestamp)}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center">
-                      <Ionicons name="school" size={16} color="#6b7280" />
-                      <Text className="ml-2 text-sm text-gray-700">Session {record.sessionId}</Text>
-                    </View>
-                    <View className="flex-row items-center">
-                      <Ionicons name="checkmark-circle" size={16} color="#10b981" />
-                      <Text className="ml-2 text-sm font-medium text-green-600">Present</Text>
-                    </View>
-                  </View>
-
-                  {record.studentId && (
-                    <View className="mt-2 flex-row items-center">
-                      <Ionicons name="person" size={16} color="#6b7280" />
-                      <Text className="ml-2 text-xs text-gray-500">
-                        Student ID: {record.studentId}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              ))}
-            </View>
+          ) : Array.isArray(attendance) && attendance.length > 0 ? (
+            <View>{attendance.map((record, index) => renderAttendanceRecord(record, index))}</View>
           ) : (
             <View className="items-center py-8">
               <Ionicons name="document-text-outline" size={48} color="#9ca3af" />

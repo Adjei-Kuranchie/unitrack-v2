@@ -82,32 +82,39 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
     }
   };
 
-  const renderSessionCard = (session: any) => (
-    <TouchableOpacity
-      key={session.id}
-      className="mb-3 rounded-lg border border-gray-100 bg-white p-4 shadow-sm"
-      onPress={() => handleSessionPress(session)}>
-      <View className="mb-2 flex-row items-center justify-between">
-        <View className="flex-1">
-          <Text className="text-lg font-semibold text-gray-800">{session.course.courseName}</Text>
-          <Text className="mt-1 text-sm text-gray-500">Session #{session.id}</Text>
-        </View>
-        <View className="flex-row items-center">
-          <Ionicons name="time-outline" size={16} color="#6B7280" />
-          <Text className="ml-1 text-sm text-gray-500">{formatDate(session.createdAt)}</Text>
-        </View>
-      </View>
+  const renderSessionCard = (session: any) => {
+    // Fixed: Safe property access with fallbacks
+    const courseName = session.course?.courseName || session.course || 'Unknown Course';
+    const sessionId = session.id ? String(session.id) : 'N/A';
+    const createdAt = session.createdAt || new Date().toISOString();
 
-      <View className="flex-row items-center justify-between">
-        <View className="flex-row items-center">
-          <View className="rounded-full bg-blue-100 px-3 py-1">
-            <Text className="text-xs font-medium text-blue-700">Active</Text>
+    return (
+      <TouchableOpacity
+        key={sessionId} // Fixed: Ensure string key
+        className="mb-3 rounded-lg border border-gray-100 bg-white p-4 shadow-sm"
+        onPress={() => handleSessionPress(session)}>
+        <View className="mb-2 flex-row items-center justify-between">
+          <View className="flex-1">
+            <Text className="text-lg font-semibold text-gray-800">{String(courseName)}</Text>
+            <Text className="mt-1 text-sm text-gray-500">Session #{sessionId}</Text>
+          </View>
+          <View className="flex-row items-center">
+            <Ionicons name="time-outline" size={16} color="#6B7280" />
+            <Text className="ml-1 text-sm text-gray-500">{formatDate(createdAt)}</Text>
           </View>
         </View>
-        <Ionicons name="chevron-forward" size={20} color="#6B7280" />
-      </View>
-    </TouchableOpacity>
-  );
+
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center">
+            <View className="rounded-full bg-blue-100 px-3 py-1">
+              <Text className="text-xs font-medium text-blue-700">Active</Text>
+            </View>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#6B7280" />
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   const renderCreateModal = () => (
     <Modal
