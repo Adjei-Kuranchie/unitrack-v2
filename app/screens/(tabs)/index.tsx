@@ -64,7 +64,7 @@ export default function DashboardScreen() {
 
       <View className="px-6 py-6">
         {/* Stats Grid */}
-        <View className="mb-6 flex-row space-x-4">
+        <View className="mb-6 flex-row gap-4 space-x-4">
           <StatCard
             title="Total Courses"
             count={courses.length}
@@ -81,7 +81,7 @@ export default function DashboardScreen() {
           />
         </View>
 
-        <View className="mb-6 flex-row space-x-4">
+        <View className="mb-6 flex-row gap-4 space-x-4">
           <StatCard
             title="Attendance Records"
             count={attendance.length}
@@ -92,7 +92,7 @@ export default function DashboardScreen() {
           <StatCard
             title="My Courses"
             count={
-              isLecturer ? courses.filter((c) => c.lecturer === user?.id).length : courses.length
+              isLecturer ? courses.filter((c) => c.lecturerId === user?.id).length : courses.length
             }
             icon="library-books"
             color="#ef4444"

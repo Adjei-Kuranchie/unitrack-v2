@@ -1,8 +1,7 @@
 interface Course {
-  id: number;
   courseName: string;
   courseCode: string;
-  lecturer: number;
+  lecturerId: number;
 }
 
 interface Session {

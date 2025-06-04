@@ -1,9 +1,280 @@
-import { Text, View } from 'react-native';
-const Sessions = () => {
+import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import {
+  Alert,
+  Modal,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { useApiStore } from '~/store/apiStore';
+import { useAuthStore } from '~/store/authStore';
+
+interface SessionScreenProps {
+  navigation?: any;
+}
+
+const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
+  const [refreshing, setRefreshing] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState('');
+
+  const {
+    sessions,
+    courses,
+    isLoading,
+    error,
+    fetchSessions,
+    fetchCourses,
+    createSession,
+    clearError,
+  } = useApiStore();
+
+  const { role } = useAuthStore();
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    await Promise.all([fetchSessions(), fetchCourses()]);
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadData();
+    setRefreshing(false);
+  };
+
+  const handleCreateSession = async () => {
+    if (!selectedCourse.trim()) {
+      Alert.alert('Error', 'Please select a course');
+      return;
+    }
+
+    try {
+      await createSession(selectedCourse);
+      setShowCreateModal(false);
+      setSelectedCourse('');
+      Alert.alert('Success', 'Session created successfully');
+    } catch (err) {
+      Alert.alert('Error', 'Failed to create session');
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const handleSessionPress = (session: any) => {
+    // Navigate to session details or attendance marking
+    if (navigation) {
+      navigation.navigate('SessionDetails', { session });
+    }
+  };
+
+  const renderSessionCard = (session: any) => (
+    <TouchableOpacity
+      key={session.id}
+      className="mb-3 rounded-lg border border-gray-100 bg-white p-4 shadow-sm"
+      onPress={() => handleSessionPress(session)}>
+      <View className="mb-2 flex-row items-center justify-between">
+        <View className="flex-1">
+          <Text className="text-lg font-semibold text-gray-800">{session.course.courseName}</Text>
+          <Text className="mt-1 text-sm text-gray-500">Session #{session.id}</Text>
+        </View>
+        <View className="flex-row items-center">
+          <Ionicons name="time-outline" size={16} color="#6B7280" />
+          <Text className="ml-1 text-sm text-gray-500">{formatDate(session.createdAt)}</Text>
+        </View>
+      </View>
+
+      <View className="flex-row items-center justify-between">
+        <View className="flex-row items-center">
+          <View className="rounded-full bg-blue-100 px-3 py-1">
+            <Text className="text-xs font-medium text-blue-700">Active</Text>
+          </View>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color="#6B7280" />
+      </View>
+    </TouchableOpacity>
+  );
+
+  const renderCreateModal = () => (
+    <Modal
+      visible={showCreateModal}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setShowCreateModal(false)}>
+      <View className="flex-1 justify-center bg-black/50 px-4">
+        <View className="rounded-lg bg-white p-6">
+          <View className="mb-4 flex-row items-center justify-between">
+            <Text className="text-xl font-semibold text-gray-800">Create New Session</Text>
+            <TouchableOpacity onPress={() => setShowCreateModal(false)}>
+              <Ionicons name="close" size={24} color="#6B7280" />
+            </TouchableOpacity>
+          </View>
+
+          <Text className="mb-3 text-gray-600">Select Course</Text>
+
+          <ScrollView className="mb-4 max-h-60">
+            {courses.map((course) => (
+              <TouchableOpacity
+                key={course.courseCode}
+                className={`mb-2 rounded-lg border p-3 ${
+                  selectedCourse === course.courseName
+                    ? 'border-blue-200 bg-blue-50'
+                    : 'border-gray-200 bg-gray-50'
+                }`}
+                onPress={() => setSelectedCourse(course.courseName)}>
+                <Text
+                  className={`font-medium ${
+                    selectedCourse === course.courseName ? 'text-blue-700' : 'text-gray-800'
+                  }`}>
+                  {course.courseName}
+                </Text>
+                <Text
+                  className={`text-sm ${
+                    selectedCourse === course.courseName ? 'text-blue-600' : 'text-gray-500'
+                  }`}>
+                  {course.courseCode}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          <View className="flex-row space-x-3">
+            <TouchableOpacity
+              className="flex-1 rounded-lg bg-gray-100 py-3"
+              onPress={() => setShowCreateModal(false)}>
+              <Text className="text-center font-medium text-gray-700">Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="flex-1 rounded-lg bg-blue-600 py-3"
+              onPress={handleCreateSession}
+              disabled={isLoading}>
+              <Text className="text-center font-medium text-white">
+                {isLoading ? 'Creating...' : 'Create Session'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+
+  if (error) {
+    return (
+      <View className="flex-1 items-center justify-center bg-gray-50 px-4">
+        <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
+        <Text className="mt-4 text-center text-lg font-medium text-red-600">{error}</Text>
+        <TouchableOpacity
+          className="mt-4 rounded-lg bg-blue-600 px-6 py-3"
+          onPress={() => {
+            clearError();
+            loadData();
+          }}>
+          <Text className="font-medium text-white">Try Again</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
-    <View>
-      <Text>Sessions</Text>
+    <View className="flex-1 bg-gray-50">
+      {/* Header */}
+      <View className="border-b border-gray-200 bg-white px-4 py-6">
+        <View className="flex-row items-center justify-between">
+          <View>
+            <Text className="text-2xl font-bold text-gray-800">Sessions</Text>
+            <Text className="mt-1 text-gray-500">
+              {sessions.length} active session{sessions.length !== 1 ? 's' : ''}
+            </Text>
+          </View>
+          {role === 'LECTURER' && (
+            <TouchableOpacity
+              className="flex-row items-center rounded-lg bg-blue-600 px-4 py-2"
+              onPress={() => setShowCreateModal(true)}>
+              <Ionicons name="add" size={20} color="white" />
+              <Text className="ml-1 font-medium text-white">New</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
+      {/* Sessions List */}
+      <ScrollView
+        className="flex-1 px-4 py-4"
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        showsVerticalScrollIndicator={false}>
+        {isLoading && sessions.length === 0 ? (
+          <View className="flex-1 items-center justify-center py-20">
+            <Ionicons name="reload-outline" size={48} color="#6B7280" />
+            <Text className="mt-4 text-gray-500">Loading sessions...</Text>
+          </View>
+        ) : sessions.length === 0 ? (
+          <View className="flex-1 items-center justify-center py-20">
+            <Ionicons name="school-outline" size={64} color="#6B7280" />
+            <Text className="mt-4 text-lg font-medium text-gray-600">No Sessions Yet</Text>
+            <Text className="mt-2 px-8 text-center text-gray-500">
+              {role === 'LECTURER'
+                ? 'Create your first session to get started'
+                : 'No active sessions available'}
+            </Text>
+            {role === 'LECTURER' && (
+              <TouchableOpacity
+                className="mt-6 rounded-lg bg-blue-600 px-6 py-3"
+                onPress={() => setShowCreateModal(true)}>
+                <Text className="font-medium text-white">Create Session</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        ) : (
+          <>
+            {sessions.map(renderSessionCard)}
+
+            {/* Stats Card */}
+            <View className="mt-4 rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
+              <Text className="mb-3 text-lg font-semibold text-gray-800">Quick Stats</Text>
+              <View className="flex-row justify-between">
+                <View className="items-center">
+                  <Text className="text-2xl font-bold text-blue-600">{sessions.length}</Text>
+                  <Text className="text-sm text-gray-500">Total Sessions</Text>
+                </View>
+                <View className="items-center">
+                  <Text className="text-2xl font-bold text-green-600">{courses.length}</Text>
+                  <Text className="text-sm text-gray-500">Courses</Text>
+                </View>
+                <View className="items-center">
+                  <Text className="text-2xl font-bold text-purple-600">
+                    {
+                      sessions.filter((s) => {
+                        const today = new Date();
+                        const sessionDate = new Date(s.createdAt);
+                        return sessionDate.toDateString() === today.toDateString();
+                      }).length
+                    }
+                  </Text>
+                  <Text className="text-sm text-gray-500">Today</Text>
+                </View>
+              </View>
+            </View>
+          </>
+        )}
+      </ScrollView>
+
+      {renderCreateModal()}
     </View>
   );
 };
-export default Sessions;
+
+export default SessionScreen;
