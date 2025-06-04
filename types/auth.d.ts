@@ -4,11 +4,13 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
-  role: 'LECTURER' | 'STUDENT';
+  role: 'LECTURER' | 'STUDENT' | 'ADMIN';
 }
 
 interface AuthState {
   user: User | null;
+  role: User.role | null; // User role for access control
+  resMessage: boolean | null; // Response message for registration or other actions
   token: string | null;
   isLoading: boolean;
   error: string | null;
@@ -24,7 +26,7 @@ interface RegisterData {
   firstName: string;
   lastName: string;
   email: string;
-  role: 'LECTURER' | 'STUDENT';
+  role: 'LECTURER' | 'STUDENT' | 'ADMIN';
 }
 
 export { AuthState, RegisterData };

@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-// import Constants from 'expo-constants';
+import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -12,8 +12,7 @@ import {
   View,
 } from 'react-native';
 import { useAuthStore } from '~/store/authStore';
-// const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
-const API_BASE_URL = 'https://unitrack-cp2u.onrender.com';
+const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 
 /**
  * SignInScreen component allows users to sign in to their account.
@@ -36,8 +35,8 @@ export default function SignInScreen() {
     await signIn(username, password);
 
     // Check if sign in was successful
-    const { user } = useAuthStore.getState();
-    if (user) {
+    const { user, resMessage } = useAuthStore.getState();
+    if (resMessage) {
       router.replace('/screens/(tabs)');
     }
   };

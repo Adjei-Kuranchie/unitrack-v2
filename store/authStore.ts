@@ -79,7 +79,9 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       user: null,
+      resMessage: null,
       token: null,
+      role: null, // User role for access control
       isLoading: false,
       error: null,
 
@@ -103,8 +105,9 @@ export const useAuthStore = create<AuthState>()(
 
           // Assuming the API returns user data and token
           set({
-            user: data.user,
-            token: data.token,
+            resMessage: true,
+            role: data.role, // Set user role for access control
+            token: data.jwt,
             isLoading: false,
           });
         } catch (error) {

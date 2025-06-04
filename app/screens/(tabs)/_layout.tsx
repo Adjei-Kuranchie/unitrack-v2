@@ -3,8 +3,8 @@ import { Tabs } from 'expo-router';
 import { useAuthStore } from '~/store/authStore';
 
 export default function TabLayout() {
-  const user = useAuthStore((state) => state.user);
-  const isLecturer = user?.role === 'LECTURER';
+  const role = useAuthStore((state) => state.role);
+  const isLecturer = role === 'LECTURER';
 
   return (
     <Tabs
