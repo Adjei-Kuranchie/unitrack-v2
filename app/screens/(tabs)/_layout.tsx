@@ -1,6 +1,5 @@
-import React from 'react';
-import { Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
 import { useAuthStore } from '~/store/authStore';
 
 export default function TabLayout() {
@@ -45,7 +44,7 @@ export default function TabLayout() {
         }}
       />
 
-      {isLecturer && (
+      {isLecturer ? (
         <Tabs.Screen
           name="sessions"
           options={{
@@ -53,6 +52,14 @@ export default function TabLayout() {
             tabBarIcon: ({ color, size }) => (
               <MaterialIcons name="event" size={size} color={color} />
             ),
+          }}
+        />
+      ) : (
+        <Tabs.Screen
+          name="sessions"
+          options={{
+            title: 'Sessions',
+            tabBarItemStyle: { display: 'none' }, // Hide this tab for students
           }}
         />
       )}

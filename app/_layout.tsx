@@ -5,6 +5,7 @@ import { Stack } from 'expo-router';
 export default function Layout() {
   return (
     <Stack>
+      {/* TODO: Add authentication screens back to ui */}
       {/* <Stack.Screen
         name="screens/(auth)/RegisterScreen"
         options={{
