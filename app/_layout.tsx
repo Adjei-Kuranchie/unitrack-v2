@@ -6,7 +6,7 @@ export default function Layout() {
   return (
     <Stack>
       {/* TODO: Add authentication screens back to ui */}
-      {/* <Stack.Screen
+      <Stack.Screen
         name="screens/(auth)/RegisterScreen"
         options={{
           headerShown: false,
@@ -17,7 +17,7 @@ export default function Layout() {
         options={{
           headerShown: false,
         }}
-      /> */}
+      />
       <Stack.Screen
         name="screens/(tabs)"
         options={{
