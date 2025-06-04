@@ -1,4 +1,5 @@
 import { Feather } from '@expo/vector-icons';
+// import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -11,6 +12,14 @@ import {
   View,
 } from 'react-native';
 import { useAuthStore } from '~/store/authStore';
+// const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
+const API_BASE_URL = 'https://unitrack-cp2u.onrender.com';
+
+/**
+ * SignInScreen component allows users to sign in to their account.
+ * It includes fields for username and password, a button to submit the form,
+ * and a link to navigate to the registration screen.
+ */
 
 export default function SignInScreen() {
   const [username, setUsername] = useState('');
@@ -30,6 +39,47 @@ export default function SignInScreen() {
     const { user } = useAuthStore.getState();
     if (user) {
       router.replace('/screens/(tabs)');
+    }
+  };
+
+  // Add this function to your SignInScreen component for testing
+  const testApiConnection = async () => {
+    try {
+      console.log('Testing connection to:', API_BASE_URL);
+
+      // Test basic connectivity
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: 'Julie901',
+          password: 'julie0990',
+          firstName: 'Julie',
+          lastName: 'Dona',
+          email: 'tapose9852@jeanssi.com',
+          role: 'STUDENT',
+        }),
+      });
+
+      console.log('Connection test - Status:', response.status);
+      console.log('Connection test - OK:', response.ok);
+
+      // Also log the response text to see what the server is returning
+      const responseText = await response.text();
+      console.log('Response:', responseText);
+
+      Alert.alert(
+        'Connection Test',
+        `Status: ${response.status}\nResponse: ${responseText}\nURL: ${API_BASE_URL}`
+      );
+    } catch (error) {
+      console.error('Connection test failed:', error);
+      Alert.alert(
+        'Connection Failed',
+        `Error: ${error instanceof Error ? error.message : 'Unknown error'}\nURL: ${API_BASE_URL}`
+      );
     }
   };
 
@@ -98,6 +148,11 @@ export default function SignInScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Add a test button in your JSX (temporarily): */}
+      <TouchableOpacity className="mt-4 rounded-lg bg-gray-600 py-4" onPress={testApiConnection}>
+        <Text className="text-center text-lg font-semibold text-white">Test API Connection</Text>
+      </TouchableOpacity>
     </View>
   );
 }

@@ -43,6 +43,7 @@
       "package": "com.adjeikuranchie.unitrackv2"
     },
     "extra": {
+      "API_BASE_URL": "https://unitrack-cp2u.onrender.com",
       "router": {},
       "eas": {
         "projectId": "740c3ae3-5e06-4eaf-8eca-6fb39815ecd1"

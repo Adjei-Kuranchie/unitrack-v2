@@ -1,8 +1,8 @@
+import Constants from 'expo-constants';
 import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 import { AuthState, RegisterData } from '~/types/auth';
-import { persist, createJSONStorage } from 'zustand/middleware';
-
-const API_BASE_URL = process.env.API_BASE_URL;
+const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 
 /* export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,

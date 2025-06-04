@@ -2,8 +2,8 @@ import { create } from 'zustand';
 import { useAuthStore } from '~/store/authStore';
 import { ApiState } from '~/types/app';
 
-// stores/appStore.ts
-const API_BASE_URL = process.env.API_BASE_URL;
+import Constants from 'expo-constants';
+const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 
 const getAuthHeaders = () => {
   const token = useAuthStore.getState().token;
