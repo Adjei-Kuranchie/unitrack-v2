@@ -152,6 +152,7 @@ const CoursesScreen = () => {
       )}
     </View>
   );
+  console.log(courses);
 
   return (
     <View className="flex-1 bg-gray-50">

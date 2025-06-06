@@ -2,11 +2,20 @@ interface Course {
   courseName: string;
   courseCode: string;
   lecturerId: number;
+  id: number;
+  courseCode: string;
+  courseName: string;
+  session: string | null;
+  attendance: any[]; // Replace 'any' if you have Attendance[] type
+  student: any[];
+  // lecturer: LecturerSummary[]; // It's an array of lecturer summaries
 }
 
 interface Session {
   id: number;
-  course: string;
+  status: string;
+
+  course: Course;
   createdAt: string;
 }
 
