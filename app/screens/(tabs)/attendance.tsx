@@ -154,7 +154,6 @@ const AttendanceScreen = () => {
       </View>
     );
   };
-  // console.info(sessions);
 
   return (
     <View className="flex-1 bg-gray-50">
@@ -180,7 +179,7 @@ const AttendanceScreen = () => {
         )}
 
         {/* Mark Attendance Section - Only for Students */}
-        {role === 'LECTURER' && (
+        {role === 'STUDENT' && (
           <View className="mb-4 rounded-lg bg-white p-6 shadow-sm">
             <Text className="mb-4 text-xl font-semibold text-gray-800">Mark Attendance</Text>
 
