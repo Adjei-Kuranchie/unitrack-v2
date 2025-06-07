@@ -25,6 +25,8 @@ export default function ProfileScreen() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedFields, setEditedFields] = useState<Record<string, string>>({});
 
+  // Ensure user is defined before accessing properties
+
   // Profile fields configuration
   const profileFields: EditableField[] = [
     { key: 'name', label: 'Full Name', value: user?.firstName || '', editable: true },
