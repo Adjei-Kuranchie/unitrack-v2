@@ -146,7 +146,8 @@ export default function RegisterScreen() {
               <Picker
                 selectedValue={formData.role}
                 onValueChange={(value) => setFormData({ ...formData, role: value })}
-                enabled={!isLoading}>
+                enabled={!isLoading}
+                style={{ height: 100, width: 100 }}>
                 <Picker.Item label="Student" value="STUDENT" />
                 <Picker.Item label="Lecturer" value="LECTURER" />
               </Picker>
