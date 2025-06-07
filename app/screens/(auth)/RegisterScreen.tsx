@@ -1,5 +1,4 @@
 import { Feather } from '@expo/vector-icons';
-import { Picker } from '@react-native-picker/picker';
 import { router } from 'expo-router';
 
 import React, { useState } from 'react';
@@ -140,19 +139,18 @@ export default function RegisterScreen() {
             />
           </View>
 
-          <View>
+          {/* <View>
             <Text className="mb-2 font-medium text-gray-700">Role</Text>
             <View className="rounded-lg border border-gray-300">
               <Picker
                 selectedValue={formData.role}
                 onValueChange={(value) => setFormData({ ...formData, role: value })}
-                enabled={!isLoading}
-                style={{ height: 100, width: 100 }}>
+                enabled={!isLoading}>
                 <Picker.Item label="Student" value="STUDENT" />
                 <Picker.Item label="Lecturer" value="LECTURER" />
               </Picker>
             </View>
-          </View>
+          </View> */}
 
           <TouchableOpacity
             className={`mt-6 rounded-lg bg-blue-600 py-4 ${isLoading ? 'opacity-50' : ''}`}

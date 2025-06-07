@@ -184,7 +184,7 @@ const AttendanceScreen = () => {
             <Text className="mb-4 text-xl font-semibold text-gray-800">Mark Attendance</Text>
 
             {/* Session Picker */}
-            <View className="mb-4">
+            {/*   <View className="mb-4">
               <Text className="mb-2 text-sm font-medium text-gray-700">Select Session</Text>
               <View className="rounded-md border border-gray-300 bg-white">
                 <Picker
@@ -201,7 +201,7 @@ const AttendanceScreen = () => {
                   ))}
                 </Picker>
               </View>
-            </View>
+            </View> */}
 
             {/* Location Status */}
             <View className="mb-4">
