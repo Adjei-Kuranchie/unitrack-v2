@@ -1,18 +1,7 @@
-import { router } from 'expo-router';
-import { Text, View } from 'react-native';
-import { useAuthStore } from '~/store/authStore';
+import { Redirect } from 'expo-router';
+
 const Index = () => {
-  const { user } = useAuthStore();
-
-  if (!user) {
-    router.replace('/screens/(auth)/SignInScreen');
-    return null;
-  }
-
-  return (
-    <View>
-      <Text>Index</Text>
-    </View>
-  );
+  return <Redirect href="/screens/(auth)/RegisterScreen" />;
 };
+
 export default Index;

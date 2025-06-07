@@ -200,7 +200,7 @@ const CoursesScreen = () => {
           data={filteredCourses} // Fixed: Remove type casting
           renderItem={renderCourseCard}
           keyExtractor={(item, index) =>
-            item.lecturerId ? String(item.lecturerId) : String(index)
+            item.lecturerId ? String(item.courseCode) : String(index)
           } // Fixed: Ensure string key
           contentContainerStyle={{ padding: 16, flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
