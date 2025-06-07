@@ -221,6 +221,9 @@ export const useApiStore = create<ApiState>((set, get) => ({
       });
 
       if (!response.ok) {
+        //TODO: Remind to give permissions to update user
+        // console.log(response);
+
         throw new Error('Failed to update user');
       }
 

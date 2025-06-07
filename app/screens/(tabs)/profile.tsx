@@ -23,49 +23,27 @@ export default function ProfileScreen() {
   const { updateUser, fetchUserProfile, isLoading, error, clearError } = useApiStore();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [isStudent, setIsStudent] = useState(user?.role === 'STUDENT');
   const [editedFields, setEditedFields] = useState<Record<string, string>>({});
   const [profileLoading, setProfileLoading] = useState(false);
+  const [isStudent, setIsStudent] = useState(user?.role === 'STUDENT');
 
   // Profile fields configuration
   const profileFields: EditableField[] = [
-    {
-      key: 'firstName',
-      label: 'First Name',
-      value: user?.firstName || '',
-      editable: true,
-    },
-    {
-      key: 'lastName',
-      label: 'Last Name',
-      value: user?.lastName || '',
-      editable: true,
-    },
-    {
-      key: 'email',
-      label: 'Email',
-      value: user?.email || '',
-      editable: true,
-    },
-    {
-      key: 'username',
-      label: 'Username',
-      value: user?.username || '',
-      editable: false,
-    },
-    {
-      key: 'program',
-      label: 'Program',
-      value: user?.program || '',
-      editable: true,
-    },
-    isStudent && {
-      key: 'IndexNumber',
-      label: 'Index Number',
-      value: user?.IndexNumber || '',
-      editable: false,
-    },
+    { key: 'firstName', label: 'First Name', value: user?.firstName || '', editable: true },
+    { key: 'lastName', label: 'Last Name', value: user?.lastName || '', editable: true },
+    { key: 'email', label: 'Email', value: user?.email || '', editable: true },
+    { key: 'username', label: 'Username', value: user?.username || '', editable: false },
+    { key: 'program', label: 'Program', value: user?.program || '', editable: true },
+    { key: 'IndexNumber', label: 'Index Number', value: user?.IndexNumber || '', editable: false },
   ];
+  useEffect(() => {
+    // Update isStudent when user data changes
+    setIsStudent(user?.role === 'STUDENT');
+  }, [user?.role]);
+
+  const filteredFields = isStudent
+    ? profileFields
+    : profileFields.filter((f) => f.key !== 'program' && f.key !== 'IndexNumber');
 
   useEffect(() => {
     // Fetch user profile when component mounts if user is not already loaded
@@ -214,19 +192,19 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        {profileFields.map(({ key, label, value, editable }) => (
-          <View key={key} className={`mb-5`}>
-            <Text className="mb-1 text-sm font-medium text-gray-600">{label}</Text>
-            {isEditing && editable ? (
+        {filteredFields.map((field) => (
+          <View key={field.key} className="mb-5">
+            <Text className="mb-1 text-sm font-medium text-gray-600">{field.label}</Text>
+            {isEditing && field.editable ? (
               <TextInput
                 className="rounded-md border border-blue-500 bg-gray-50 px-3 py-3 text-base text-gray-800"
-                value={editedFields[key] || value}
-                onChangeText={(text) => updateField(key, text)}
-                placeholder={`Enter ${label.toLowerCase()}`}
+                value={editedFields[field.key] || field.value}
+                onChangeText={(text) => updateField(field.key, text)}
+                placeholder={`Enter ${field.label.toLowerCase()}`}
               />
             ) : (
               <Text className="border-b border-gray-100 py-3 text-base text-gray-800">
-                {value || 'Not provided'}
+                {field.value || 'Not provided'}
               </Text>
             )}
           </View>
