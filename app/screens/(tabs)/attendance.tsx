@@ -154,8 +154,7 @@ const AttendanceScreen = () => {
       </View>
     );
   };
-  console.log(sessions);
-  console.log(attendance);
+
   return (
     <View className="flex-1 bg-gray-50">
       <ScrollView
