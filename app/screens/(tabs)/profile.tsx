@@ -20,19 +20,59 @@ interface EditableField {
 
 export default function ProfileScreen() {
   const { user, signOut, token } = useAuthStore();
-  const { updateUser, isLoading, error, clearError } = useApiStore();
+  const { updateUser, fetchUserProfile, isLoading, error, clearError } = useApiStore();
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isStudent, setIsStudent] = useState(user?.role === 'STUDENT');
   const [editedFields, setEditedFields] = useState<Record<string, string>>({});
-
-  // Ensure user is defined before accessing properties
+  const [profileLoading, setProfileLoading] = useState(false);
 
   // Profile fields configuration
   const profileFields: EditableField[] = [
-    { key: 'name', label: 'Full Name', value: user?.firstName || '', editable: true },
-    { key: 'email', label: 'Email', value: user?.email || '', editable: true },
-    { key: 'username', label: 'Username', value: user?.username || '', editable: false },
+    {
+      key: 'firstName',
+      label: 'First Name',
+      value: user?.firstName || '',
+      editable: true,
+    },
+    {
+      key: 'lastName',
+      label: 'Last Name',
+      value: user?.lastName || '',
+      editable: true,
+    },
+    {
+      key: 'email',
+      label: 'Email',
+      value: user?.email || '',
+      editable: true,
+    },
+    {
+      key: 'username',
+      label: 'Username',
+      value: user?.username || '',
+      editable: false,
+    },
+    {
+      key: 'program',
+      label: 'Program',
+      value: user?.program || '',
+      editable: true,
+    },
+    isStudent && {
+      key: 'IndexNumber',
+      label: 'Index Number',
+      value: user?.IndexNumber || '',
+      editable: false,
+    },
   ];
+
+  useEffect(() => {
+    // Fetch user profile when component mounts if user is not already loaded
+    if (token && !user) {
+      loadUserProfile();
+    }
+  }, [token, user]);
 
   useEffect(() => {
     if (error) {
@@ -40,6 +80,19 @@ export default function ProfileScreen() {
       clearError();
     }
   }, [error]);
+
+  const loadUserProfile = async () => {
+    if (!token) return;
+
+    setProfileLoading(true);
+    try {
+      await fetchUserProfile();
+    } catch (err) {
+      console.error('Failed to load user profile:', err);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -86,12 +139,36 @@ export default function ProfileScreen() {
     }));
   };
 
-  if (!user || !token) {
+  if (!token) {
     return (
       <View className="flex-1 bg-gray-100">
         <Text className="mt-12 text-center text-base text-red-500">
           Please sign in to view your profile
         </Text>
+      </View>
+    );
+  }
+
+  if (profileLoading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-gray-100">
+        <ActivityIndicator size="large" color="#3b82f6" />
+        <Text className="mt-4 text-base text-gray-600">Loading profile...</Text>
+      </View>
+    );
+  }
+
+  if (!user) {
+    return (
+      <View className="flex-1 bg-gray-100">
+        <View className="mt-12 items-center px-5">
+          <Text className="mb-4 text-center text-base text-red-500">
+            Failed to load profile data
+          </Text>
+          <TouchableOpacity onPress={loadUserProfile} className="rounded-md bg-blue-500 px-4 py-2">
+            <Text className="text-white">Retry</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -104,7 +181,11 @@ export default function ProfileScreen() {
             {user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U'}
           </Text>
         </View>
-        <Text className="mb-1 text-2xl font-bold text-gray-800">{user.firstName || 'User'}</Text>
+        <Text className="mb-1 text-2xl font-bold text-gray-800">
+          {user.firstName && user.lastName
+            ? `${user.firstName} ${user.lastName}`
+            : user.firstName || user.username || 'User'}
+        </Text>
         <Text className="text-base capitalize text-gray-600">{user.role || 'Student'}</Text>
       </View>
 
@@ -133,19 +214,19 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        {profileFields.map((field) => (
-          <View key={field.key} className="mb-5">
-            <Text className="mb-1 text-sm font-medium text-gray-600">{field.label}</Text>
-            {isEditing && field.editable ? (
+        {profileFields.map(({ key, label, value, editable }) => (
+          <View key={key} className={`mb-5`}>
+            <Text className="mb-1 text-sm font-medium text-gray-600">{label}</Text>
+            {isEditing && editable ? (
               <TextInput
                 className="rounded-md border border-blue-500 bg-gray-50 px-3 py-3 text-base text-gray-800"
-                value={editedFields[field.key] || field.value}
-                onChangeText={(text) => updateField(field.key, text)}
-                placeholder={`Enter ${field.label.toLowerCase()}`}
+                value={editedFields[key] || value}
+                onChangeText={(text) => updateField(key, text)}
+                placeholder={`Enter ${label.toLowerCase()}`}
               />
             ) : (
               <Text className="border-b border-gray-100 py-3 text-base text-gray-800">
-                {field.value || 'Not provided'}
+                {value || 'Not provided'}
               </Text>
             )}
           </View>

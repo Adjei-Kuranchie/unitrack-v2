@@ -4,8 +4,9 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
-
   role: 'LECTURER' | 'STUDENT' | 'ADMIN';
+  program?: string; // Optional for lecturers/admins
+  IndexNumber?: string; // Optional for students
 }
 
 interface AuthState {
@@ -17,6 +18,7 @@ interface AuthState {
   error: string | null;
   signIn: (username: string, password: string) => Promise<void>;
   signOut: () => void;
+  setUser: (user: any) => void;
   register: (userData: RegisterData) => Promise<void>;
   clearError: () => void;
 }

@@ -21,6 +21,34 @@ export const useApiStore = create<ApiState>((set, get) => ({
   isLoading: false,
   error: null,
 
+  fetchUserProfile: async () => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/users/profile`, {
+        headers: getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user profile');
+      }
+
+      const userData = await response.json();
+
+      // Update the user in auth store
+      useAuthStore.getState().setUser(userData);
+
+      set({ isLoading: false });
+      return userData;
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Failed to fetch user profile',
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+
   fetchCourses: async () => {
     set({ isLoading: true, error: null });
 
@@ -196,8 +224,8 @@ export const useApiStore = create<ApiState>((set, get) => ({
         throw new Error('Failed to update user');
       }
 
-      // Refresh users after updating
-      await get().fetchUsers();
+      // Refresh user profile after updating
+      await get().fetchUserProfile();
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'Failed to update user',

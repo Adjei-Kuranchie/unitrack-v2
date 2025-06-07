@@ -68,6 +68,7 @@ interface ApiState {
   markAttendance: (sessionId: number, studentId: string) => Promise<void>;
 
   // User actions
+  fetchUserProfile: () => Promise<any>;
   fetchUsers: () => Promise<void>;
   updateUser: (userData: any) => Promise<void>;
   deleteUser: (userId: number) => Promise<void>;
