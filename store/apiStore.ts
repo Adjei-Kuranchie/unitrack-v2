@@ -43,6 +43,7 @@ export const useApiStore = create<ApiState>((set, get) => ({
     }
   },
 
+  //TODO:Make sure to add privileges to add course
   addCourse: async (course) => {
     set({ isLoading: true, error: null });
 

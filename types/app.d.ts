@@ -2,34 +2,55 @@ interface Course {
   courseName: string;
   courseCode: string;
   lecturerId: number;
-  id: number;
-  courseCode: string;
-  courseName: string;
-  session: string | null;
-  attendance: any[]; // Replace 'any' if you have Attendance[] type
-  student: any[];
-  // lecturer: LecturerSummary[]; // It's an array of lecturer summaries
 }
 
 interface Session {
   id: number;
-  status: string;
-
+  status: 'ACTIVE' | 'CLOSED';
+  startTime: string;
+  endTime: string;
+  location: Location;
+  lecturer: Lecturer;
   course: Course;
-  createdAt: string;
+  attendance: Attendance;
 }
 
-interface AttendanceRecord {
-  id: number;
-  sessionId: number;
-  studentId: string;
-  timestamp: string;
+interface Location {
+  latitude: number;
+  longitude: number;
+}
+
+interface Lecturer {
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: 'LECTURER' | string;
+  department: string | null;
+}
+
+interface Student {
+  username: string;
+  firstName: string;
+  lastName: string;
+  program: string;
+  IndexNumber: string;
+  email: string;
+  role: 'STUDENT' | string;
+}
+
+interface Attendance {
+  courseName: string;
+  date: string;
+  time: string;
+  lecturer: string;
+  studentList: Student[]; // Define `Student` based on your structure
 }
 
 interface ApiState {
   courses: Course[];
   sessions: Session[];
-  attendance: AttendanceRecord[];
+  attendance: Attendance[];
   users: any[];
   isLoading: boolean;
   error: string | null;
@@ -53,4 +74,4 @@ interface ApiState {
 
   clearError: () => void;
 }
-export { ApiState };
+export type { ApiState, Attendance, Course, Lecturer, Location, Session };

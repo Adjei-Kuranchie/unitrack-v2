@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useApiStore } from '~/store/apiStore';
 import { useAuthStore } from '~/store/authStore';
+import { Session } from '~/types/app';
 
 interface SessionScreenProps {
   navigation?: any;
@@ -64,7 +65,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: Date) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
@@ -82,11 +83,13 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
     }
   };
 
-  const renderSessionCard = (session: any) => {
+  const renderSessionCard = (session: Session) => {
     // Fixed: Safe property access with fallbacks
-    const courseName = session.course?.courseName || session.course || 'Unknown Course';
-    const sessionId = session.id ? String(session.id) : 'N/A';
-    const createdAt = session.createdAt || new Date().toISOString();
+    const courseName = session.course?.courseName || 'Unknown Course';
+    const courseCode = session.course?.courseCode || 'Unknown Code';
+    const status = session.status || 'ACTIVE';
+    const sessionId = session.id && String(session.id);
+    const startTime = new Date(session.startTime);
 
     return (
       <TouchableOpacity
@@ -95,19 +98,20 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
         onPress={() => handleSessionPress(session)}>
         <View className="mb-2 flex-row items-center justify-between">
           <View className="flex-1">
-            <Text className="text-lg font-semibold text-gray-800">{String(courseName)}</Text>
+            <Text className="text-lg font-semibold text-gray-800">{`${String(courseCode)} | ${String(courseName)}`}</Text>
             <Text className="mt-1 text-sm text-gray-500">Session #{sessionId}</Text>
           </View>
           <View className="flex-row items-center">
             <Ionicons name="time-outline" size={16} color="#6B7280" />
-            <Text className="ml-1 text-sm text-gray-500">{formatDate(createdAt)}</Text>
+            <Text className="ml-1 text-sm text-gray-500">{formatDate(startTime)}</Text>
           </View>
         </View>
 
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center">
             <View className="rounded-full bg-blue-100 px-3 py-1">
-              <Text className="text-xs font-medium text-blue-700">Active</Text>
+              <Text
+                className={`text-xs font-medium capitalize ${status === 'ACTIVE' ? 'text-blue-700' : 'text-gray-500'}`}>{`${status}`}</Text>
             </View>
           </View>
           <Ionicons name="chevron-forward" size={20} color="#6B7280" />
@@ -196,6 +200,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
     );
   }
 
+  // console.log('Courses:', sessions[0].attendance.studentList);
   return (
     <View className="flex-1 bg-gray-50">
       {/* Header */}
@@ -266,7 +271,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
                     {
                       sessions.filter((s) => {
                         const today = new Date();
-                        const sessionDate = new Date(s.createdAt);
+                        const sessionDate = new Date(s.startTime);
                         return sessionDate.toDateString() === today.toDateString();
                       }).length
                     }

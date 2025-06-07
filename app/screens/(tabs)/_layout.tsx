@@ -4,7 +4,8 @@ import { useAuthStore } from '~/store/authStore';
 
 export default function TabLayout() {
   const role = useAuthStore((state) => state.role);
-  const isLecturer = role === 'LECTURER';
+  // const isLecturer = role === 'LECTURER';
+  const isLecturer = true; // For testing purposes, set to true
 
   return (
     <Tabs

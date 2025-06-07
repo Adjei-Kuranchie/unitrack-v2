@@ -4,6 +4,7 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
+
   role: 'LECTURER' | 'STUDENT' | 'ADMIN';
 }
 
@@ -29,4 +30,4 @@ interface RegisterData {
   role: 'LECTURER' | 'STUDENT' | 'ADMIN';
 }
 
-export { AuthState, RegisterData };
+export type { AuthState, RegisterData };
