@@ -250,6 +250,9 @@ export const useApiStore = create<ApiState>((set, get) => ({
         throw new Error('Failed to delete user');
       }
 
+      const result = await response.text();
+      console.log('Delete user response:', result);
+
       // Refresh users after deleting
       await get().fetchUsers();
     } catch (error) {

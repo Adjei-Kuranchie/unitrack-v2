@@ -10,7 +10,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       resMessage: null,
       token: null,
-      role: null, // User role for access control
+      role: null,
       isLoading: false,
       error: null,
 
@@ -32,10 +32,9 @@ export const useAuthStore = create<AuthState>()(
 
           const data = await response.json();
 
-          // Assuming the API returns user data and token
           set({
             resMessage: true,
-            role: data.role, // Set user role for access control
+            role: data.role,
             token: data.jwt,
             isLoading: false,
           });
