@@ -69,7 +69,7 @@ interface Attendance {
   date: string;
   time: string;
   lecturer: string;
-  studentList: Student[]; // Define `Student` based on your structure
+  studentList: Student[];
 }
 
 interface ApiState {

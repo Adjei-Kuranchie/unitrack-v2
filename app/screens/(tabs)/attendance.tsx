@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-// import RNPickerSelect from 'react-native-picker-select';
-import { formatDate, formatTime } from '~/lib/utils';
 import { useApiStore } from '~/store/apiStore';
 import { useAuthStore } from '~/store/authStore';
+import { Attendance } from '~/types/app';
 
 const AttendanceScreen = () => {
   const {
@@ -93,12 +93,13 @@ const AttendanceScreen = () => {
     }
   };
 
-  const renderAttendanceRecord = (record: any, index: number) => {
+  const renderAttendanceRecord = (record: Attendance, index: number) => {
     // Ensure we have valid string/number values for display
-    const recordId = record.id ? String(record.id) : String(index);
-    const sessionId = record.sessionId ? String(record.sessionId) : 'N/A';
-    const studentId = record.studentId ? String(record.studentId) : null;
-    const timestamp = record.timestamp || new Date().toISOString();
+    const recordId = String(index);
+    const lecturer = String(record.lecturer);
+    const studentId = IndexNumber ? String(IndexNumber) : null;
+    const date = record.date;
+    const time = record.time;
 
     return (
       <View
@@ -107,18 +108,18 @@ const AttendanceScreen = () => {
         <View className="mb-2 flex-row items-center justify-between">
           <View className="flex-row items-center">
             <Ionicons name="calendar" size={16} color="#6b7280" />
-            <Text className="ml-2 text-sm text-gray-600">{formatDate(timestamp)}</Text>
+            <Text className="ml-2 text-sm text-gray-600">{date}</Text>
           </View>
           <View className="flex-row items-center">
             <Ionicons name="time" size={16} color="#6b7280" />
-            <Text className="ml-2 text-sm text-gray-600">{formatTime(timestamp)}</Text>
+            <Text className="ml-2 text-sm text-gray-600">{time}</Text>
           </View>
         </View>
 
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center">
             <Ionicons name="school" size={16} color="#6b7280" />
-            <Text className="ml-2 text-sm text-gray-700">Session {sessionId}</Text>
+            <Text className="ml-2 text-sm capitalize text-gray-700">{lecturer}</Text>
           </View>
           <View className="flex-row items-center">
             <Ionicons name="checkmark-circle" size={16} color="#10b981" />
@@ -165,21 +166,24 @@ const AttendanceScreen = () => {
             <Text className="mb-4 text-xl font-semibold text-gray-800">Mark Attendance</Text>
 
             {/* Session Picker */}
-            {/*<View className="mb-4">
+            <View className="mb-4">
               <Text className="mb-2 text-sm font-medium text-gray-700">Select Session</Text>
               <View className="rounded-md border border-gray-300 bg-white">
-                <RNPickerSelect
-                  placeholder={{ label: 'Select a session...', value: null }}
+                <Picker
+                  selectedValue={selectedSession}
                   onValueChange={(itemValue) => setSelectedSession(itemValue)}
-                  items={[
-                    ...sessions.map((session) => ({
-                      label: `${session.course.courseName} - ${formatDate(session.startTime)}`,
-                      value: session.id,
-                    })),
-                  ]}
-                />
+                  enabled={!marking}>
+                  <Picker.Item label="Select a session" value={null} />
+                  {sessions.map((session) => (
+                    <Picker.Item
+                      key={session.id}
+                      label={`${session.course.courseCode}: ${session.course.courseName}`}
+                      value={session.id}
+                    />
+                  ))}
+                </Picker>
               </View>
-            </View>*/}
+            </View>
 
             {/* Location Status */}
             <View className="mb-4">
