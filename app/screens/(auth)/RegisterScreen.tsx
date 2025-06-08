@@ -13,36 +13,50 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '~/store/authStore';
 
 export default function RegisterScreen() {
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    username: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: 'STUDENT' | 'LECTURER' | 'ADMIN';
+    program: string;
+    IndexNumber: string;
+  }>({
     username: '',
     password: '',
     firstName: '',
     lastName: '',
     email: '',
-    role: 'STUDENT' as 'LECTURER' | 'STUDENT',
+    role: 'LECTURER',
+    program: '',
+    IndexNumber: '',
   });
 
   const { register, isLoading, error, clearError } = useAuthStore();
 
   const handleRegister = async () => {
     const { username, password, firstName, lastName, email } = formData;
-
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (
       !username.trim() ||
       !password.trim() ||
       !firstName.trim() ||
       !lastName.trim() ||
-      !email.trim()
+      !email.trim() ||
+      !formData.program.trim() ||
+      !formData.IndexNumber.trim()
     ) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
-    if (!email.includes('@')) {
+    if (!emailRegex.test(email)) {
       Alert.alert('Error', 'Please enter a valid email address');
       return;
     }
@@ -65,115 +79,145 @@ export default function RegisterScreen() {
   }, [error]);
 
   return (
-    <ScrollView className="flex-1 bg-white pt-12">
-      <View className="px-6 py-8">
-        <View className="mb-8">
-          <Text className="mb-2 text-center text-3xl font-bold text-blue-600">Create Account</Text>
-          <Text className="text-center text-gray-600">Join UniTrack today</Text>
-        </View>
-
-        <View className="flex flex-col gap-4 space-y-8">
-          <View>
-            <Text className="mb-2 font-medium text-gray-700">Username</Text>
-            <TextInput
-              className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
-              placeholder="Choose a username"
-              value={formData.username}
-              onChangeText={(text) => setFormData({ ...formData, username: text.trim() })}
-              autoCapitalize="none"
-              editable={!isLoading}
-            />
+    <SafeAreaView className="flex-1 bg-white">
+      <ScrollView className="flex-1 bg-white pt-12">
+        <View className="px-6 py-8">
+          <View className="mb-8">
+            <Text className="mb-2 text-center text-3xl font-bold text-blue-600">
+              Create Account
+            </Text>
+            <Text className="text-center text-gray-600">Join UniTrack today</Text>
           </View>
 
-          <View>
-            <Text className="mb-2 font-medium text-gray-700">Password</Text>
-            <View className="relative">
+          <View className="flex flex-col gap-4 space-y-8">
+            <View>
+              <Text className="mb-2 font-medium text-gray-700">Username</Text>
               <TextInput
                 className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
-                placeholder="Create a password"
-                value={formData.password}
-                onChangeText={(text) => setFormData({ ...formData, password: text.trim() })}
-                secureTextEntry={!showPassword}
+                placeholder="Choose a username"
+                value={formData.username}
+                onChangeText={(text) => setFormData({ ...formData, username: text.trim() })}
+                autoCapitalize="none"
                 editable={!isLoading}
               />
-
-              <Pressable
-                onPress={() => setShowPassword((prev) => !prev)}
-                className="absolute right-2 h-12 w-12 items-center justify-center rounded-full ">
-                <Feather name={showPassword ? 'eye-off' : 'eye'} size={20} color="gray" />
-              </Pressable>
             </View>
-          </View>
 
-          <View>
-            <Text className="mb-2 font-medium text-gray-700">First Name</Text>
-            <TextInput
-              className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
-              placeholder="Enter your first name"
-              value={formData.firstName}
-              onChangeText={(text) => setFormData({ ...formData, firstName: text.trim() })}
-              editable={!isLoading}
-            />
-          </View>
+            <View>
+              <Text className="mb-2 font-medium text-gray-700">Password</Text>
+              <View className="relative">
+                <TextInput
+                  className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
+                  placeholder="Create a password"
+                  value={formData.password}
+                  onChangeText={(text) => setFormData({ ...formData, password: text.trim() })}
+                  secureTextEntry={!showPassword}
+                  editable={!isLoading}
+                />
 
-          <View>
-            <Text className="mb-2 font-medium text-gray-700">Last Name</Text>
-            <TextInput
-              className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
-              placeholder="Enter your last name"
-              value={formData.lastName}
-              onChangeText={(text) => setFormData({ ...formData, lastName: text.trim() })}
-              editable={!isLoading}
-            />
-          </View>
-
-          <View>
-            <Text className="mb-2 font-medium text-gray-700">Email</Text>
-            <TextInput
-              className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
-              placeholder="Enter your email"
-              value={formData.email}
-              onChangeText={(text) => setFormData({ ...formData, email: text.trim() })}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              editable={!isLoading}
-            />
-          </View>
-
-          <View>
-            <Text className="mb-2 font-medium text-gray-700">Role</Text>
-            <View className="rounded-lg border border-gray-300">
-              {Platform.OS === 'android' || Platform.OS === 'ios' ? (
-                <Picker
-                  selectedValue={formData.role}
-                  onValueChange={(itemValue) => setFormData({ ...formData, role: itemValue })}
-                  enabled={!isLoading}>
-                  <Picker.Item label="Student" value="STUDENT" />
-                  <Picker.Item label="Lecturer" value="LECTURER" />
-                </Picker>
-              ) : null}
+                <Pressable
+                  onPress={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-2 h-12 w-12 items-center justify-center rounded-full ">
+                  <Feather name={showPassword ? 'eye-off' : 'eye'} size={20} color="gray" />
+                </Pressable>
+              </View>
             </View>
-          </View>
 
-          <TouchableOpacity
-            className={`mt-6 rounded-lg bg-blue-600 py-4 ${isLoading ? 'opacity-50' : ''}`}
-            onPress={handleRegister}
-            disabled={isLoading}>
-            {isLoading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text className="text-center text-lg font-semibold text-white">Create Account</Text>
+            <View>
+              <Text className="mb-2 font-medium text-gray-700">First Name</Text>
+              <TextInput
+                className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
+                placeholder="Enter your first name"
+                value={formData.firstName}
+                onChangeText={(text) => setFormData({ ...formData, firstName: text.trim() })}
+                editable={!isLoading}
+              />
+            </View>
+
+            <View>
+              <Text className="mb-2 font-medium text-gray-700">Last Name</Text>
+              <TextInput
+                className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
+                placeholder="Enter your last name"
+                value={formData.lastName}
+                onChangeText={(text) => setFormData({ ...formData, lastName: text.trim() })}
+                editable={!isLoading}
+              />
+            </View>
+
+            <View>
+              <Text className="mb-2 font-medium text-gray-700">Email</Text>
+              <TextInput
+                className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
+                placeholder="Enter your email"
+                value={formData.email}
+                onChangeText={(text) => setFormData({ ...formData, email: text.trim() })}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                editable={!isLoading}
+              />
+            </View>
+
+            <View>
+              <Text className="mb-2 font-medium text-gray-700">Role</Text>
+              <View className="rounded-lg border border-gray-300">
+                {Platform.OS === 'android' || Platform.OS === 'ios' ? (
+                  <Picker
+                    selectedValue={formData.role}
+                    onValueChange={(itemValue) => setFormData({ ...formData, role: itemValue })}
+                    enabled={!isLoading}>
+                    <Picker.Item label="Student" value="STUDENT" />
+                    <Picker.Item label="Lecturer" value="LECTURER" />
+                  </Picker>
+                ) : null}
+              </View>
+            </View>
+
+            {formData.role === 'STUDENT' && (
+              <View>
+                <Text className="mb-2 font-medium text-gray-700">Program</Text>
+                <TextInput
+                  className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
+                  placeholder="eg: Computer Science"
+                  value={formData.program}
+                  onChangeText={(text) => setFormData({ ...formData, program: text.trim() })}
+                  editable={!isLoading}
+                />
+              </View>
             )}
-          </TouchableOpacity>
 
-          <TouchableOpacity
-            className="mt-4"
-            onPress={() => router.replace('/screens/(auth)/SignInScreen')}
-            disabled={isLoading}>
-            <Text className="text-center text-blue-600">Already have an account? Sign in</Text>
-          </TouchableOpacity>
+            {formData.role === 'STUDENT' && (
+              <View>
+                <Text className="mb-2 font-medium text-gray-700">Index Number</Text>
+                <TextInput
+                  className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
+                  placeholder="eg: PS/CSC/21/0001"
+                  value={formData.IndexNumber}
+                  onChangeText={(text) => setFormData({ ...formData, IndexNumber: text.trim() })}
+                  editable={!isLoading}
+                />
+              </View>
+            )}
+
+            <TouchableOpacity
+              className={`mt-6 rounded-lg bg-blue-600 py-4 ${isLoading ? 'opacity-50' : ''}`}
+              onPress={handleRegister}
+              disabled={isLoading}>
+              {isLoading ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <Text className="text-center text-lg font-semibold text-white">Create Account</Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="mt-4"
+              onPress={() => router.replace('/screens/(auth)/SignInScreen')}
+              disabled={isLoading}>
+              <Text className="text-center text-blue-600">Already have an account? Sign in</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

@@ -34,7 +34,6 @@ export const useApiStore = create<ApiState>((set, get) => ({
       }
 
       const userData = await response.json();
-
       // Update the user in auth store
       useAuthStore.getState().setUser(userData);
 

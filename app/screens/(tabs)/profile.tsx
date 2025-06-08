@@ -32,19 +32,22 @@ export default function ProfileScreen() {
   const profileFields: EditableField[] = [
     { key: 'firstName', label: 'First Name', value: user?.firstName || '', editable: true },
     { key: 'lastName', label: 'Last Name', value: user?.lastName || '', editable: true },
-    { key: 'email', label: 'Email', value: user?.email || '', editable: true },
+    { key: 'email', label: 'Email', value: user?.email || '', editable: false },
     { key: 'username', label: 'Username', value: user?.username || '', editable: false },
-    { key: 'program', label: 'Program', value: user?.program || '', editable: true },
+    { key: 'program', label: 'Program', value: user?.program || '', editable: false },
     { key: 'IndexNumber', label: 'Index Number', value: user?.IndexNumber || '', editable: false },
   ];
+
+  console.log(user);
+
   useEffect(() => {
     // Update isStudent when user data changes
     setIsStudent(user?.role === 'STUDENT');
   }, [user?.role]);
 
   const filteredFields = isStudent
-    ? profileFields
-    : profileFields.filter((f) => f.key !== 'program' && f.key !== 'IndexNumber');
+    ? profileFields.filter((f) => f.key !== 'program' && f.key !== 'IndexNumber')
+    : profileFields;
 
   useEffect(() => {
     // Fetch user profile when component mounts if user is not already loaded
