@@ -9,6 +9,11 @@ interface SessionRequest {
   location: Location;
 }
 
+interface AttendanceRequest {
+  sessionId: number;
+  location: Location;
+}
+
 interface Session {
   id: number;
   status: 'ACTIVE' | 'CLOSED';
@@ -25,6 +30,7 @@ interface Location {
   longitude: number;
 }
 
+//TODO: Ask what the attendance/lecturer and attendance/student does
 interface Lecturer {
   username: string;
   firstName: string;
@@ -32,6 +38,16 @@ interface Lecturer {
   email: string;
   role: 'LECTURER' | string;
   department: string | null;
+  //TODO: extras?
+
+  id: number;
+  lecturerId: number;
+  name: string;
+  courses: Course[];
+  sessions: Session[];
+  attendance: Attendance[];
+  department: string;
+  location?: Location;
 }
 
 interface Student {
@@ -69,7 +85,7 @@ interface ApiState {
   createSession: (sessionReq: SessionRequest) => Promise<void>;
   // Attendance actions
   fetchAttendance: () => Promise<void>;
-  markAttendance: (sessionId: number, studentId: string) => Promise<void>;
+  markAttendance: (attendanceReq: AttendanceRequest) => Promise<void>;
 
   // User actions
   fetchUserProfile: () => Promise<any>;
@@ -79,4 +95,13 @@ interface ApiState {
 
   clearError: () => void;
 }
-export type { ApiState, Attendance, Course, Lecturer, Location, Session, SessionRequest };
+export type {
+  ApiState,
+  Attendance,
+  AttendanceRequest,
+  Course,
+  Lecturer,
+  Location,
+  Session,
+  SessionRequest,
+};

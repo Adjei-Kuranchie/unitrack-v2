@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { useAuthStore } from '~/store/authStore';
-import { ApiState, SessionRequest } from '~/types/app';
+import { ApiState, AttendanceRequest, SessionRequest } from '~/types/app';
 
 import Constants from 'expo-constants';
 const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
@@ -164,14 +164,14 @@ export const useApiStore = create<ApiState>((set, get) => ({
     }
   },
 
-  markAttendance: async (sessionId, studentId) => {
+  markAttendance: async (attendanceReq: AttendanceRequest) => {
     set({ isLoading: true, error: null });
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/attendance/mark`, {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify({ sessionId, studentId }),
+        body: JSON.stringify(attendanceReq),
       });
 
       if (!response.ok) {

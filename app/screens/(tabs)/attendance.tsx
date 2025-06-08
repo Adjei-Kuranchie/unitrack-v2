@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import Constants from 'expo-constants';
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
@@ -9,8 +8,16 @@ import { useApiStore } from '~/store/apiStore';
 import { useAuthStore } from '~/store/authStore';
 
 const AttendanceScreen = () => {
-  const { sessions, attendance, isLoading, error, fetchSessions, fetchAttendance, clearError } =
-    useApiStore();
+  const {
+    sessions,
+    attendance,
+    isLoading,
+    error,
+    fetchSessions,
+    fetchAttendance,
+    markAttendance,
+    clearError,
+  } = useApiStore();
 
   const { token, role } = useAuthStore();
 
@@ -73,7 +80,7 @@ const AttendanceScreen = () => {
     setMarking(true);
 
     try {
-      await markAttendanceWithLocation(selectedSession, location);
+      await markAttendance({ sessionId: selectedSession, location });
 
       Alert.alert('Success', 'Attendance marked successfully!');
       await fetchAttendance(); // Refresh attendance records
@@ -81,34 +88,6 @@ const AttendanceScreen = () => {
       Alert.alert('Error', 'Failed to mark attendance');
     } finally {
       setMarking(false);
-    }
-  };
-
-  // Custom function to mark attendance with location
-  const markAttendanceWithLocation = async (
-    sessionId: number,
-    locationData: { latitude: number; longitude: number }
-  ) => {
-    const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
-
-    // Get current user ID from token or store (you might need to add this to your auth store)
-    // For now, using a placeholder - you'll need to extract user ID from token or store it during login
-    const userId = 9; // This should come from your auth store or be extracted from JWT
-
-    const response = await fetch(`${API_BASE_URL}/api/v1/attendance/mark?id=${userId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        sessionId,
-        location: locationData,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to mark attendance');
     }
   };
 
