@@ -79,7 +79,7 @@ export default function RegisterScreen() {
               className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
               placeholder="Choose a username"
               value={formData.username}
-              onChangeText={(text) => setFormData({ ...formData, username: text })}
+              onChangeText={(text) => setFormData({ ...formData, username: text.trim() })}
               autoCapitalize="none"
               editable={!isLoading}
             />
@@ -92,7 +92,7 @@ export default function RegisterScreen() {
                 className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
                 placeholder="Create a password"
                 value={formData.password}
-                onChangeText={(text) => setFormData({ ...formData, password: text })}
+                onChangeText={(text) => setFormData({ ...formData, password: text.trim() })}
                 secureTextEntry={!showPassword}
                 editable={!isLoading}
               />
@@ -111,7 +111,7 @@ export default function RegisterScreen() {
               className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
               placeholder="Enter your first name"
               value={formData.firstName}
-              onChangeText={(text) => setFormData({ ...formData, firstName: text })}
+              onChangeText={(text) => setFormData({ ...formData, firstName: text.trim() })}
               editable={!isLoading}
             />
           </View>
@@ -122,7 +122,7 @@ export default function RegisterScreen() {
               className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
               placeholder="Enter your last name"
               value={formData.lastName}
-              onChangeText={(text) => setFormData({ ...formData, lastName: text })}
+              onChangeText={(text) => setFormData({ ...formData, lastName: text.trim() })}
               editable={!isLoading}
             />
           </View>
@@ -133,7 +133,7 @@ export default function RegisterScreen() {
               className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
               placeholder="Enter your email"
               value={formData.email}
-              onChangeText={(text) => setFormData({ ...formData, email: text })}
+              onChangeText={(text) => setFormData({ ...formData, email: text.trim() })}
               keyboardType="email-address"
               autoCapitalize="none"
               editable={!isLoading}

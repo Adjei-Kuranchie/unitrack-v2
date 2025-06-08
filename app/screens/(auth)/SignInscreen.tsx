@@ -37,7 +37,7 @@ export default function SignInScreen() {
     // Check if sign in was successful
     const { user, resMessage } = useAuthStore.getState();
     if (resMessage) {
-      router.replace('/screens/(tabs)');
+      router.replace('/screens/(tabs)/dashboard');
     }
   };
 
@@ -102,7 +102,7 @@ export default function SignInScreen() {
             className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
             placeholder="Enter your username"
             value={username}
-            onChangeText={setUsername}
+            onChangeText={(text) => setUsername(text.trim())}
             autoCapitalize="none"
             editable={!isLoading}
           />
@@ -115,7 +115,7 @@ export default function SignInScreen() {
               className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
               placeholder="Enter your password"
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(text) => setPassword(text.trim())}
               secureTextEntry={!showPassword}
               editable={!isLoading}
             />
