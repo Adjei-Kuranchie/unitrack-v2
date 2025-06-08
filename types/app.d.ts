@@ -8,10 +8,14 @@ interface SessionRequest {
   courseName: string;
   location: Location;
 }
-
+/*TODO: ask to make sure the student Index number is a string eg:"PS/CSC/21/0001"  
+  or are you making it to send the user id then you query the student table to find the index number?
+  it better if you don't query the db many times, i can just send the index number and then you add it to the response and then i can display it for the lecturer
+*/
 interface AttendanceRequest {
   sessionId: number;
   location: Location;
+  studentId?: string;
 }
 
 interface Session {

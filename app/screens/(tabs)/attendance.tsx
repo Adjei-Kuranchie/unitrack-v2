@@ -19,13 +19,15 @@ const AttendanceScreen = () => {
     clearError,
   } = useApiStore();
 
-  const { token, role } = useAuthStore();
+  const { role, user } = useAuthStore();
 
   const [selectedSession, setSelectedSession] = useState<number | null>(null);
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [marking, setMarking] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  const IndexNumber = user?.IndexNumber;
 
   useEffect(() => {
     loadInitialData();
@@ -80,7 +82,7 @@ const AttendanceScreen = () => {
     setMarking(true);
 
     try {
-      await markAttendance({ sessionId: selectedSession, location });
+      await markAttendance({ sessionId: selectedSession, location, studentId: IndexNumber });
 
       Alert.alert('Success', 'Attendance marked successfully!');
       await fetchAttendance(); // Refresh attendance records
