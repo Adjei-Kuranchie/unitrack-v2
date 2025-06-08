@@ -40,6 +40,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
 
   useEffect(() => {
     loadData();
+    requestLocationPermission();
   }, []);
 
   const loadData = async () => {

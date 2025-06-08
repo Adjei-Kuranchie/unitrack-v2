@@ -64,16 +64,25 @@ export default function TabLayout() {
           }}
         />
       )}
-
-      <Tabs.Screen
-        name="attendance"
-        options={{
-          title: 'Attendance',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="fact-check" size={size} color={color} />
-          ),
-        }}
-      />
+      {!isLecturer ? (
+        <Tabs.Screen
+          name="attendance"
+          options={{
+            title: 'Attendance',
+            tabBarIcon: ({ color, size }) => (
+              <MaterialIcons name="fact-check" size={size} color={color} />
+            ),
+          }}
+        />
+      ) : (
+        <Tabs.Screen
+          name="attendance"
+          options={{
+            title: 'Attendance',
+            tabBarItemStyle: { display: 'none' }, // Hide this tab for students
+          }}
+        />
+      )}
 
       <Tabs.Screen
         name="profile"
