@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Picker } from '@react-native-picker/picker';
 import Constants from 'expo-constants';
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+// import RNPickerSelect from 'react-native-picker-select';
 import { formatDate, formatTime } from '~/lib/utils';
 import { useApiStore } from '~/store/apiStore';
 import { useAuthStore } from '~/store/authStore';
@@ -184,24 +184,21 @@ const AttendanceScreen = () => {
             <Text className="mb-4 text-xl font-semibold text-gray-800">Mark Attendance</Text>
 
             {/* Session Picker */}
-            <View className="mb-4">
+            {/*<View className="mb-4">
               <Text className="mb-2 text-sm font-medium text-gray-700">Select Session</Text>
               <View className="rounded-md border border-gray-300 bg-white">
-                <Picker
-                  selectedValue={selectedSession}
+                <RNPickerSelect
+                  placeholder={{ label: 'Select a session...', value: null }}
                   onValueChange={(itemValue) => setSelectedSession(itemValue)}
-                  style={{ height: 50 }}>
-                  <Picker.Item label="Select a session..." value={null} />
-                  {sessions.map((session) => (
-                    <Picker.Item
-                      key={session.id}
-                      label={`${session.course.courseName} - ${formatDate(session.createdAt)}`}
-                      value={session.id}
-                    />
-                  ))}
-                </Picker>
+                  items={[
+                    ...sessions.map((session) => ({
+                      label: `${session.course.courseName} - ${formatDate(session.startTime)}`,
+                      value: session.id,
+                    })),
+                  ]}
+                />
               </View>
-            </View>
+            </View>*/}
 
             {/* Location Status */}
             <View className="mb-4">

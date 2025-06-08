@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { useAuthStore } from '~/store/authStore';
-import { ApiState } from '~/types/app';
+import { ApiState, SessionRequest } from '~/types/app';
 
 import Constants from 'expo-constants';
 const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
@@ -118,14 +118,14 @@ export const useApiStore = create<ApiState>((set, get) => ({
     }
   },
 
-  createSession: async (course) => {
+  createSession: async (sessionReq: SessionRequest) => {
     set({ isLoading: true, error: null });
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/session/create`, {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify({ course }),
+        body: JSON.stringify(sessionReq),
       });
 
       if (!response.ok) {

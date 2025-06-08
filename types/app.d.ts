@@ -4,6 +4,11 @@ interface Course {
   lecturerId: number;
 }
 
+interface SessionRequest {
+  courseName: string;
+  location: Location;
+}
+
 interface Session {
   id: number;
   status: 'ACTIVE' | 'CLOSED';
@@ -61,8 +66,7 @@ interface ApiState {
 
   // Session actions
   fetchSessions: () => Promise<void>;
-  createSession: (course: string) => Promise<void>;
-
+  createSession: (sessionReq: SessionRequest) => Promise<void>;
   // Attendance actions
   fetchAttendance: () => Promise<void>;
   markAttendance: (sessionId: number, studentId: string) => Promise<void>;
@@ -75,4 +79,4 @@ interface ApiState {
 
   clearError: () => void;
 }
-export type { ApiState, Attendance, Course, Lecturer, Location, Session };
+export type { ApiState, Attendance, Course, Lecturer, Location, Session, SessionRequest };

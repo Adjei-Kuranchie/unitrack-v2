@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
@@ -21,6 +22,8 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState('');
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [location, setLocation] = useState<{ latitude: number; longitude: number }>();
 
   const {
     sessions,
@@ -56,7 +59,11 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
     }
 
     try {
-      await createSession(selectedCourse);
+      if (!location) {
+        Alert.alert('Error', 'Location is required to create a session');
+        return;
+      }
+      await createSession({ courseName: selectedCourse, location });
       setShowCreateModal(false);
       setSelectedCourse('');
       Alert.alert('Success', 'Session created successfully');
@@ -129,7 +136,24 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
       <View className="flex-1 justify-center bg-black/50 px-4">
         <View className="rounded-lg bg-white p-6">
           <View className="mb-4 flex-row items-center justify-between">
-            <Text className="text-xl font-semibold text-gray-800">Create New Session</Text>
+            <View className="flex-col items-center rounded-md p-3">
+              <Text className="text-xl font-semibold text-gray-800">Create New Session</Text>
+              <View className="flex-row items-center">
+                <Ionicons name="location" size={20} color={location ? '#10b981' : '#ef4444'} />
+                <Text className="ml-2 text-sm text-gray-600">
+                  {location
+                    ? `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`
+                    : locationError || 'Getting location...'}
+                </Text>
+              </View>
+              {(locationError || !location) && (
+                <TouchableOpacity
+                  onPress={requestLocationPermission}
+                  className="ml-2 rounded-full bg-blue-100 p-1">
+                  <Ionicons name="refresh" size={20} color="#3b82f6" />
+                </TouchableOpacity>
+              )}
+            </View>
             <TouchableOpacity onPress={() => setShowCreateModal(false)}>
               <Ionicons name="close" size={24} color="#6B7280" />
             </TouchableOpacity>
@@ -183,6 +207,29 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
     </Modal>
   );
 
+  const requestLocationPermission = async () => {
+    try {
+      setLocationError(null);
+      const { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status !== 'granted') {
+        setLocationError('Location permission denied');
+        return;
+      }
+
+      const currentLocation = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+
+      setLocation({
+        latitude: currentLocation.coords.latitude,
+        longitude: currentLocation.coords.longitude,
+      });
+    } catch (error) {
+      setLocationError('Failed to get location');
+    }
+  };
+
   if (error) {
     return (
       <View className="flex-1 items-center justify-center bg-gray-50 px-4">
@@ -200,7 +247,6 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
     );
   }
 
-  // console.log('Courses:', sessions[0].attendance.studentList);
   return (
     <View className="flex-1 bg-gray-50">
       {/* Header */}
@@ -221,6 +267,37 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
             </TouchableOpacity>
           )}
         </View>
+      </View>
+      {/* TODO:Fix the UI for here */}
+      {/* Location Status */}
+      <View className="mb-4">
+        <Text className="mb-2 text-sm font-medium text-gray-700">Current Location</Text>
+        <View className="flex-row items-center rounded-md bg-gray-50 p-3">
+          <Ionicons name="location" size={20} color={location ? '#10b981' : '#ef4444'} />
+          <Text className="ml-2 flex-1 text-sm text-gray-600">
+            {location
+              ? `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`
+              : locationError || 'Getting location...'}
+          </Text>
+          {(locationError || !location) && (
+            <TouchableOpacity
+              onPress={requestLocationPermission}
+              className="ml-2 rounded-full bg-blue-100 p-1">
+              <Ionicons name="refresh" size={20} color="#3b82f6" />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {locationError && (
+          <TouchableOpacity
+            onPress={requestLocationPermission}
+            className="mt-2 rounded-lg border border-blue-200 bg-blue-50 p-2">
+            <View className="flex-row items-center justify-center">
+              <Ionicons name="location" size={16} color="#3b82f6" />
+              <Text className="ml-2 font-medium text-blue-600">Retry Location Access</Text>
+            </View>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Sessions List */}
