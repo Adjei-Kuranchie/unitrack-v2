@@ -15,27 +15,17 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '~/store/authStore';
+import { RegisterData } from '~/types/auth';
 
 export default function RegisterScreen() {
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState<{
-    username: string;
-    password: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    role: 'STUDENT' | 'LECTURER' | 'ADMIN';
-    program: string;
-    IndexNumber: string;
-  }>({
+  const [formData, setFormData] = useState<RegisterData>({
     username: '',
     password: '',
     firstName: '',
     lastName: '',
     email: '',
     role: 'LECTURER',
-    program: '',
-    IndexNumber: '',
   });
 
   const { register, isLoading, error, clearError } = useAuthStore();
@@ -48,9 +38,7 @@ export default function RegisterScreen() {
       !password.trim() ||
       !firstName.trim() ||
       !lastName.trim() ||
-      !email.trim() ||
-      !formData.program.trim() ||
-      !formData.IndexNumber.trim()
+      !email.trim()
     ) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
@@ -101,7 +89,6 @@ export default function RegisterScreen() {
                 editable={!isLoading}
               />
             </View>
-
             <View>
               <Text className="mb-2 font-medium text-gray-700">Password</Text>
               <View className="relative">
@@ -121,7 +108,6 @@ export default function RegisterScreen() {
                 </Pressable>
               </View>
             </View>
-
             <View>
               <Text className="mb-2 font-medium text-gray-700">First Name</Text>
               <TextInput
@@ -132,7 +118,6 @@ export default function RegisterScreen() {
                 editable={!isLoading}
               />
             </View>
-
             <View>
               <Text className="mb-2 font-medium text-gray-700">Last Name</Text>
               <TextInput
@@ -143,7 +128,6 @@ export default function RegisterScreen() {
                 editable={!isLoading}
               />
             </View>
-
             <View>
               <Text className="mb-2 font-medium text-gray-700">Email</Text>
               <TextInput
@@ -156,7 +140,6 @@ export default function RegisterScreen() {
                 editable={!isLoading}
               />
             </View>
-
             <View>
               <Text className="mb-2 font-medium text-gray-700">Role</Text>
               <View className="rounded-lg border border-gray-300">
@@ -172,7 +155,9 @@ export default function RegisterScreen() {
               </View>
             </View>
 
-            {formData.role === 'STUDENT' && (
+            {/* TODO:ask to make the registerData take in program and indexNumber */}
+            {/*
+            {formData.role === 'LECTURER' && (
               <View>
                 <Text className="mb-2 font-medium text-gray-700">Program</Text>
                 <TextInput
@@ -197,7 +182,7 @@ export default function RegisterScreen() {
                 />
               </View>
             )}
-
+              */}
             <TouchableOpacity
               className={`mt-6 rounded-lg bg-blue-600 py-4 ${isLoading ? 'opacity-50' : ''}`}
               onPress={handleRegister}
@@ -208,7 +193,6 @@ export default function RegisterScreen() {
                 <Text className="text-center text-lg font-semibold text-white">Create Account</Text>
               )}
             </TouchableOpacity>
-
             <TouchableOpacity
               className="mt-4"
               onPress={() => router.replace('/screens/(auth)/SignInScreen')}

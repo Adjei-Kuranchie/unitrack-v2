@@ -38,8 +38,6 @@ export default function ProfileScreen() {
     { key: 'IndexNumber', label: 'Index Number', value: user?.IndexNumber || '', editable: false },
   ];
 
-  console.log(user);
-
   useEffect(() => {
     // Update isStudent when user data changes
     setIsStudent(user?.role === 'STUDENT');
