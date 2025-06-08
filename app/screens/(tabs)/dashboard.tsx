@@ -1,18 +1,21 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { StatCard } from '~/components';
 import { useApiStore } from '~/store/apiStore';
 import { useAuthStore } from '~/store/authStore';
 
 export default function DashboardScreen() {
-  const user = useAuthStore((state) => state.user);
+  const { user, token, role } = useAuthStore();
+  const fetchUserProfile = useApiStore((state) => state.fetchUserProfile);
+  const [profileLoading, setProfileLoading] = useState(false);
+
   const signOut = useAuthStore((state) => state.signOut);
   const { courses, sessions, attendance, isLoading, fetchCourses, fetchSessions, fetchAttendance } =
     useApiStore();
 
-  const isLecturer = user?.role === 'LECTURER';
+  const isLecturer = role === 'LECTURER';
 
   useEffect(() => {
     // Fetch initial data
@@ -20,6 +23,13 @@ export default function DashboardScreen() {
     fetchSessions();
     fetchAttendance();
   }, []);
+
+  useEffect(() => {
+    // Fetch user profile when component mounts if user is not already loaded
+    if (token && !user) {
+      loadUserProfile();
+    }
+  }, [token, user]);
 
   const handleSignOut = () => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
@@ -43,6 +53,19 @@ export default function DashboardScreen() {
       </View>
     );
   }
+
+  const loadUserProfile = async () => {
+    if (!token) return;
+
+    setProfileLoading(true);
+    try {
+      await fetchUserProfile();
+    } catch (err) {
+      console.error('Failed to load user profile:', err);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   return (
     <ScrollView className="flex-1 bg-gray-50">
@@ -72,23 +95,26 @@ export default function DashboardScreen() {
             color="#10b981"
             onPress={() => router.push('/screens/(tabs)/courses')}
           />
-          <StatCard
-            title="Sessions"
-            count={sessions.length}
-            icon="event"
-            color="#f59e0b"
-            onPress={isLecturer ? () => router.push('/screens/(tabs)/sessions') : undefined}
-          />
+          {isLecturer ? (
+            <StatCard
+              title="Sessions"
+              count={sessions.length}
+              icon="event"
+              color="#f59e0b"
+              onPress={isLecturer ? () => router.push('/screens/(tabs)/sessions') : undefined}
+            />
+          ) : (
+            <StatCard
+              title="Attendance Records"
+              count={attendance.length}
+              icon="fact-check"
+              color="#8b5cf6"
+              onPress={() => router.push('/screens/(tabs)/attendance')}
+            />
+          )}
         </View>
 
         <View className="mb-6 flex-row gap-4 space-x-4">
-          <StatCard
-            title="Attendance Records"
-            count={attendance.length}
-            icon="fact-check"
-            color="#8b5cf6"
-            onPress={() => router.push('/screens/(tabs)/attendance')}
-          />
           <StatCard
             title="My Courses"
             count={
@@ -120,22 +146,24 @@ export default function DashboardScreen() {
                 </TouchableOpacity>
               </>
             )}
+            {role === 'STUDENT' && (
+              <TouchableOpacity
+                className="flex-row items-center rounded-lg bg-white p-4 shadow-sm"
+                onPress={() => router.push('/screens/(tabs)/attendance')}>
+                <MaterialIcons name="check-circle" size={24} color="#f59e0b" />
+                <Text className="ml-3 font-medium text-gray-900">
+                  {isLecturer ? 'View Attendance' : 'Mark Attendance'}
+                </Text>
+              </TouchableOpacity>
+            )}
 
-            <TouchableOpacity
-              className="flex-row items-center rounded-lg bg-white p-4 shadow-sm"
-              onPress={() => router.push('/screens/(tabs)/attendance')}>
-              <MaterialIcons name="check-circle" size={24} color="#f59e0b" />
-              <Text className="ml-3 font-medium text-gray-900">
-                {isLecturer ? 'View Attendance' : 'Mark Attendance'}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
+            {/* Uncomment this section when profile update is implemented */}
+            {/* <TouchableOpacity
               className="flex-row items-center rounded-lg bg-white p-4 shadow-sm"
               onPress={() => router.push('/screens/(tabs)/profile')}>
               <MaterialIcons name="person" size={24} color="#8b5cf6" />
               <Text className="ml-3 font-medium text-gray-900">Update Profile</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </View>
 
@@ -149,11 +177,13 @@ export default function DashboardScreen() {
                   key={session.id}
                   className={`${index > 0 ? 'mt-3 border-t border-gray-200 pt-3' : ''}`}>
                   <Text className="font-medium text-gray-900">
-                    {typeof session.course === 'string' ? session.course : 'Unknown Course'}
+                    {typeof session.course.courseCode === 'string'
+                      ? session.course.courseCode
+                      : 'Unknown Course'}
                   </Text>
 
                   <Text className="text-sm text-gray-600">
-                    Session created • {new Date(session.createdAt).toLocaleDateString()}
+                    Session created • {new Date(session.startTime).toLocaleString()}
                   </Text>
                 </View>
               ))
@@ -166,5 +196,3 @@ export default function DashboardScreen() {
     </ScrollView>
   );
 }
-
-//TODO: index renders an object as the child: find and fix

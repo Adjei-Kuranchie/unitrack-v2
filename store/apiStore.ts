@@ -7,6 +7,7 @@ const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 
 const getAuthHeaders = () => {
   const token = useAuthStore.getState().token;
+
   return {
     'Content-Type': 'application/json',
     Authorization: token ? `Bearer ${token}` : '',
@@ -80,8 +81,10 @@ export const useApiStore = create<ApiState>((set, get) => ({
         headers: getAuthHeaders(),
         body: JSON.stringify(course),
       });
+      console.log();
 
       if (!response.ok) {
+        console.log(response);
         throw new Error('Failed to add course');
       }
 

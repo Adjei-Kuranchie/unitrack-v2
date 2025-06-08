@@ -15,16 +15,6 @@ import {
 import { useApiStore } from '~/store/apiStore';
 import { useAuthStore } from '~/store/authStore';
 
-interface Course {
-  id: string;
-  courseName: string;
-  courseCode: string;
-  lecturerId: number;
-  lecturerName?: string;
-  department?: string;
-  createdAt?: string;
-}
-
 interface NewCourseData {
   courseName: string;
   courseCode: string;
