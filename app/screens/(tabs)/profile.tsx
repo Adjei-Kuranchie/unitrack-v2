@@ -20,13 +20,12 @@ interface EditableField {
 
 export default function ProfileScreen() {
   const { user, signOut, token } = useAuthStore();
-  const { updateUser, fetchUserProfile, deleteUser, isLoading, error, clearError } = useApiStore();
+  const { updateUser, fetchUserProfile, isLoading, error, clearError } = useApiStore();
 
   const [isEditing, setIsEditing] = useState(false);
   const [editedFields, setEditedFields] = useState<Record<string, string>>({});
   const [profileLoading, setProfileLoading] = useState(false);
   const [isStudent, setIsStudent] = useState(user?.role === 'STUDENT');
-  const [isDeleting, setIsDeleting] = useState(false);
 
   // Profile fields configuration
   const profileFields: EditableField[] = [
@@ -37,7 +36,6 @@ export default function ProfileScreen() {
     { key: 'program', label: 'Program', value: user?.program || '', editable: true },
     { key: 'IndexNumber', label: 'Index Number', value: user?.IndexNumber || '', editable: false },
   ];
-
   useEffect(() => {
     // Update isStudent when user data changes
     setIsStudent(user?.role === 'STUDENT');
@@ -112,62 +110,6 @@ export default function ProfileScreen() {
     ]);
   };
 
-  const handleDeleteAccount = () => {
-    Alert.alert(
-      'Delete Account',
-      'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: confirmDeleteAccount,
-        },
-      ]
-    );
-  };
-
-  const confirmDeleteAccount = () => {
-    Alert.alert(
-      'Final Confirmation',
-      'This will permanently delete your account and all associated data. Are you absolutely sure?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Yes, Delete',
-          style: 'destructive',
-          onPress: executeDeleteAccount,
-        },
-      ]
-    );
-  };
-
-  const executeDeleteAccount = async () => {
-    if (!user?.id) {
-      Alert.alert('Error', 'Unable to delete account. User ID not found.');
-      return;
-    }
-
-    setIsDeleting(true);
-    try {
-      await deleteUser(user.id);
-      Alert.alert('Account Deleted', 'Your account has been successfully deleted.', [
-        {
-          text: 'OK',
-          onPress: () => {
-            // Sign out the user after successful deletion
-            signOut();
-          },
-        },
-      ]);
-    } catch (err) {
-      Alert.alert('Error', 'Failed to delete account. Please try again.');
-      console.error('Delete account error:', err);
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
   const updateField = (key: string, value: string) => {
     setEditedFields((prev) => ({
       ...prev,
@@ -175,7 +117,6 @@ export default function ProfileScreen() {
     }));
   };
 
-  console.log(user);
   if (!token) {
     return (
       <View className="flex-1 bg-gray-100">
@@ -272,25 +213,10 @@ export default function ProfileScreen() {
 
       <View className="mt-5 bg-white px-5 py-4">
         <Text className="mb-3 text-lg font-semibold text-gray-800">Account Actions</Text>
-
         <TouchableOpacity
           onPress={handleSignOut}
-          className="mb-3 items-center rounded-lg bg-red-500 py-4">
+          className="items-center rounded-lg bg-red-500 py-4">
           <Text className="text-base font-semibold text-white">Sign Out</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={handleDeleteAccount}
-          disabled={isDeleting}
-          className="items-center rounded-lg bg-red-700 py-4">
-          {isDeleting ? (
-            <View className="flex-row items-center">
-              <ActivityIndicator color="#ffffff" size="small" />
-              <Text className="ml-2 text-base font-semibold text-white">Deleting...</Text>
-            </View>
-          ) : (
-            <Text className="text-base font-semibold text-white">Delete Account</Text>
-          )}
         </TouchableOpacity>
       </View>
 
