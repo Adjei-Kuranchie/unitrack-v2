@@ -4,9 +4,10 @@
     "slug": "unitrack-v2",
     "version": "1.0.0",
     "scheme": "unitrack-v2",
+    "newArchEnabled": true,
     "web": {
       "bundler": "metro",
-      "output": "static",
+      "output": "server",
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
@@ -28,7 +29,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#2f80ed"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
@@ -38,7 +39,7 @@
       "permissions": ["android.permissions.INTERNET", "android.permission.ACCESS_NETWORK_STATE"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#2f80ed"
       },
       "package": "com.adjeikuranchie.unitrackv2"
     },
