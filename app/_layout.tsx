@@ -11,20 +11,9 @@ export default function Layout() {
           headerShown: false,
         }}
       />
+
       <Stack.Screen
-        name="screens/(auth)/RegisterScreen"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="screens/(auth)/SignInScreen"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="screens/(tabs)"
+        name="screens"
         options={{
           headerShown: false,
         }}

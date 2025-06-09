@@ -328,6 +328,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
           </View>
         </View>
       </View>
+
       <ScrollView
         className="flex-1 px-4 py-4"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
@@ -355,7 +356,11 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
             )}
           </View>
         ) : (
-          <>{sessions.map(renderSessionCard)}</>
+          <>
+            {sessions
+              .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
+              .map(renderSessionCard)}
+          </>
         )}
       </ScrollView>
 
