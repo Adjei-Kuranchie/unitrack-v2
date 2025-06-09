@@ -13,7 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '~/store/authStore';
 import { RegisterData } from '~/types/auth';
@@ -68,9 +68,7 @@ export default function RegisterScreen() {
   }, [error]);
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1"
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <KeyboardAwareScrollView className="flex-1" bottomOffset={50}>
       <SafeAreaView className="flex-1 bg-white">
         <ScrollView className="flex-1 bg-white pt-12">
           <View className="px-6 py-8">
@@ -209,6 +207,6 @@ export default function RegisterScreen() {
           </View>
         </ScrollView>
       </SafeAreaView>
-    </KeyboardAvoidingView>
+    </KeyboardAwareScrollView>
   );
 }
