@@ -1,7 +1,9 @@
-import { Redirect } from 'expo-router';
-
+import { Text, View } from 'react-native';
 const Index = () => {
-  return <Redirect href="/screens/(auth)/RegisterScreen" />;
+  return (
+    <View>
+      <Text>Index</Text>
+    </View>
+  );
 };
-
 export default Index;
