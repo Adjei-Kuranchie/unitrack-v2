@@ -93,6 +93,7 @@ const CoursesScreen = () => {
         key={courseId} // Fixed: Ensure string key
         className="mb-4 rounded-lg bg-white p-4 shadow-sm"
         onPress={() => {
+          /*TODO: Implement the navigation to course Details */
           router.push(`/screens/(tabs)`);
         }}>
         <View className="mb-2 flex-row items-start justify-between">
