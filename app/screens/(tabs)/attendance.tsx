@@ -28,6 +28,7 @@ const AttendanceScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const IndexNumber = user?.IndexNumber;
+  const filteredSessions = sessions.filter((session) => session.status === 'ACTIVE');
 
   useEffect(() => {
     loadInitialData();
@@ -174,7 +175,7 @@ const AttendanceScreen = () => {
                   onValueChange={(itemValue) => setSelectedSession(itemValue)}
                   enabled={!marking}>
                   <Picker.Item label="Select a session" value={null} />
-                  {sessions.map((session) => (
+                  {filteredSessions.map((session) => (
                     <Picker.Item
                       key={session.id}
                       label={`${session.course.courseCode}: ${session.course.courseName}`}

@@ -271,7 +271,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
       </View>
       {/* TODO:Fix the UI for here */}
       {/* Location Status */}
-      <View className="mb-4">
+      {/* <View className="mb-4">
         <Text className="mb-2 text-sm font-medium text-gray-700">Current Location</Text>
         <View className="flex-row items-center rounded-md bg-gray-50 p-3">
           <Ionicons name="location" size={20} color={location ? '#10b981' : '#ef4444'} />
@@ -299,9 +299,35 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
             </View>
           </TouchableOpacity>
         )}
-      </View>
+      </View> */}
 
       {/* Sessions List */}
+      {/* Stats Card */}
+      <View className="mt-4 rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
+        <Text className="mb-3 text-lg font-semibold text-gray-800">Quick Stats</Text>
+        <View className="flex-row justify-between">
+          <View className="items-center">
+            <Text className="text-2xl font-bold text-blue-600">{sessions.length}</Text>
+            <Text className="text-sm text-gray-500">Total Sessions</Text>
+          </View>
+          <View className="items-center">
+            <Text className="text-2xl font-bold text-green-600">{courses.length}</Text>
+            <Text className="text-sm text-gray-500">Courses</Text>
+          </View>
+          <View className="items-center">
+            <Text className="text-2xl font-bold text-purple-600">
+              {
+                sessions.filter((s) => {
+                  const today = new Date();
+                  const sessionDate = new Date(s.startTime);
+                  return sessionDate.toDateString() === today.toDateString();
+                }).length
+              }
+            </Text>
+            <Text className="text-sm text-gray-500">Today</Text>
+          </View>
+        </View>
+      </View>
       <ScrollView
         className="flex-1 px-4 py-4"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
@@ -329,36 +355,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
             )}
           </View>
         ) : (
-          <>
-            {sessions.map(renderSessionCard)}
-
-            {/* Stats Card */}
-            <View className="mt-4 rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
-              <Text className="mb-3 text-lg font-semibold text-gray-800">Quick Stats</Text>
-              <View className="flex-row justify-between">
-                <View className="items-center">
-                  <Text className="text-2xl font-bold text-blue-600">{sessions.length}</Text>
-                  <Text className="text-sm text-gray-500">Total Sessions</Text>
-                </View>
-                <View className="items-center">
-                  <Text className="text-2xl font-bold text-green-600">{courses.length}</Text>
-                  <Text className="text-sm text-gray-500">Courses</Text>
-                </View>
-                <View className="items-center">
-                  <Text className="text-2xl font-bold text-purple-600">
-                    {
-                      sessions.filter((s) => {
-                        const today = new Date();
-                        const sessionDate = new Date(s.startTime);
-                        return sessionDate.toDateString() === today.toDateString();
-                      }).length
-                    }
-                  </Text>
-                  <Text className="text-sm text-gray-500">Today</Text>
-                </View>
-              </View>
-            </View>
-          </>
+          <>{sessions.map(renderSessionCard)}</>
         )}
       </ScrollView>
 
