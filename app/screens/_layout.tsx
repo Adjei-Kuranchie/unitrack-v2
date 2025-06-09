@@ -1,15 +1,20 @@
-import { Redirect } from 'expo-router';
-import { useAuthStore } from '~/store/authStore';
+import { Stack } from 'expo-router';
 
-const Layout = () => {
-  const { token } = useAuthStore();
-  const isAuthenticated = !!token;
-
-  if (!isAuthenticated) {
-    return <Redirect href="/screens/(auth)/RegisterScreen" />;
-  }
-
-  return <Redirect href="/screens/(tabs)/dashboard" />;
-};
-
-export default Layout;
+export default function ScreensLayout() {
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen
+        name="(auth)"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="(tabs)"
+        options={{
+          headerShown: false,
+        }}
+      />
+    </Stack>
+  );
+}

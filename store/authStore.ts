@@ -1,7 +1,9 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { AuthState, RegisterData } from '~/types/auth';
+
 const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 
 export const useAuthStore = create<AuthState>()(
@@ -77,7 +79,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       signOut: () => {
-        set({ user: null, token: null, error: null });
+        set({ user: null, token: null, role: null, resMessage: null, error: null });
       },
 
       clearError: () => {
@@ -86,11 +88,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
-      storage: createJSONStorage(() => ({
-        getItem: () => null, // We'll implement this without localStorage
-        setItem: () => {},
-        removeItem: () => {},
-      })),
+      storage: createJSONStorage(() => AsyncStorage),
     }
   )
 );
