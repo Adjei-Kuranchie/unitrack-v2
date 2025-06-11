@@ -1,17 +1,19 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import { BottomSheetModal, BottomSheetTextInput, BottomSheetView } from '@gorhom/bottom-sheet';
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
 import {
   ActivityIndicator,
   Alert,
   FlatList,
-  Modal,
   RefreshControl,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import CustomBottomSheetModal from '~/components/CustomBottomSheetModal';
 import { useApiStore } from '~/store/apiStore';
 import { useAuthStore } from '~/store/authStore';
 import { Course } from '~/types/app';
@@ -25,14 +27,14 @@ const CoursesScreen = () => {
   const { user, role } = useAuthStore();
   const { courses, isLoading, error, fetchCourses, addCourse, clearError } = useApiStore();
 
-  const [refreshing, setRefreshing] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
   const [newCourse, setNewCourse] = useState<NewCourseData>({
     courseName: '',
     courseCode: '',
   });
 
+  const bottomSheetRef = useRef<BottomSheetModal>(null);
   const isLecturer = role === 'LECTURER';
 
   useEffect(() => {
@@ -65,7 +67,7 @@ const CoursesScreen = () => {
         courseCode: newCourse.courseCode.trim(),
       });
 
-      setShowAddModal(false);
+      bottomSheetRef.current?.dismiss();
       setNewCourse({ courseName: '', courseCode: '' });
       Alert.alert('Success', 'Course added successfully');
     } catch (err) {
@@ -141,7 +143,9 @@ const CoursesScreen = () => {
       {isLecturer && (
         <TouchableOpacity
           className="mt-4 rounded-lg bg-blue-600 px-6 py-3"
-          onPress={() => setShowAddModal(true)}>
+          onPress={() => {
+            bottomSheetRef.current?.present();
+          }}>
           <Text className="font-medium text-white">Add Course</Text>
         </TouchableOpacity>
       )}
@@ -157,7 +161,9 @@ const CoursesScreen = () => {
           {isLecturer && (
             <TouchableOpacity
               className="rounded-lg bg-blue-600 px-4 py-2"
-              onPress={() => setShowAddModal(true)}>
+              onPress={() => {
+                bottomSheetRef.current?.present();
+              }}>
               <View className="flex-row items-center">
                 <MaterialIcons name="add" size={20} color="white" />
                 <Text className="ml-1 font-medium text-white">Add Course</Text>
@@ -205,17 +211,13 @@ const CoursesScreen = () => {
       )}
 
       {/* Add Course Modal */}
-      <Modal
-        visible={showAddModal}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setShowAddModal(false)}>
-        <View className="flex-1 bg-white">
-          <View className="flex-row items-center justify-between border-b border-gray-200 px-4 py-4">
-            <TouchableOpacity onPress={() => setShowAddModal(false)}>
+      <CustomBottomSheetModal ref={bottomSheetRef}>
+        <BottomSheetView style={{ flex: 1, width: '100%' }} className="items-center">
+          <BottomSheetView className="mb-15 flex-row items-center justify-between border-b border-gray-200 px-8 py-8">
+            <TouchableOpacity onPress={() => bottomSheetRef.current?.dismiss()}>
               <Text className="text-lg text-blue-600">Cancel</Text>
             </TouchableOpacity>
-            <Text className="text-lg font-semibold text-gray-900">Add Course</Text>
+            <Text className="text-xl font-semibold text-gray-900">Add Course</Text>
             <TouchableOpacity
               onPress={handleAddCourse}
               disabled={isLoading}
@@ -226,34 +228,31 @@ const CoursesScreen = () => {
                 <Text className="text-lg font-medium text-blue-600">Save</Text>
               )}
             </TouchableOpacity>
-          </View>
+          </BottomSheetView>
 
-          <View className="flex-1 px-4 py-6">
-            <View className="mb-4">
-              <Text className="mb-2 text-sm font-medium text-gray-700">Course Name</Text>
-              <TextInput
-                className="rounded-lg border border-gray-300 px-3 py-3 text-gray-900"
-                placeholder="Enter course name"
-                value={newCourse.courseName}
-                onChangeText={(text) => setNewCourse((prev) => ({ ...prev, courseName: text }))}
-                placeholderTextColor="#9ca3af"
-              />
-            </View>
+          {/* Input Fields */}
+          <BottomSheetView className="mt-24 px-12">
+            <Text className="text-md mb-2 font-semibold text-gray-700">Course Name</Text>
+            <BottomSheetTextInput
+              className="mb-4 rounded-lg border border-gray-300 px-3 py-3 text-gray-900"
+              placeholder="Enter course name"
+              value={newCourse.courseName}
+              onChangeText={(text) => setNewCourse((prev) => ({ ...prev, courseName: text }))}
+              placeholderTextColor="#9ca3af"
+            />
 
-            <View className="mb-4">
-              <Text className="mb-2 text-sm font-medium text-gray-700">Course Code</Text>
-              <TextInput
-                className="rounded-lg border border-gray-300 px-3 py-3 text-gray-900"
-                placeholder="Enter course code (e.g., CSC406)"
-                value={newCourse.courseCode}
-                onChangeText={(text) => setNewCourse((prev) => ({ ...prev, courseCode: text }))}
-                placeholderTextColor="#9ca3af"
-                autoCapitalize="characters"
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
+            <Text className="text-md mb-2 font-semibold text-gray-700">Course Code</Text>
+            <BottomSheetTextInput
+              className="rounded-lg border border-gray-300 px-3 py-3 text-gray-900"
+              placeholder="Enter course code (e.g., CSC406)"
+              value={newCourse.courseCode}
+              onChangeText={(text) => setNewCourse((prev) => ({ ...prev, courseCode: text }))}
+              placeholderTextColor="#9ca3af"
+              autoCapitalize="characters"
+            />
+          </BottomSheetView>
+        </BottomSheetView>
+      </CustomBottomSheetModal>
     </View>
   );
 };

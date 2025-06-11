@@ -130,6 +130,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
     );
   };
 
+  //Implemet proper modal functionality
   const renderCreateModal = () => (
     <Modal
       visible={showCreateModal}
