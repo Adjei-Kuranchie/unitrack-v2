@@ -1,6 +1,6 @@
 import { useLocalSearchParams } from 'expo-router';
 import { Text, View } from 'react-native';
-
+// TODO: Make proper interface for the session details
 const SessionScreen = () => {
   const { session } = useLocalSearchParams();
   const sessionData = JSON.parse(session as string);
