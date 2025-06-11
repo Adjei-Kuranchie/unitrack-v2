@@ -94,7 +94,7 @@ const CoursesScreen = () => {
         className="mb-4 rounded-lg bg-white p-4 shadow-sm"
         onPress={() => {
           /*TODO: Implement the navigation to course Details */
-          router.push(`/screens/(tabs)`);
+          router.push({ pathname: `/screens/(tabs)/dashboard` });
         }}>
         <View className="mb-2 flex-row items-start justify-between">
           <View className="flex-1">
