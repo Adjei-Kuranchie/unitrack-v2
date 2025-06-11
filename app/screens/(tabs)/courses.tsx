@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useApiStore } from '~/store/apiStore';
 import { useAuthStore } from '~/store/authStore';
+import { Course } from '~/types/app';
 
 interface NewCourseData {
   courseName: string;
@@ -78,13 +79,13 @@ const CoursesScreen = () => {
       course.courseCode.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const renderCourseCard = ({ item: course }: { item: any }) => {
+  const renderCourseCard = ({ item: course }: { item: Course }) => {
     // Fixed: Ensure all displayed values are strings
     const courseName = course.courseName ? String(course.courseName) : 'Unknown Course';
     const courseCode = course.courseCode ? String(course.courseCode) : 'N/A';
-    const lecturerName = course.lecturerName ? String(course.lecturerName) : null;
-    const department = course.department ? String(course.department) : null;
-    const courseId = course.id ? String(course.id) : String(Math.random());
+    /* const lecturerName = course.lecturerName ? String(course.lecturerName) : null;
+    const department = course.department ? String(course.department) : null; */
+    const courseId = course.courseCode ? String(course.courseCode) : String(Math.random());
 
     const isOwnCourse = isLecturer && course.lecturerId === user?.id;
 
@@ -94,7 +95,10 @@ const CoursesScreen = () => {
         className="mb-4 rounded-lg bg-white p-4 shadow-sm"
         onPress={() => {
           /*TODO: Implement the navigation to course Details */
-          router.push({ pathname: `/screens/(tabs)/details/[courseDetails]`, params: course });
+          router.push({
+            pathname: `/screens/course/course`,
+            params: { course: JSON.stringify(course) },
+          });
         }}>
         <View className="mb-2 flex-row items-start justify-between">
           <View className="flex-1">
@@ -108,11 +112,11 @@ const CoursesScreen = () => {
           )}
         </View>
 
-        {lecturerName && (
+        {/*  {lecturerName && (
           <Text className="mb-2 text-sm text-gray-600">Lecturer: {lecturerName}</Text>
         )}
 
-        {department && <Text className="mb-2 text-sm text-gray-600">Department: {department}</Text>}
+        {department && <Text className="mb-2 text-sm text-gray-600">Department: {department}</Text>} */}
 
         <View className="mt-2 flex-row items-center justify-between">
           <View className="flex-row items-center">

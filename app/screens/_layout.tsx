@@ -21,6 +21,7 @@ export default function ScreensLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen name="course/course" />
     </Stack>
   );
 }

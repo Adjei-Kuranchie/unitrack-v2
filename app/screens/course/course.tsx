@@ -4,12 +4,9 @@ import { Course } from '~/types/app';
 
 const CourseDetails = () => {
   const params = useLocalSearchParams();
-  // If course is passed as a JSON string in the query, parse it
-  const course: Course | undefined = params.course
-    ? typeof params.course === 'string'
-      ? JSON.parse(params.course)
-      : params.course
-    : undefined;
+
+  const course: Course | undefined =
+    typeof params.course === 'string' ? JSON.parse(params.course) : undefined;
 
   if (!course) {
     return (
@@ -27,4 +24,5 @@ const CourseDetails = () => {
     </View>
   );
 };
+
 export default CourseDetails;
