@@ -21,7 +21,18 @@ export default function ScreensLayout() {
           headerShown: false,
         }}
       />
-      <Stack.Screen name="course/course" />
+      <Stack.Screen
+        name="details/course"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="details/session"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

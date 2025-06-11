@@ -96,7 +96,7 @@ const CoursesScreen = () => {
         onPress={() => {
           /*TODO: Implement the navigation to course Details */
           router.push({
-            pathname: `/screens/course/course`,
+            pathname: `/screens/details/course`,
             params: { course: JSON.stringify(course) },
           });
         }}>

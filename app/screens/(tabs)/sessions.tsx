@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
@@ -25,6 +26,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
   const [locationError, setLocationError] = useState<string | null>(null);
   const [location, setLocation] = useState<{ latitude: number; longitude: number }>();
 
+  const router = useRouter();
   const {
     sessions,
     courses,
@@ -85,10 +87,10 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
   };
 
   const handleSessionPress = (session: any) => {
-    // Navigate to session details or attendance marking
-    if (navigation) {
-      navigation.navigate('SessionDetails', { session });
-    }
+    router.push({
+      pathname: '/screens/details/session',
+      params: { session: JSON.stringify(session) },
+    });
   };
 
   const renderSessionCard = (session: Session) => {
