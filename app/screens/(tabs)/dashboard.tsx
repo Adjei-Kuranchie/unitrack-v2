@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { StatCard } from '~/components';
+import { formatDate } from '~/lib/utils';
 import { useApiStore } from '~/store/apiStore';
 import { useAuthStore } from '~/store/authStore';
 
@@ -173,19 +174,24 @@ export default function DashboardScreen() {
           <View className="rounded-lg bg-white p-4 shadow-sm">
             {sessions.length > 0 ? (
               sessions.slice(0, 3).map((session, index) => (
-                <View
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push({
+                      pathname: '/screens/details/session',
+                      params: { session: JSON.stringify(session) },
+                    })
+                  }
                   key={session.id}
                   className={`${index > 0 ? 'mt-3 border-t border-gray-200 pt-3' : ''}`}>
                   <Text className="font-medium text-gray-900">
-                    {typeof session.course.courseCode === 'string'
-                      ? session.course.courseCode
-                      : 'Unknown Course'}
+                    {typeof session.course.courseCode === 'string' && session.course.courseCode} -{' '}
+                    {typeof session.course.courseName === 'string' && session.course.courseName}
                   </Text>
 
                   <Text className="text-sm text-gray-600">
-                    Session created • {new Date(session.startTime).toLocaleString()}
+                    Session created • {formatDate(session.startTime)}
                   </Text>
-                </View>
+                </TouchableOpacity>
               ))
             ) : (
               <Text className="text-center text-gray-500">No recent activity</Text>
