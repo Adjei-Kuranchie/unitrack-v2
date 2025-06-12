@@ -43,7 +43,7 @@ export default function ProfileScreen() {
     setIsStudent(user?.role === 'STUDENT');
   }, [user?.role]);
 
-  const filteredFields = isStudent
+  const filteredFields = !isStudent
     ? profileFields.filter((f) => f.key !== 'program' && f.key !== 'IndexNumber')
     : profileFields;
 
@@ -173,7 +173,9 @@ export default function ProfileScreen() {
             ? `${user.firstName} ${user.lastName}`
             : user.firstName || user.username || 'User'}
         </Text>
-        <Text className="text-base capitalize text-gray-600">{user.role || 'Student'}</Text>
+        <Text className="text-base capitalize text-gray-600">
+          {isStudent ? 'Student' : 'Lecturer'}
+        </Text>
       </View>
 
       <View className="mt-5 bg-white px-5 py-4">
