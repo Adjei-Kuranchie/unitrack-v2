@@ -114,12 +114,8 @@ const CourseDetails = () => {
   const handleSessionPress = (session: Session) => {
     // Navigate to session details
     router.push({
-      // pathname: '/session/[id]',
-      pathname: '/screens/(tabs)/dashboard',
-      params: {
-        id: session.id.toString(),
-        session: JSON.stringify(session),
-      },
+      pathname: '/screens/details/session',
+      params: { session: JSON.stringify(session) },
     });
   };
 
