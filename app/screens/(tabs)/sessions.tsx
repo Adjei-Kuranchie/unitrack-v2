@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { formatDate } from '~/lib/utils';
 import { useApiStore } from '~/store/apiStore';
 import { useAuthStore } from '~/store/authStore';
 import { Session } from '~/types/app';
@@ -75,17 +76,6 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
     }
   };
 
-  const formatDate = (dateString: Date) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
   const handleSessionPress = (session: any) => {
     router.push({
       pathname: '/screens/details/session',
@@ -113,7 +103,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
           </View>
           <View className="flex-row items-center">
             <Ionicons name="time-outline" size={16} color="#6B7280" />
-            <Text className="ml-1 text-sm text-gray-500">{formatDate(startTime)}</Text>
+            <Text className="ml-1 text-sm text-gray-500">{formatDate(String(startTime))}</Text>
           </View>
         </View>
 
@@ -130,7 +120,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
     );
   };
 
-  //Implemet proper modal functionality
+  //TODO:Implement proper modal functionality
   const renderCreateModal = () => (
     <Modal
       visible={showCreateModal}

@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { formatDateTime } from '~/lib/utils';
 import { useApiStore } from '~/store/apiStore';
 import { Course, Session } from '~/types/app';
 
@@ -91,15 +92,6 @@ const CourseDetails = () => {
     });
   };
 
-  const formatDateOnly = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
   const getSessionStatusColor = (status: string) => {
     switch (status) {
       case 'ACTIVE':
@@ -139,7 +131,9 @@ const CourseDetails = () => {
                 </View>
               )}
             </View>
-            <Text className="mt-1 text-sm text-gray-500">{formatDate(session.startTime)}</Text>
+            <Text className="mt-1 text-sm text-gray-500">
+              {formatDateTime(session.startTime).date} {formatDateTime(session.startTime).time}
+            </Text>
           </View>
 
           <View className="items-end">
