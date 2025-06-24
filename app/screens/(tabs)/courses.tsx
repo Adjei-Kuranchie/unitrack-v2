@@ -23,6 +23,8 @@ interface NewCourseData {
   courseCode: string;
 }
 
+//TODO: make sure to find the problem why every one has the same number of courses,sessions, attendance records, and fix it
+
 const CoursesScreen = () => {
   const { user, role } = useAuthStore();
   const { courses, isLoading, error, fetchCourses, addCourse, clearError } = useApiStore();
@@ -98,7 +100,7 @@ const CoursesScreen = () => {
         onPress={() => {
           router.push({
             pathname: `/screens/details/course`,
-            params: { course: JSON.stringify(course) },
+            params: { course: JSON.stringify(course), role: role },
           });
         }}>
         <View className="mb-2 flex-row items-start justify-between">

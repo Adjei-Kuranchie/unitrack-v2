@@ -24,27 +24,25 @@ const CourseDetails = () => {
 
   const course: Course | undefined =
     typeof params.course === 'string' ? JSON.parse(params.course) : undefined;
+  const role = params.role as 'STUDENT' | 'LECTURER' | undefined;
 
   useEffect(() => {
     if (sessions.length === 0) {
-      // Only fetch if we don't have any sessions yet
       loadCourseSessions();
     }
-    // Filter existing sessions without fetching again
+
     filterCourseSessions();
   }, [sessions]);
 
   const filterCourseSessions = () => {
     if (!course) return;
 
-    // Filter sessions for this specific course
     const filteredSessions = sessions.filter(
       (session) =>
         session.course?.courseCode === course.courseCode ||
         session.course?.courseName === course.courseName
     );
 
-    // Sort sessions by start time (most recent first)
     const sortedSessions = filteredSessions.sort(
       (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
     );
@@ -103,13 +101,15 @@ const CourseDetails = () => {
   const renderSessionCard = (session: Session) => {
     const startTime = new Date(session.startTime);
     const isToday = startTime.toDateString() === new Date().toDateString();
-    const isPast = startTime < new Date();
+    //TODO: Modify the renderSessionCard to show the session time(like yesterday, today, last 5 days, shows the date when it's been more than a week) and the session status whether absent or present for that session, no session number
+
+    //TODO: or change the whole courses.tsx UI to show the students courses in a grid view with the course name, code, and lecturer name, and then on click it shows the sessions for that course in a bottom sheet list view with the session time and status whether absent or present for that session
 
     return (
       <TouchableOpacity
         key={session.id}
         className="mb-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm"
-        onPress={() => handleSessionPress(session)}>
+        onPress={() => role == 'LECTURER' && handleSessionPress(session)}>
         <View className="mb-3 flex-row items-center justify-between">
           <View className="flex-1">
             <View className="flex-row items-center">
