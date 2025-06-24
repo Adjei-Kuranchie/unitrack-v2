@@ -2,6 +2,7 @@
 import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
+import { isJWTExpired } from '~/lib/utils';
 import { useAuthStore } from '~/store/authStore';
 
 const Index = () => {
@@ -27,10 +28,10 @@ const Index = () => {
   }
 
   // Redirect based on authentication state
-  if (token) {
-    return <Redirect href="/screens/(tabs)/dashboard" />;
-  } else {
+  if (isJWTExpired(token!)) {
     return <Redirect href="/screens/(auth)/RegisterScreen" />;
+  } else {
+    return <Redirect href="/screens/(tabs)/dashboard" />;
   }
 };
 

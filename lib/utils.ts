@@ -29,4 +29,29 @@ const formatDateTime = (dateString: string) => {
   };
 };
 
-export { formatDate, formatDateTime, formatTime };
+const isJWTExpired = (token: string): boolean => {
+  try {
+    // Split the JWT into parts
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      throw new Error('Invalid JWT format');
+    }
+
+    // Decode the payload (second part)
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+
+    // Check if exp claim exists
+    if (!payload.exp) {
+      throw new Error('No expiration time found in token');
+    }
+
+    // Compare expiration time with current time
+    const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+    return payload.exp < currentTime;
+  } catch (error) {
+    console.error('Error checking JWT expiration:', error);
+    return true; // Assume expired if we can't parse it
+  }
+};
+
+export { formatDate, formatDateTime, formatTime, isJWTExpired };
