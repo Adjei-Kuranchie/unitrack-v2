@@ -70,7 +70,7 @@ export default function DashboardScreen() {
   return (
     <ScrollView className="flex-1 bg-gray-50">
       {/* Header */}
-      <View className="bg-blue-600 px-6 pb-6 pt-4">
+      <View className="bg-blue-600 px-6 py-12 pb-6">
         <View className="flex-row items-center justify-between">
           <View>
             <Text className="text-lg font-medium text-blue-100">Welcome back,</Text>

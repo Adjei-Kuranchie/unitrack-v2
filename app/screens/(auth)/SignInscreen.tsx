@@ -149,9 +149,8 @@ export default function SignInScreen() {
       </View>
 
       {/* Add a test button in your JSX (temporarily): */}
-      <TouchableOpacity className="mt-4 rounded-lg bg-gray-600 py-4" onPress={testApiConnection}>
-        <Text className="text-center text-lg font-semibold text-white">Test API Connection</Text>
-      </TouchableOpacity>
+      {/*
+       */}
     </View>
   );
 }

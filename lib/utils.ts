@@ -50,9 +50,13 @@ const isJWTExpired = (token: string | null): boolean => {
     const currentTime = Math.floor(Date.now() / 1000);
     const expired = payload.exp < currentTime;
     if (expired) {
-      useAuthStore.getState().token = null;
-      useAuthStore.getState().role = null;
-      useAuthStore.getState().user = null;
+      useAuthStore.setState({
+        token: null,
+        user: null,
+        role: null,
+        resMessage: null,
+        error: 'Session expired. Please log in again.',
+      });
     }
     return expired;
   } catch (error) {

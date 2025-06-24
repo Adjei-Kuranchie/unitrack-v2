@@ -28,6 +28,7 @@ export default function TabLayout() {
         name="dashboard"
         options={{
           title: 'Dashboard',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="dashboard" size={size} color={color} />
           ),

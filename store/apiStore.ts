@@ -81,11 +81,14 @@ export const useApiStore = create<ApiState>((set, get) => ({
         headers: getAuthHeaders(),
         body: JSON.stringify(course),
       });
-      console.log();
 
       if (!response.ok) {
-        console.log(response);
-        throw new Error('Failed to add course');
+        const errorText = await response.text();
+        set({
+          error: errorText || 'Failed to add course',
+          isLoading: false,
+        });
+        throw new Error(errorText || 'Failed to add course');
       }
 
       // Refresh courses after adding
@@ -95,6 +98,7 @@ export const useApiStore = create<ApiState>((set, get) => ({
         error: error instanceof Error ? error.message : 'Failed to add course',
         isLoading: false,
       });
+      throw error; // Ensure error is thrown to be caught in UI
     }
   },
 

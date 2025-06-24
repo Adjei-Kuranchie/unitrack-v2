@@ -31,8 +31,7 @@ const AttendanceScreen = () => {
   const filteredSessions = sessions.filter((session) => session.status === 'ACTIVE');
 
   useEffect(() => {
-    loadInitialData();
-    requestLocationPermission();
+    Promise.all([loadInitialData(), requestLocationPermission()]);
   }, []);
 
   const loadInitialData = async () => {

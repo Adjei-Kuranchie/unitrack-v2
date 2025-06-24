@@ -39,14 +39,14 @@ const CoursesScreen = () => {
 
   useEffect(() => {
     fetchCourses();
-  }, []);
+  }, [fetchCourses]);
 
   useEffect(() => {
     if (error) {
       Alert.alert('Error', error);
       clearError();
     }
-  }, [error]);
+  }, [error, clearError]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -72,6 +72,7 @@ const CoursesScreen = () => {
       Alert.alert('Success', 'Course added successfully');
     } catch (err) {
       Alert.alert('Error', 'Failed to add course');
+      bottomSheetRef.current?.dismiss();
     }
   };
 

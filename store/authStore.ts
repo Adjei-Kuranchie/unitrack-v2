@@ -77,7 +77,6 @@ export const useAuthStore = create<AuthState>()(
       setUser: (userData) => {
         set({ user: userData });
       },
-
       signOut: () => {
         set({ user: null, token: null, role: null, resMessage: null, error: null });
       },
