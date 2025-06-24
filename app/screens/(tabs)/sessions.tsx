@@ -93,8 +93,8 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
 
     return (
       <TouchableOpacity
-        key={sessionId} // Fixed: Ensure string key
-        className="mb-3 rounded-lg border border-gray-100 bg-white p-4 shadow-sm"
+        key={sessionId}
+        className={`mb-3 rounded-lg border border-gray-100 bg-white p-4 shadow-sm ${status === 'ACTIVE' ? 'border-green-500 bg-green-50' : ''}`}
         onPress={() => handleSessionPress(session)}>
         <View className="mb-2 flex-row items-center justify-between">
           <View className="flex-1">
@@ -109,10 +109,17 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
 
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center">
-            <View className="rounded-full bg-blue-100 px-3 py-1">
+            <View
+              className={`rounded-full px-3 py-1 ${status === 'ACTIVE' ? 'bg-green-100' : 'bg-blue-100'}`}>
               <Text
-                className={`text-xs font-medium capitalize ${status === 'ACTIVE' ? 'text-blue-700' : 'text-gray-500'}`}>{`${status}`}</Text>
+                className={`text-xs font-medium capitalize ${status === 'ACTIVE' ? 'text-green-700' : 'text-blue-700'}`}>{`${status}`}</Text>
             </View>
+            {status === 'ACTIVE' && (
+              <View className="ml-2 flex-row items-center">
+                <Ionicons name="checkmark-circle" size={16} color="#10b981" />
+                <Text className="ml-1 text-xs font-semibold text-green-700">Active</Text>
+              </View>
+            )}
           </View>
           <Ionicons name="chevron-forward" size={20} color="#6B7280" />
         </View>

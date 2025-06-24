@@ -19,10 +19,7 @@ export default function DashboardScreen() {
   const isLecturer = role === 'LECTURER';
 
   useEffect(() => {
-    // Fetch initial data
-    fetchCourses();
-    fetchSessions();
-    fetchAttendance();
+    Promise.all([fetchCourses(), fetchSessions(), fetchAttendance()]);
   }, []);
 
   useEffect(() => {
@@ -40,7 +37,9 @@ export default function DashboardScreen() {
         style: 'destructive',
         onPress: () => {
           signOut();
-          router.replace('/screens/(auth)/SignInScreen');
+          setTimeout(() => {
+            router.replace('/screens/(auth)/SignInScreen');
+          }, 100);
         },
       },
     ]);

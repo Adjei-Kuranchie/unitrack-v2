@@ -82,7 +82,6 @@ const CoursesScreen = () => {
   );
 
   const renderCourseCard = ({ item: course }: { item: Course }) => {
-    // Fixed: Ensure all displayed values are strings
     const courseName = course.courseName ? String(course.courseName) : 'Unknown Course';
     const courseCode = course.courseCode ? String(course.courseCode) : 'N/A';
     /* const lecturerName = course.lecturerName ? String(course.lecturerName) : null;
@@ -96,7 +95,6 @@ const CoursesScreen = () => {
         key={courseId} // Fixed: Ensure string key
         className="mb-4 rounded-lg bg-white p-4 shadow-sm"
         onPress={() => {
-          /*TODO: Implement the navigation to course Details */
           router.push({
             pathname: `/screens/details/course`,
             params: { course: JSON.stringify(course) },

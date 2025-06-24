@@ -56,6 +56,7 @@ const isJWTExpired = (token: string | null): boolean => {
     }
     return expired;
   } catch (error) {
+    //TODO: Remove console.error in production
     console.error('Error checking JWT expiration:', error);
     return true;
   }
