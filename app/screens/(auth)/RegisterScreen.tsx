@@ -68,9 +68,9 @@ export default function RegisterScreen() {
   }, [error]);
 
   return (
-    <KeyboardAwareScrollView className="flex-1" bottomOffset={50}>
+    <KeyboardAwareScrollView className="flex-1" bottomOffset={30}>
       <SafeAreaView className="flex-1 bg-white">
-        <ScrollView className="flex-1 bg-white pt-12">
+        <ScrollView className="h-[100vh] flex-1 pt-12">
           <View className="px-6 py-8">
             <View className="mb-8">
               <Text className="mb-2 text-center text-3xl font-bold text-blue-600">
