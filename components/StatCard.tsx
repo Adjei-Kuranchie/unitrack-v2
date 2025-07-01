@@ -15,6 +15,7 @@ const StatCard = ({
   onPress?: () => void;
 }) => (
   <TouchableOpacity
+    activeOpacity={0.7}
     className="flex-1 rounded-lg bg-white p-4 shadow-sm"
     style={{ borderLeftWidth: 4, borderLeftColor: color }}
     onPress={onPress}

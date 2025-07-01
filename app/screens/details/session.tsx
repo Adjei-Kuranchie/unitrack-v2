@@ -30,6 +30,7 @@ const SessionScreen = () => {
       {/* Header */}
       <View className="flex-row items-center justify-between border-b border-gray-200 bg-white px-4 py-3 shadow-sm">
         <TouchableOpacity
+          activeOpacity={0.7}
           onPress={() => router.back()}
           className="-ml-2 rounded-full p-2"
           activeOpacity={0.7}>

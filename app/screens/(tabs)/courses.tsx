@@ -95,6 +95,7 @@ const CoursesScreen = () => {
 
     return (
       <TouchableOpacity
+        activeOpacity={0.7}
         key={courseId} // Fixed: Ensure string key
         className="mb-4 rounded-lg bg-white p-4 shadow-sm"
         onPress={() => {
@@ -143,6 +144,7 @@ const CoursesScreen = () => {
       </Text>
       {isLecturer && (
         <TouchableOpacity
+          activeOpacity={0.7}
           className="mt-4 rounded-lg bg-blue-600 px-6 py-3"
           onPress={() => {
             bottomSheetRef.current?.present();
@@ -161,6 +163,7 @@ const CoursesScreen = () => {
           <Text className="text-xl font-bold text-gray-900">Courses</Text>
           {isLecturer && (
             <TouchableOpacity
+              activeOpacity={0.7}
               className="rounded-lg bg-blue-600 px-4 py-2"
               onPress={() => {
                 bottomSheetRef.current?.present();
@@ -184,7 +187,7 @@ const CoursesScreen = () => {
             placeholderTextColor="#9ca3af"
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <TouchableOpacity activeOpacity={0.7} onPress={() => setSearchQuery('')}>
               <MaterialIcons name="clear" size={20} color="#6b7280" />
             </TouchableOpacity>
           )}
@@ -215,11 +218,12 @@ const CoursesScreen = () => {
       <CustomBottomSheetModal ref={bottomSheetRef}>
         <BottomSheetView style={{ flex: 1, width: '100%' }} className="items-center">
           <BottomSheetView className="mb-15 flex-row items-center justify-between border-b border-gray-200 px-8 py-8">
-            <TouchableOpacity onPress={() => bottomSheetRef.current?.dismiss()}>
+            <TouchableOpacity activeOpacity={0.7} onPress={() => bottomSheetRef.current?.dismiss()}>
               <Text className="text-lg text-blue-600">Cancel</Text>
             </TouchableOpacity>
             <Text className="text-xl font-semibold text-gray-900">Add Course</Text>
             <TouchableOpacity
+              activeOpacity={0.7}
               onPress={handleAddCourse}
               disabled={isLoading}
               className={`${isLoading ? 'opacity-50' : ''}`}>

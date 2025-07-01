@@ -152,7 +152,10 @@ export default function ProfileScreen() {
           <Text className="mb-4 text-center text-base text-red-500">
             Failed to load profile data
           </Text>
-          <TouchableOpacity onPress={loadUserProfile} className="rounded-md bg-blue-500 px-4 py-2">
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={loadUserProfile}
+            className="rounded-md bg-blue-500 px-4 py-2">
             <Text className="text-white">Retry</Text>
           </TouchableOpacity>
         </View>
@@ -182,15 +185,22 @@ export default function ProfileScreen() {
         <View className="mb-4 flex-row items-center justify-between">
           <Text className="text-lg font-semibold text-gray-800">Profile Information</Text>
           {!isEditing ? (
-            <TouchableOpacity onPress={handleEdit} className="rounded-md bg-blue-500 px-4 py-2">
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={handleEdit}
+              className="rounded-md bg-blue-500 px-4 py-2">
               <Text className="font-medium text-white">Edit</Text>
             </TouchableOpacity>
           ) : (
             <View className="flex-row gap-2">
-              <TouchableOpacity onPress={handleCancel} className="rounded-md bg-gray-500 px-4 py-2">
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={handleCancel}
+                className="rounded-md bg-gray-500 px-4 py-2">
                 <Text className="font-medium text-white">Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                activeOpacity={0.7}
                 onPress={handleSave}
                 className="min-w-[60px] items-center rounded-md bg-green-500 px-4 py-2">
                 {isLoading ? (
@@ -225,6 +235,7 @@ export default function ProfileScreen() {
       <View className="mt-5 bg-white px-5 py-4">
         <Text className="mb-3 text-lg font-semibold text-gray-800">Account Actions</Text>
         <TouchableOpacity
+          activeOpacity={0.7}
           onPress={handleSignOut}
           className="items-center rounded-lg bg-red-500 py-4">
           <Text className="text-base font-semibold text-white">Sign Out</Text>

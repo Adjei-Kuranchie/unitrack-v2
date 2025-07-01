@@ -93,6 +93,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
 
     return (
       <TouchableOpacity
+        activeOpacity={0.7}
         key={sessionId}
         className={`mb-3 rounded-lg border border-gray-100 bg-white p-4 shadow-sm ${status === 'ACTIVE' ? 'border-green-500 bg-green-50' : ''}`}
         onPress={() => handleSessionPress(session)}>
@@ -149,13 +150,14 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
               </View>
               {(locationError || !location) && (
                 <TouchableOpacity
+                  activeOpacity={0.7}
                   onPress={requestLocationPermission}
                   className="ml-2 rounded-full bg-blue-100 p-1">
                   <Ionicons name="refresh" size={20} color="#3b82f6" />
                 </TouchableOpacity>
               )}
             </View>
-            <TouchableOpacity onPress={() => setShowCreateModal(false)}>
+            <TouchableOpacity activeOpacity={0.7} onPress={() => setShowCreateModal(false)}>
               <Ionicons name="close" size={24} color="#6B7280" />
             </TouchableOpacity>
           </View>
@@ -165,6 +167,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
           <ScrollView className="mb-4 max-h-60">
             {courses.map((course) => (
               <TouchableOpacity
+                activeOpacity={0.7}
                 key={course.courseCode}
                 className={`mb-2 rounded-lg border p-3 ${
                   selectedCourse === course.courseName
@@ -190,11 +193,13 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
 
           <View className="flex-row space-x-3">
             <TouchableOpacity
+              activeOpacity={0.7}
               className="flex-1 rounded-lg bg-gray-100 py-3"
               onPress={() => setShowCreateModal(false)}>
               <Text className="text-center font-medium text-gray-700">Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
+              activeOpacity={0.7}
               className="flex-1 rounded-lg bg-blue-600 py-3"
               onPress={handleCreateSession}
               disabled={isLoading}>
@@ -237,6 +242,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
         <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
         <Text className="mt-4 text-center text-lg font-medium text-red-600">{error}</Text>
         <TouchableOpacity
+          activeOpacity={0.7}
           className="mt-4 rounded-lg bg-blue-600 px-6 py-3"
           onPress={() => {
             clearError();
@@ -261,6 +267,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
           </View>
           {role === 'LECTURER' && (
             <TouchableOpacity
+              activeOpacity={0.7}
               className="flex-row items-center rounded-lg bg-blue-600 px-4 py-2"
               onPress={() => setShowCreateModal(true)}>
               <Ionicons name="add" size={20} color="white" />
@@ -281,7 +288,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
               : locationError || 'Getting location...'}
           </Text>
           {(locationError || !location) && (
-            <TouchableOpacity
+            <TouchableOpacity activeOpacity={0.7}
               onPress={requestLocationPermission}
               className="ml-2 rounded-full bg-blue-100 p-1">
               <Ionicons name="refresh" size={20} color="#3b82f6" />
@@ -290,7 +297,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
         </View>
 
         {locationError && (
-          <TouchableOpacity
+          <TouchableOpacity activeOpacity={0.7}
             onPress={requestLocationPermission}
             className="mt-2 rounded-lg border border-blue-200 bg-blue-50 p-2">
             <View className="flex-row items-center justify-center">
@@ -349,6 +356,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
             </Text>
             {role === 'LECTURER' && (
               <TouchableOpacity
+                activeOpacity={0.7}
                 className="mt-6 rounded-lg bg-blue-600 px-6 py-3"
                 onPress={() => setShowCreateModal(true)}>
                 <Text className="font-medium text-white">Create Session</Text>

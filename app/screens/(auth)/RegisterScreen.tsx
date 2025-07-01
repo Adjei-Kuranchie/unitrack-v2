@@ -186,6 +186,7 @@ export default function RegisterScreen() {
             )}
               */}
               <TouchableOpacity
+                activeOpacity={0.7}
                 className={`mt-6 rounded-lg bg-blue-600 py-4 ${isLoading ? 'opacity-50' : ''}`}
                 onPress={handleRegister}
                 disabled={isLoading}>
@@ -198,6 +199,7 @@ export default function RegisterScreen() {
                 )}
               </TouchableOpacity>
               <TouchableOpacity
+                activeOpacity={0.7}
                 className="mt-4"
                 onPress={() => router.replace('/screens/(auth)/SignInScreen')}
                 disabled={isLoading}>

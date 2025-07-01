@@ -79,7 +79,10 @@ export default function DashboardScreen() {
             </Text>
             <Text className="text-blue-200">{isLecturer ? 'Lecturer' : 'Student'} Dashboard</Text>
           </View>
-          <TouchableOpacity className="rounded-full bg-blue-500 p-2" onPress={handleSignOut}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            className="rounded-full bg-blue-500 p-2"
+            onPress={handleSignOut}>
             <MaterialIcons name="logout" size={24} color="white" />
           </TouchableOpacity>
         </View>
@@ -132,6 +135,7 @@ export default function DashboardScreen() {
             {isLecturer && (
               <>
                 <TouchableOpacity
+                  activeOpacity={0.7}
                   className="flex-row items-center rounded-lg bg-white p-4 shadow-sm"
                   onPress={() => router.push('/screens/(tabs)/courses')}>
                   <MaterialIcons name="add-circle" size={24} color="#2563eb" />
@@ -139,6 +143,7 @@ export default function DashboardScreen() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
+                  activeOpacity={0.7}
                   className="flex-row items-center rounded-lg bg-white p-4 shadow-sm"
                   onPress={() => router.push('/screens/(tabs)/sessions')}>
                   <MaterialIcons name="event-note" size={24} color="#10b981" />
@@ -148,6 +153,7 @@ export default function DashboardScreen() {
             )}
             {role === 'STUDENT' && (
               <TouchableOpacity
+                activeOpacity={0.7}
                 className="flex-row items-center rounded-lg bg-white p-4 shadow-sm"
                 onPress={() => router.push('/screens/(tabs)/attendance')}>
                 <MaterialIcons name="check-circle" size={24} color="#f59e0b" />
@@ -158,7 +164,7 @@ export default function DashboardScreen() {
             )}
 
             {/* Uncomment this section when profile update is implemented */}
-            {/* <TouchableOpacity
+            {/* <TouchableOpacity activeOpacity={0.7}
               className="flex-row items-center rounded-lg bg-white p-4 shadow-sm"
               onPress={() => router.push('/screens/(tabs)/profile')}>
               <MaterialIcons name="person" size={24} color="#8b5cf6" />
@@ -174,6 +180,7 @@ export default function DashboardScreen() {
             {sessions.length > 0 ? (
               sessions.slice(0, 3).map((session, index) => (
                 <TouchableOpacity
+                  activeOpacity={0.7}
                   onPress={() =>
                     router.push({
                       pathname: '/screens/details/session',

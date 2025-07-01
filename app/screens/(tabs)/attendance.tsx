@@ -153,7 +153,7 @@ const AttendanceScreen = () => {
           <View className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4">
             <View className="flex-row items-center justify-between">
               <Text className="flex-1 text-red-700">{error}</Text>
-              <TouchableOpacity onPress={clearError}>
+              <TouchableOpacity activeOpacity={0.7} onPress={clearError}>
                 <Ionicons name="close" size={20} color="#dc2626" />
               </TouchableOpacity>
             </View>
@@ -197,6 +197,7 @@ const AttendanceScreen = () => {
                 </Text>
                 {(locationError || !location) && (
                   <TouchableOpacity
+                    activeOpacity={0.7}
                     onPress={requestLocationPermission}
                     className="ml-2 rounded-full bg-blue-100 p-1">
                     <Ionicons name="refresh" size={20} color="#3b82f6" />
@@ -206,6 +207,7 @@ const AttendanceScreen = () => {
 
               {locationError && (
                 <TouchableOpacity
+                  activeOpacity={0.7}
                   onPress={requestLocationPermission}
                   className="mt-2 rounded-lg border border-blue-200 bg-blue-50 p-2">
                   <View className="flex-row items-center justify-center">
@@ -218,6 +220,7 @@ const AttendanceScreen = () => {
 
             {/* Mark Attendance Button */}
             <TouchableOpacity
+              activeOpacity={0.7}
               onPress={handleMarkAttendance}
               disabled={marking || !location || !selectedSession}
               className={`flex-row items-center justify-center rounded-md px-4 py-3 ${
@@ -236,6 +239,7 @@ const AttendanceScreen = () => {
           <View className="mb-4 flex-row items-center justify-between">
             <Text className="text-xl font-semibold text-gray-800">Attendance History</Text>
             <TouchableOpacity
+              activeOpacity={0.7}
               onPress={loadInitialData}
               disabled={isLoading}
               className="flex-row items-center rounded-md bg-gray-100 px-3 py-2">

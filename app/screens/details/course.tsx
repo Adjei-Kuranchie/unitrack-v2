@@ -107,6 +107,7 @@ const CourseDetails = () => {
 
     return (
       <TouchableOpacity
+        activeOpacity={0.7}
         key={session.id}
         className="mb-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm"
         onPress={() => role == 'LECTURER' && handleSessionPress(session)}>
@@ -165,7 +166,10 @@ const CourseDetails = () => {
   if (!course) {
     return (
       <View className="flex-1 bg-gray-50 px-6 py-8">
-        <TouchableOpacity onPress={() => router.back()} className="mb-6 flex-row items-center">
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => router.back()}
+          className="mb-6 flex-row items-center">
           <Ionicons name="arrow-back" size={24} color="#374151" />
           <Text className="ml-2 text-lg font-medium text-gray-700">Back</Text>
         </TouchableOpacity>
@@ -196,6 +200,7 @@ const CourseDetails = () => {
         {/* Header with Back Button */}
         <View className="mb-6 flex-row items-center justify-between">
           <TouchableOpacity
+            activeOpacity={0.7}
             onPress={() => router.back()}
             className="flex-row items-center rounded-full border border-gray-200 bg-white px-4 py-2 shadow-sm">
             <Ionicons name="arrow-back" size={20} color="#374151" />
@@ -241,6 +246,7 @@ const CourseDetails = () => {
         <View className="mb-4 flex-row items-center justify-between">
           <Text className="text-xl font-bold text-gray-800">Course Sessions</Text>
           <TouchableOpacity
+            activeOpacity={0.7}
             onPress={() => !isLoadingSessions && loadCourseSessions()}
             disabled={isLoadingSessions}>
             {isLoadingSessions ? (
