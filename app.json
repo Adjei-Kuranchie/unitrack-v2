@@ -31,12 +31,21 @@
       "resizeMode": "contain",
       "backgroundColor": "#2f80ed"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.adjeikuranchie.unitrackv2",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
-      "permissions": ["android.permissions.INTERNET", "android.permission.ACCESS_NETWORK_STATE"],
+      "permissions": [
+        "android.permissions.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#2f80ed"
