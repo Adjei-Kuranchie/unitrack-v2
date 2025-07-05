@@ -1,7 +1,7 @@
 // app/index.tsx - Main entry point that handles auth flow
 import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { isJWTExpired } from '~/lib/utils';
 import { useAuthStore } from '~/store/authStore';
 
@@ -23,16 +23,16 @@ const Index = () => {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#2563eb" />
+        <Text>Checking Auth state{` isLoading:${isLoading} | isReady:${isReady}`}</Text>
       </View>
     );
   }
 
   // Redirect based on authentication state
-  if (isJWTExpired(token!)) {
-    return <Redirect href="/screens/(auth)/RegisterScreen" />;
-  } else {
+  if (token && !isJWTExpired(token)) {
     return <Redirect href="/screens/(tabs)/dashboard" />;
   }
+  return <Redirect href="/screens/(auth)/RegisterScreen" />;
 };
 
 export default Index;

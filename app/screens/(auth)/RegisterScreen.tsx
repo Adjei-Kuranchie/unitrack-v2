@@ -70,8 +70,8 @@ export default function RegisterScreen() {
   return (
     <KeyboardAwareScrollView className="flex-1" bottomOffset={30}>
       <SafeAreaView className="flex-1 bg-white">
-        <ScrollView className="h-[100vh] flex-1 pt-12">
-          <View className="px-6 py-8">
+        <ScrollView className="flex h-[100vh] flex-1 items-center pt-12">
+          <View className="max-w-[400px] px-6 py-8 md:w-[600px]">
             <View className="mb-8">
               <Text className="mb-2 text-center text-3xl font-bold text-blue-600">
                 Create Account
@@ -79,7 +79,7 @@ export default function RegisterScreen() {
               <Text className="text-center text-gray-600">Join UniTrack today</Text>
             </View>
 
-            <View className="flex flex-col gap-4 space-y-8">
+            <View className="flex flex-col gap-4 space-y-8 md:gap-2 md:space-y-4">
               <View>
                 <Text className="mb-2 font-medium text-gray-700">Username</Text>
                 <TextInput
