@@ -13,7 +13,7 @@ export const useAuthStore = create<AuthState>()(
       resMessage: null,
       token: null,
       role: null,
-      isLoading: false,
+      isLoading: true,
       error: null,
 
       signIn: async (username: string, password: string) => {
@@ -88,7 +88,7 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => AsyncStorage),
-      onRehydrateStorage: (state) => {
+      onRehydrateStorage: () => (state) => {
         if (state) {
           state.isLoading = false;
           state.error = null;
