@@ -1,3 +1,24 @@
+/**
+ * DashboardScreen component displays the main dashboard for both lecturers and students.
+ *
+ * Features:
+ * - Shows a personalized welcome message and user role.
+ * - Displays statistics such as total courses, sessions, and attendance records.
+ * - Provides quick actions based on user role (e.g., add course, create session, mark attendance).
+ * - Lists recent activity (latest sessions).
+ * - Handles user sign out with confirmation.
+ * - Loads user profile and dashboard data on mount.
+ *
+ * Uses:
+ * - `useAuthStore` for authentication and user state.
+ * - `useApiStore` for fetching courses, sessions, attendance, and user profile.
+ * - React Native components for layout and interactivity.
+ * - Expo Router for navigation.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered dashboard screen.
+ */
+
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';

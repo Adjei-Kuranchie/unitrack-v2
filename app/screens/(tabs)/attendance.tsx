@@ -1,3 +1,29 @@
+/**
+ * AttendanceScreen component for managing and displaying class attendance.
+ *
+ * - Allows students to mark their attendance for active sessions using their current location.
+ * - Displays attendance history for the logged-in user.
+ * - Handles location permissions and errors.
+ * - Supports pull-to-refresh and manual refresh of attendance data.
+ * - Shows error messages and loading states.
+ *
+ * Features:
+ * - Session picker for students to select an active session.
+ * - Location status display and retry option if location access fails.
+ * - Button to mark attendance, disabled if prerequisites are not met.
+ * - Attendance history list with date, time, lecturer, and status.
+ * - Error handling and user feedback via alerts and banners.
+ *
+ * Uses:
+ * - `useApiStore` for fetching sessions, attendance, and marking attendance.
+ * - `useAuthStore` for user authentication and role.
+ * - Expo Location API for geolocation.
+ * - React Native components and styling.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered AttendanceScreen component.
+ */
+
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import * as Location from 'expo-location';

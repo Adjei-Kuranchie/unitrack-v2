@@ -1,3 +1,30 @@
+/**
+ * CourseDetails component displays detailed information about a specific course,
+ * including its sessions and session statistics. It allows users to refresh session data,
+ * view session details, and navigate back to the previous screen.
+ *
+ * Features:
+ * - Fetches and filters sessions related to the selected course.
+ * - Displays course information, session statistics, and a list of sessions.
+ * - Allows pull-to-refresh and manual refresh of session data.
+ * - Shows session status and time, and navigates to session details for lecturers.
+ * - Handles loading and error states gracefully.
+ *
+ * Usage:
+ * This component is intended to be used within a navigation stack where course details
+ * are passed via route parameters.
+ *
+ * Dependencies:
+ * - React Native components for UI rendering.
+ * - Expo Router for navigation.
+ * - Tailwind CSS classes for styling.
+ * - Custom hooks and utilities for API and date formatting.
+ *
+ * @component
+ * @example
+ * <CourseDetails />
+ */
+
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';

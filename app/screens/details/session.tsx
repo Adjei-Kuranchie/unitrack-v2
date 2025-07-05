@@ -1,3 +1,30 @@
+/**
+ * Displays detailed information about a specific session, including course details,
+ * session status, schedule, location, lecturer, and attendance summary.
+ *
+ * This screen expects a `session` parameter from the local search params, which should be
+ * a JSON string representing the session data. The session data is parsed and used to
+ * populate the UI with relevant information.
+ *
+ * Features:
+ * - Header with navigation back button and session ID.
+ * - Course information (code and name).
+ * - Session status with color-coded badge.
+ * - Schedule section showing start and end times.
+ * - Location details with coordinates (if available).
+ * - Lecturer information (if available).
+ * - Attendance summary showing number of students present (if available).
+ *
+ * Utilizes:
+ * - `expo-router` for navigation and parameter handling.
+ * - `react-native-safe-area-context` for safe area insets.
+ * - `@expo/vector-icons` for icons.
+ * - Utility function `formatDateTime` for formatting date and time.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered session details screen.
+ */
+
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
@@ -32,8 +59,7 @@ const SessionScreen = () => {
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={() => router.back()}
-          className="-ml-2 rounded-full p-2"
-          activeOpacity={0.7}>
+          className="-ml-2 rounded-full p-2">
           <Ionicons name="arrow-back" size={24} color="#374151" />
         </TouchableOpacity>
         <Text className="text-lg font-semibold text-gray-900">Session Details</Text>

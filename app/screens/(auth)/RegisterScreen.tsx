@@ -1,5 +1,24 @@
+/**
+ * RegisterScreen component provides a user registration form for the UniTrack app.
+ *
+ * Features:
+ * - Collects user information: username, password, first name, last name, email, and role (Student or Lecturer).
+ * - Validates required fields and email format.
+ * - Displays toast notifications for validation errors and registration success.
+ * - Handles registration logic using the `useAuthStore` store.
+ * - Shows loading indicator during registration.
+ * - Allows toggling password visibility.
+ * - Navigates to the Sign In screen upon successful registration.
+ * - Responsive UI with keyboard awareness and safe area support.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered registration screen.
+ */
+
 import { Feather } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
+import { showToast } from 'au-react-native-toast';
+
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -41,12 +60,26 @@ export default function RegisterScreen() {
       !lastName.trim() ||
       !email.trim()
     ) {
-      Alert.alert('Error', 'Please fill in all fields');
+      // Alert.alert('Error', 'Please fill in all fields');
+      showToast(
+        'Please fill in all fields',
+        3000,
+        true,
+        { backgroundColor: 'pink', padding: 5 },
+        { color: 'red', fontSize: 15 }
+      );
       return;
     }
 
     if (!emailRegex.test(email)) {
-      Alert.alert('Error', 'Please enter a valid email address');
+      // Alert.alert('Error', 'Please enter a valid email address');
+      showToast(
+        'Please enter a valid email address',
+        3000,
+        true,
+        { backgroundColor: 'pink', padding: 5 },
+        { color: 'red', fontSize: 15 }
+      );
       return;
     }
 
@@ -55,9 +88,17 @@ export default function RegisterScreen() {
     // Check if registration was successful
     const { error: registrationError } = useAuthStore.getState();
     if (!registrationError) {
-      Alert.alert('Success', 'Account created successfully! Please sign in.', [
-        { text: 'OK', onPress: () => router.replace('/screens/(auth)/SignInScreen') },
-      ]);
+      showToast(
+        'Account Created! Please Sign In',
+        3000,
+        true,
+        { backgroundColor: '#C0FFCB', padding: 5 },
+        { color: 'green', fontSize: 15 }
+      );
+      return router.replace('/screens/(auth)/SignInScreen');
+      // Alert.alert('Success', 'Account created successfully! Please sign in.', [
+      //   { text: 'OK', onPress: () => router.replace('/screens/(auth)/SignInScreen') },
+      // ]);
     }
   };
 
@@ -70,8 +111,8 @@ export default function RegisterScreen() {
   return (
     <KeyboardAwareScrollView className="flex-1" bottomOffset={30}>
       <SafeAreaView className="flex-1 bg-white">
-        <ScrollView className="flex h-[100vh] flex-1 items-center pt-12">
-          <View className="max-w-[400px] px-6 py-8 md:w-[600px]">
+        <ScrollView className="h-[100vh] flex-1 pt-12">
+          <View className="px-6 py-8">
             <View className="mb-8">
               <Text className="mb-2 text-center text-3xl font-bold text-blue-600">
                 Create Account
@@ -79,7 +120,7 @@ export default function RegisterScreen() {
               <Text className="text-center text-gray-600">Join UniTrack today</Text>
             </View>
 
-            <View className="flex flex-col gap-4 space-y-8 md:gap-2 md:space-y-4">
+            <View className="flex flex-col gap-4 space-y-8">
               <View>
                 <Text className="mb-2 font-medium text-gray-700">Username</Text>
                 <TextInput

@@ -1,3 +1,39 @@
+/**
+ * Represents a user in the authentication system.
+ * @property {number} id - Unique identifier for the user.
+ * @property {string} username - Username for login.
+ * @property {string} firstName - User's first name.
+ * @property {string} lastName - User's last name.
+ * @property {string} email - User's email address.
+ * @property {'LECTURER' | 'STUDENT' | 'ADMIN'} role - Role assigned to the user.
+ * @property {string} [program] - Program name, optional for lecturers/admins.
+ * @property {string} [IndexNumber] - Index number, optional for students.
+ */
+
+/**
+ * Represents the authentication state and actions.
+ * @property {User | null} user - The currently authenticated user, or null if not authenticated.
+ * @property {User.role | null} role - The role of the current user for access control.
+ * @property {boolean | null} resMessage - Response message for registration or other actions.
+ * @property {string | null} token - Authentication token, if available.
+ * @property {boolean} isLoading - Indicates if an authentication request is in progress.
+ * @property {string | null} error - Error message, if any.
+ * @property {(username: string, password: string) => Promise<void>} signIn - Function to sign in a user.
+ * @property {() => void} signOut - Function to sign out the current user.
+ * @property {(user: any) => void} setUser - Function to set the current user.
+ * @property {(userData: RegisterData) => Promise<void>} register - Function to register a new user.
+ * @property {() => void} clearError - Function to clear the error state.
+ */
+
+/**
+ * Represents the data required to register a new user.
+ * @property {string} username - Desired username.
+ * @property {string} password - Desired password.
+ * @property {string} firstName - User's first name.
+ * @property {string} lastName - User's last name.
+ * @property {string} email - User's email address.
+ * @property {'LECTURER' | 'STUDENT' | 'ADMIN'} role - Role assigned to the user.
+ */
 interface User {
   id: number;
   username: string;

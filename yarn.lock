@@ -2270,6 +2270,11 @@ async-limiter@~1.0.0:
   resolved "https://registry.yarnpkg.com/async-limiter/-/async-limiter-1.0.1.tgz#dd379e94f0db8310b08291f9d64c3209766617fd"
   integrity sha512-csOlWGAcRFJaI6m+F2WKdnMKr4HhdhFVBk0H/QbJFMCr+uO2kwohwXQPxw/9OCxp05r5ghVBFSyioixx3gfkNQ==
 
+au-react-native-toast@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/au-react-native-toast/-/au-react-native-toast-1.1.3.tgz#263adbb46a88d12795e69c32324f4e1dcafc81e1"
+  integrity sha512-UrswLM78gEJJWwhmpWwBLs0YA8AKOdjWW3UAAciFTarSMMyXWz771WYpfzsd71sHx5MHA+H7I9cyz5HEOMy8nw==
+
 available-typed-arrays@^1.0.7:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/available-typed-arrays/-/available-typed-arrays-1.0.7.tgz#a5cc375d6a03c2efc87a553f3e0b1522def14846"

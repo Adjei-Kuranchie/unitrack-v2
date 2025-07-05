@@ -1,7 +1,34 @@
+/**
+ * SignInScreen component provides a user interface for signing in to the UniTrack application.
+ *
+ * Features:
+ * - Allows users to input their username and password.
+ * - Toggles password visibility.
+ * - Handles sign-in logic with validation and error handling.
+ * - Displays loading indicator during authentication.
+ * - Navigates to the dashboard upon successful sign-in.
+ * - Provides a link to the registration screen for new users.
+ * - Includes a temporary function for testing API connectivity.
+ *
+ * State:
+ * - `username`: The username input by the user.
+ * - `password`: The password input by the user.
+ * - `showPassword`: Boolean to toggle password visibility.
+ *
+ * Store:
+ * - Uses `useAuthStore` for authentication logic, loading state, and error handling.
+ *
+ * Side Effects:
+ * - Displays an alert if an authentication error occurs.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered sign-in screen.
+ */
 import { Feather } from '@expo/vector-icons';
+import { showToast } from 'au-react-native-toast';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -14,12 +41,6 @@ import {
 import { useAuthStore } from '~/store/authStore';
 const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 
-/**
- * SignInScreen component allows users to sign in to their account.
- * It includes fields for username and password, a button to submit the form,
- * and a link to navigate to the registration screen.
- */
-
 export default function SignInScreen() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -28,7 +49,13 @@ export default function SignInScreen() {
 
   const handleSignIn = async () => {
     if (!username.trim() || !password.trim()) {
-      Alert.alert('Error', 'Please fill in all fields');
+      showToast(
+        'Please fill in all fields',
+        3000,
+        true,
+        { backgroundColor: 'pink', padding: 5 },
+        { color: 'red', fontSize: 15 }
+      );
       return;
     }
 
@@ -82,7 +109,7 @@ export default function SignInScreen() {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (error) {
       Alert.alert('Error', error, [{ text: 'OK', onPress: clearError }]);
     }

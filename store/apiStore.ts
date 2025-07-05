@@ -1,3 +1,32 @@
+/**
+ * Zustand store for managing API state and actions in the application.
+ *
+ * This store provides methods to interact with the backend API for operations such as:
+ * - Fetching and updating user profiles
+ * - Managing courses (fetch, add)
+ * - Managing sessions (fetch, create)
+ * - Managing attendance (fetch, mark)
+ * - Managing users (fetch, update, delete)
+ *
+ * The store maintains loading and error states for UI feedback.
+ *
+ * @remarks
+ * - Uses the authentication token from `useAuthStore` for authorized requests.
+ * - Automatically refreshes relevant data after mutations (e.g., after adding a course, creating a session, etc.).
+ * - Handles API errors and exposes them via the `error` state.
+ *
+ * @example
+ * ```typescript
+ * const { fetchCourses, courses, isLoading, error } = useApiStore();
+ * useEffect(() => {
+ *   fetchCourses();
+ * }, []);
+ * ```
+ *
+ * @see ApiState
+ * @see useAuthStore
+ */
+
 import { create } from 'zustand';
 import { useAuthStore } from '~/store/authStore';
 import { ApiState, AttendanceRequest, SessionRequest } from '~/types/app';

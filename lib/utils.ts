@@ -1,3 +1,34 @@
+/**
+ * Formats a date string into a human-readable date and time string.
+ *
+ * @param dateString - The date string to format.
+ * @returns The formatted date string (e.g., "Jan 1, 2023, 12:00 PM").
+ */
+
+/**
+ * Formats a date string into a human-readable time string.
+ *
+ * @param dateString - The date string to format.
+ * @returns The formatted time string (e.g., "12:00 PM").
+ */
+
+/**
+ * Formats a date string into an object containing formatted date and time strings.
+ *
+ * @param dateString - The date string to format.
+ * @returns An object with `date` and `time` properties containing formatted strings.
+ */
+
+/**
+ * Checks if a JWT token is expired.
+ *
+ * If the token is expired, it resets the authentication state and returns `true`.
+ * If the token is invalid or an error occurs, it logs the error and returns `true`.
+ *
+ * @param token - The JWT token string to check.
+ * @returns `true` if the token is expired or invalid, otherwise `false`.
+ */
+
 import { useAuthStore } from '~/store/authStore';
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);

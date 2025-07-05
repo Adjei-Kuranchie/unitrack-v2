@@ -1,3 +1,23 @@
+/**
+ * Zustand store for authentication state management.
+ *
+ * This store handles user authentication, registration, and session persistence using AsyncStorage.
+ * It provides actions for signing in, registering, setting user data, signing out, and clearing errors.
+ *
+ * @remarks
+ * - Uses `zustand` for state management and `zustand/middleware` for persistence.
+ * - Persists authentication state in AsyncStorage under the key 'auth-storage'.
+ * - Communicates with the backend API using the base URL from Expo Constants.
+ *
+ * @example
+ * ```typescript
+ * const { signIn, signOut, user, token } = useAuthStore();
+ * await signIn('username', 'password');
+ * ```
+ *
+ * @see {@link AuthState}
+ * @see {@link RegisterData}
+ */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { create } from 'zustand';
@@ -13,7 +33,7 @@ export const useAuthStore = create<AuthState>()(
       resMessage: null,
       token: null,
       role: null,
-      isLoading: true,
+      isLoading: false,
       error: null,
 
       signIn: async (username: string, password: string) => {
@@ -88,12 +108,6 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => AsyncStorage),
-      onRehydrateStorage: () => (state) => {
-        if (state) {
-          state.isLoading = false;
-          state.error = null;
-        }
-      },
     }
   )
 );

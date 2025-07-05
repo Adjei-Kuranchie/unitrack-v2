@@ -1,3 +1,34 @@
+/**
+ * SessionScreen component displays a list of sessions and allows lecturers to create new sessions.
+ *
+ * Features:
+ * - Fetches and displays sessions and courses from the API store.
+ * - Allows pull-to-refresh to reload sessions and courses.
+ * - Displays quick statistics about sessions and courses.
+ * - Shows a modal for lecturers to create a new session, requiring location access.
+ * - Handles location permissions and displays current location status.
+ * - Navigates to session details on session card press.
+ * - Handles loading and error states gracefully.
+ *
+ * Props:
+ * @param {object} props - Component props.
+ * @param {any} [props.navigation] - Optional navigation prop for navigation integration.
+ *
+ * State:
+ * - `refreshing`: Indicates if the list is being refreshed.
+ * - `showCreateModal`: Controls visibility of the create session modal.
+ * - `selectedCourse`: Stores the currently selected course for session creation.
+ * - `locationError`: Stores any error related to location access.
+ * - `location`: Stores the user's current latitude and longitude.
+ *
+ * Usage:
+ * ```tsx
+ * <SessionScreen />
+ * ```
+ *
+ * @component
+ */
+
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';

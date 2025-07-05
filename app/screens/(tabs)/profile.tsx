@@ -1,3 +1,25 @@
+/**
+ * ProfileScreen component displays and allows editing of the authenticated user's profile information.
+ *
+ * - Fetches and displays user profile data from the store.
+ * - Allows editing of editable fields (first name, last name) with save/cancel functionality.
+ * - Handles loading and error states for profile data.
+ * - Supports role-based field visibility (Student vs Lecturer).
+ * - Provides a sign-out action with confirmation.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered profile screen.
+ *
+ * @example
+ * // Usage in navigation stack
+ * <ProfileScreen />
+ *
+ * @remarks
+ * - Requires authentication token to display profile.
+ * - Uses Zustand stores for authentication and API state management.
+ * - Utilizes React Native components and Tailwind classes for styling.
+ */
+
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {

@@ -1,3 +1,25 @@
+/**
+ * CoursesScreen component displays a list of courses for the authenticated user.
+ *
+ * - Fetches and displays courses from the API store.
+ * - Allows searching/filtering courses by name or code.
+ * - Supports pull-to-refresh to reload courses.
+ * - For lecturers, provides the ability to add new courses via a bottom sheet modal.
+ * - Handles loading and error states, and displays appropriate UI feedback.
+ * - Navigates to course details when a course card is pressed.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered CoursesScreen component.
+ *
+ * @remarks
+ * - Uses Zustand stores for authentication and API state management.
+ * - Utilizes React Native and Expo Router for navigation and UI.
+ * - Only lecturers can add new courses.
+ *
+ * @todo
+ * - Investigate and fix the issue where all users see the same number of courses, sessions, and attendance records.
+ */
+
 import { MaterialIcons } from '@expo/vector-icons';
 import { BottomSheetModal, BottomSheetTextInput, BottomSheetView } from '@gorhom/bottom-sheet';
 import { router } from 'expo-router';

@@ -1,14 +1,14 @@
 // app/index.tsx - Main entry point that handles auth flow
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { isJWTExpired } from '~/lib/utils';
 import { useAuthStore } from '~/store/authStore';
 
 const Index = () => {
+  const router = useRouter();
   const { token, isLoading } = useAuthStore();
   const [isReady, setIsReady] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     // Add a small delay to ensure auth store is properly initialized
@@ -20,6 +20,7 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
+    // Handle navigation after component is ready and auth state is determined
     if (isReady && !isLoading) {
       if (token && !isJWTExpired(token)) {
         router.replace('/screens/(tabs)/dashboard');
@@ -29,12 +30,17 @@ const Index = () => {
     }
   }, [isReady, isLoading, token, router]);
 
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <ActivityIndicator size="large" color="#2563eb" />
-      <Text>Checking Auth state{` IsLoading:${isLoading} | isReady:${isReady}`}</Text>
-    </View>
-  );
+  // Show loading screen while checking auth state
+  if (!isReady || isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#2563eb" />
+      </View>
+    );
+  }
+
+  // Return null while navigation is happening
+  return null;
 };
 
 export default Index;
