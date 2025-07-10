@@ -30,6 +30,7 @@
  */
 
 import { Ionicons } from '@expo/vector-icons';
+import { showToast } from 'au-react-native-toast';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -70,8 +71,6 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
     clearError,
   } = useApiStore();
 
-  // console.log(sessions);
-
   const { role } = useAuthStore();
 
   useEffect(() => {
@@ -91,7 +90,14 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
 
   const handleCreateSession = async () => {
     if (!selectedCourse.trim()) {
-      Alert.alert('Error', 'Please select a course');
+      showToast(
+        'Please select a course.',
+        3000,
+        true,
+        { backgroundColor: 'pink', padding: 5 },
+        { color: 'red', fontSize: 15 }
+      );
+
       return;
     }
 
@@ -103,7 +109,14 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
       await createSession({ courseName: selectedCourse, location });
       setShowCreateModal(false);
       setSelectedCourse('');
-      Alert.alert('Success', 'Session created successfully');
+
+      showToast(
+        'Session created successfully',
+        3000,
+        true,
+        { backgroundColor: '#C0FFCB', padding: 5 },
+        { color: 'green', fontSize: 15 }
+      );
     } catch (err) {
       Alert.alert('Error', 'Failed to create session');
     }

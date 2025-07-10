@@ -60,7 +60,6 @@ export default function RegisterScreen() {
       !lastName.trim() ||
       !email.trim()
     ) {
-      // Alert.alert('Error', 'Please fill in all fields');
       showToast(
         'Please fill in all fields',
         3000,
@@ -72,7 +71,6 @@ export default function RegisterScreen() {
     }
 
     if (!emailRegex.test(email)) {
-      // Alert.alert('Error', 'Please enter a valid email address');
       showToast(
         'Please enter a valid email address',
         3000,
@@ -96,9 +94,6 @@ export default function RegisterScreen() {
         { color: 'green', fontSize: 15 }
       );
       return router.replace('/screens/(auth)/SignInScreen');
-      // Alert.alert('Success', 'Account created successfully! Please sign in.', [
-      //   { text: 'OK', onPress: () => router.replace('/screens/(auth)/SignInScreen') },
-      // ]);
     }
   };
 
