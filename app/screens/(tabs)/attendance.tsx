@@ -107,6 +107,15 @@ const AttendanceScreen = () => {
 
     setMarking(true);
 
+    /* TODO: Instead of get device Id(which we cannot retrieve from ios devices without asking for a permit), let's create our own id using uuid on the server 
+    so basically, on account creation, you run the createUuid function to create a UUid that ties to the account,
+    then you send back the uuid with all the info when they login into their account on the phone, where I set it to the app's storage 
+    Then on every mark attendance, i send back the id and you check if it is the same as the one on the server 
+    if it is then you mark it 
+    and also what is the ID for? 
+    they should not be passed through params, only through request body
+     */
+
     try {
       await markAttendance({ sessionId: selectedSession, location, studentId: IndexNumber });
 

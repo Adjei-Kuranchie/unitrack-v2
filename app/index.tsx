@@ -2,7 +2,7 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { isJWTExpired } from '~/lib/utils';
+import { isJWTExpired, useTokenWatcher } from '~/lib/utils';
 import { useAuthStore } from '~/store/authStore';
 
 const Index = () => {
@@ -18,6 +18,8 @@ const Index = () => {
 
     return () => clearTimeout(timer);
   }, []);
+
+  useTokenWatcher(token);
 
   useEffect(() => {
     // Handle navigation after component is ready and auth state is determined

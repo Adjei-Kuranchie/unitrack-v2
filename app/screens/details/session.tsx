@@ -37,6 +37,7 @@ const SessionScreen = () => {
   const insets = useSafeAreaInsets();
 
   const sessionData = JSON.parse(session as string);
+  console.log(sessionData.attendance.studentList);
 
   const startDateTime = formatDateTime(sessionData.startTime);
   const endDateTime = formatDateTime(sessionData.endTime);

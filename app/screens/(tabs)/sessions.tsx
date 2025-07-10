@@ -70,7 +70,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
     clearError,
   } = useApiStore();
 
-  console.log(sessions);
+  // console.log(sessions);
 
   const { role } = useAuthStore();
 
