@@ -37,6 +37,7 @@ const SessionScreen = () => {
   const insets = useSafeAreaInsets();
 
   const sessionData = JSON.parse(session as string);
+  console.log(sessionData.attendance);
 
   const startDateTime = formatDateTime(sessionData.startTime);
   const endDateTime = formatDateTime(sessionData.endTime);
@@ -51,7 +52,6 @@ const SessionScreen = () => {
         return 'bg-gray-100 text-gray-800';
     }
   };
-
   return (
     <View style={{ flex: 1, paddingTop: insets.top }} className="bg-gray-50">
       {/* Header */}

@@ -77,6 +77,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
     loadData();
     requestLocationPermission();
   }, []);
+  console.log(sessions);
 
   const loadData = async () => {
     await Promise.all([fetchSessions(), fetchCourses()]);

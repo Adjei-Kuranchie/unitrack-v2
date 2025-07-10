@@ -80,8 +80,8 @@ const isJWTExpired = (token: string | null): boolean => {
     if (!payload.exp) {
       throw new Error('No expiration time found in token');
     }
-
     const currentTime = Math.floor(Date.now() / 1000);
+    console.log(payload.exp, currentTime);
     return payload.exp < currentTime;
   } catch (error) {
     //TODO: Remove console.error in production
