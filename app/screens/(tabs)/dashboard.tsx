@@ -199,27 +199,30 @@ export default function DashboardScreen() {
           <Text className="mb-4 text-lg font-semibold text-gray-900">Recent Activity</Text>
           <View className="rounded-lg bg-white p-4 shadow-sm">
             {sessions.length > 0 ? (
-              sessions.slice(0, 3).map((session, index) => (
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() =>
-                    router.push({
-                      pathname: '/screens/details/session',
-                      params: { session: JSON.stringify(session) },
-                    })
-                  }
-                  key={session.id}
-                  className={`${index > 0 ? 'mt-3 border-t border-gray-200 pt-3' : ''}`}>
-                  <Text className="font-medium text-gray-900">
-                    {typeof session.course.courseCode === 'string' && session.course.courseCode} -{' '}
-                    {typeof session.course.courseName === 'string' && session.course.courseName}
-                  </Text>
+              sessions
+                .filter((session) => session.lecturer?.email === user?.email)
+                .slice(0, 3)
+                .map((session, index) => (
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() =>
+                      router.push({
+                        pathname: '/screens/details/session',
+                        params: { session: JSON.stringify(session) },
+                      })
+                    }
+                    key={session.id}
+                    className={`${index > 0 ? 'mt-3 border-t border-gray-200 pt-3' : ''}`}>
+                    <Text className="font-medium text-gray-900">
+                      {typeof session.course.courseCode === 'string' && session.course.courseCode} -{' '}
+                      {typeof session.course.courseName === 'string' && session.course.courseName}
+                    </Text>
 
-                  <Text className="text-sm text-gray-600">
-                    Session created • {formatDate(session.startTime)}
-                  </Text>
-                </TouchableOpacity>
-              ))
+                    <Text className="text-sm text-gray-600">
+                      Session created • {formatDate(session.startTime)}
+                    </Text>
+                  </TouchableOpacity>
+                ))
             ) : (
               <Text className="text-center text-gray-500">No recent activity</Text>
             )}

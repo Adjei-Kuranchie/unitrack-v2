@@ -71,13 +71,12 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
     clearError,
   } = useApiStore();
 
-  const { role } = useAuthStore();
+  const { role, user } = useAuthStore();
 
   useEffect(() => {
     loadData();
     requestLocationPermission();
   }, []);
-  console.log(sessions);
 
   const loadData = async () => {
     await Promise.all([fetchSessions(), fetchCourses()]);
@@ -413,6 +412,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
         ) : (
           <>
             {sessions
+              .filter((session) => session.lecturer?.email === user?.email)
               .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
               .map(renderSessionCard)}
           </>

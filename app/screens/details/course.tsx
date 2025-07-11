@@ -38,6 +38,7 @@ import {
 } from 'react-native';
 import { formatDateTime } from '~/lib/utils';
 import { useApiStore } from '~/store/apiStore';
+import { useAuthStore } from '~/store/authStore';
 import { Course, Session } from '~/types/app';
 
 const CourseDetails = () => {
@@ -48,6 +49,7 @@ const CourseDetails = () => {
   const [isLoadingSessions, setIsLoadingSessions] = useState(false);
 
   const { sessions, fetchSessions } = useApiStore();
+  const { user } = useAuthStore();
 
   const course: Course | undefined =
     typeof params.course === 'string' ? JSON.parse(params.course) : undefined;
@@ -64,11 +66,13 @@ const CourseDetails = () => {
   const filterCourseSessions = () => {
     if (!course) return;
 
-    const filteredSessions = sessions.filter(
-      (session) =>
-        session.course?.courseCode === course.courseCode ||
-        session.course?.courseName === course.courseName
-    );
+    const filteredSessions = sessions
+      .filter(
+        (session) =>
+          session.course?.courseCode === course.courseCode ||
+          session.course?.courseName === course.courseName
+      )
+      .filter((session) => session.lecturer?.email === user?.email);
 
     const sortedSessions = filteredSessions.sort(
       (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
@@ -111,7 +115,7 @@ const CourseDetails = () => {
       case 'ACTIVE':
         return 'text-green-700 bg-green-100';
       case 'CLOSED':
-        return 'text-gray-700 bg-gray-100';
+        return 'text-gray-700 bg-red-100';
       default:
         return 'text-blue-700 bg-blue-100';
     }

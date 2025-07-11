@@ -121,10 +121,11 @@ const CoursesScreen = () => {
         key={courseId} // Fixed: Ensure string key
         className="mb-4 rounded-lg bg-white p-4 shadow-sm"
         onPress={() => {
-          router.push({
-            pathname: `/screens/details/course`,
-            params: { course: JSON.stringify(course), role: role },
-          });
+          role === 'LECTURER' &&
+            router.push({
+              pathname: `/screens/details/course`,
+              params: { course: JSON.stringify(course), role: role },
+            });
         }}>
         <View className="mb-2 flex-row items-start justify-between">
           <View className="flex-1">
