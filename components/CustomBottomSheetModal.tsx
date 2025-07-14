@@ -16,7 +16,7 @@ const CustomBottomSheetModal = forwardRef<BottomSheetModal, Props>(
 
     // callbacks
     const handleSheetChange = useCallback((index: any) => {
-      console.log('handleSheetChange', index);
+      // console.log('handleSheetChange', index);
     }, []);
 
     const renderBackdrop = useCallback(

@@ -29,6 +29,7 @@ import { Picker } from '@react-native-picker/picker';
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { formatDateTime } from '~/lib/utils';
 import { useApiStore } from '~/store/apiStore';
 import { useAuthStore } from '~/store/authStore';
 import { Attendance } from '~/types/app';
@@ -122,7 +123,7 @@ const AttendanceScreen = () => {
       Alert.alert('Success', 'Attendance marked successfully!');
       await fetchAttendance(); // Refresh attendance records
     } catch (error) {
-      Alert.alert('Error', 'Failed to mark attendance');
+      Alert.alert('Error', 'Failed to mark attendance.\n Try again!');
     } finally {
       setMarking(false);
     }
@@ -133,8 +134,8 @@ const AttendanceScreen = () => {
     const recordId = String(index);
     const lecturer = String(record.lecturer);
     const studentId = IndexNumber ? String(IndexNumber) : null;
-    const date = record.date;
-    const time = record.time;
+    const { date } = formatDateTime(record.date);
+    const { time } = formatDateTime(record.date);
 
     return (
       <View
