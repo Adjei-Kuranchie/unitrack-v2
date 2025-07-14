@@ -123,7 +123,12 @@ const CoursesScreen = () => {
         onPress={() => {
           role === 'LECTURER' &&
             router.push({
-              pathname: `/screens/details/course`,
+              pathname: `/screens/details/course-lecturer`,
+              params: { course: JSON.stringify(course), role: role },
+            });
+          role === 'STUDENT' &&
+            router.push({
+              pathname: `/screens/details/course-student`,
               params: { course: JSON.stringify(course), role: role },
             });
         }}>

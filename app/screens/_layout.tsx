@@ -22,7 +22,13 @@ export default function ScreensLayout() {
         }}
       />
       <Stack.Screen
-        name="details/course"
+        name="details/course-student"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="details/course-lecturer"
         options={{
           headerShown: false,
         }}
