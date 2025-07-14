@@ -1,30 +1,3 @@
-/**
- * CourseDetails component displays detailed information about a specific course,
- * including its sessions and session statistics. It allows users to refresh session data,
- * view session details, and navigate back to the previous screen.
- *
- * Features:
- * - Fetches and filters sessions related to the selected course.
- * - Displays course information, session statistics, and a list of sessions.
- * - Allows pull-to-refresh and manual refresh of session data.
- * - Shows session status and time, and navigates to session details for lecturers.
- * - Handles loading and error states gracefully.
- *
- * Usage:
- * This component is intended to be used within a navigation stack where course details
- * are passed via route parameters.
- *
- * Dependencies:
- * - React Native components for UI rendering.
- * - Expo Router for navigation.
- * - Tailwind CSS classes for styling.
- * - Custom hooks and utilities for API and date formatting.
- *
- * @component
- * @example
- * <CourseDetails />
- */
-
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -39,13 +12,13 @@ import {
 import { formatDateTime } from '~/lib/utils';
 import { useApiStore } from '~/store/apiStore';
 import { useAuthStore } from '~/store/authStore';
-import { Attendance, Course, Session } from '~/types/app';
+import { Attendance, Course } from '~/types/app';
 
 const CourseDetails = () => {
   const params = useLocalSearchParams();
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
-  const [courseSessions, setCourseSessions] = useState<Attendance[]>([]);
+  const [recordSessions, setRecordSessions] = useState<Attendance[]>([]);
   const [isLoadingSessions, setIsLoadingSessions] = useState(false);
 
   const { sessions, fetchSessions, attendance } = useApiStore();
@@ -53,38 +26,25 @@ const CourseDetails = () => {
 
   const course: Course | undefined =
     typeof params.course === 'string' ? JSON.parse(params.course) : undefined;
-  const role = params.role as 'STUDENT' | 'LECTURER' | undefined;
 
   useEffect(() => {
     if (sessions.length === 0) {
-      loadCourseSessions();
+      loadRecordSessions();
     }
 
-    filterCourseSessions();
+    filterRecordSessions();
   }, [sessions]);
 
-  const filterCourseSessions = () => {
+  const filterRecordSessions = () => {
     if (!course) return;
     const filteredAttendance = attendance.filter(
       (record) => record.courseName === course.courseName
     );
 
-    const filteredSessions = sessions
-      .filter(
-        (session) =>
-          session.course?.courseCode === course.courseCode ||
-          session.course?.courseName === course.courseName
-      )
-      .filter((session) => session.lecturer?.email === user?.email);
-
-    const sortedSessions = filteredSessions.sort(
-      (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
-    );
-
-    setCourseSessions(filteredAttendance);
+    setRecordSessions(filteredAttendance);
   };
 
-  const loadCourseSessions = async () => {
+  const loadRecordSessions = async () => {
     if (!course || isLoadingSessions) return;
 
     setIsLoadingSessions(true);
@@ -94,7 +54,7 @@ const CourseDetails = () => {
     } catch (error) {
       console.error('Error loading course sessions:', error);
       // Even if fetch fails, try to filter existing sessions
-      filterCourseSessions();
+      filterRecordSessions();
     } finally {
       setIsLoadingSessions(false);
     }
@@ -105,7 +65,7 @@ const CourseDetails = () => {
 
     setRefreshing(true);
     try {
-      await loadCourseSessions();
+      await loadRecordSessions();
     } catch (error) {
       console.error('Error refreshing:', error);
     } finally {
@@ -113,86 +73,7 @@ const CourseDetails = () => {
     }
   };
 
-  const getSessionStatusColor = (status: string) => {
-    switch (status) {
-      case 'ACTIVE':
-        return 'text-green-700 bg-green-100';
-      case 'CLOSED':
-        return 'text-gray-700 bg-red-100';
-      default:
-        return 'text-blue-700 bg-blue-100';
-    }
-  };
-
-  const handleSessionPress = (session: Session) => {
-    // Navigate to session details
-    router.push({
-      pathname: '/screens/details/session',
-      params: { session: JSON.stringify(session) },
-    });
-  };
-
-  const renderSessionCard = (session: Session) => {
-    const startTime = new Date(session.startTime);
-    const isToday = startTime.toDateString() === new Date().toDateString();
-    //TODO: Modify the renderSessionCard to show the session time(like yesterday, today, last 5 days, shows the date when it's been more than a week) and the session status whether absent or present for that session, no session number
-
-    //TODO: or change the whole courses.tsx UI to show the students courses in a grid view with the course name, code, and lecturer name, and then on click it shows the sessions for that course in a bottom sheet list view with the session time and status whether absent or present for that session
-
-    return (
-      <TouchableOpacity
-        activeOpacity={0.7}
-        key={session.id}
-        className="mb-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm"
-        onPress={() => role == 'LECTURER' && handleSessionPress(session)}>
-        <View className="mb-3 flex-row items-center justify-between">
-          <View className="flex-1">
-            <View className="flex-row items-center">
-              <Text className="text-lg font-semibold text-gray-800">Session #{session.id}</Text>
-              {isToday && (
-                <View className="ml-2 rounded-full bg-orange-100 px-2 py-1">
-                  <Text className="text-xs font-medium text-orange-700">Today</Text>
-                </View>
-              )}
-            </View>
-            <Text className="mt-1 text-sm text-gray-500">
-              {formatDateTime(session.startTime).date} {formatDateTime(session.startTime).time}
-            </Text>
-          </View>
-
-          <View className="items-end">
-            <View className={`rounded-full px-3 py-1 ${getSessionStatusColor(session.status)}`}>
-              <Text className="text-xs font-medium capitalize">{session.status.toLowerCase()}</Text>
-            </View>
-            {session.lecturer && (
-              <Text className="mt-1 text-xs text-gray-500">
-                {session.lecturer.firstName} {session.lecturer.lastName}
-              </Text>
-            )}
-          </View>
-        </View>
-
-        <View className="flex-row items-center justify-between">
-          <View className="flex-row items-center">
-            <Ionicons name="location-outline" size={16} color="#6B7280" />
-            <Text className="ml-1 text-sm text-gray-500">
-              Location: {session.location.latitude.toFixed(4)},{' '}
-              {session.location.longitude.toFixed(4)}
-            </Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#6B7280" />
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
   const renderRecordCard = (record: Attendance, i: number) => {
-    // const startTime = new Date(session.startTime);
-    // const isToday = startTime.toDateString() === new Date().toDateString();
-    //TODO: Modify the renderRecordCard to show the session time(like yesterday, today, last 5 days, shows the date when it's been more than a week) and the session status whether absent or present for that session, no session number
-
-    //TODO: or change the whole courses.tsx UI to show the students courses in a grid view with the course name, code, and lecturer name, and then on click it shows the sessions for that course in a bottom sheet list view with the session time and status whether absent or present for that session
-
     return (
       <TouchableOpacity
         activeOpacity={0.7}
@@ -202,11 +83,6 @@ const CourseDetails = () => {
           <View className="flex-1">
             <View className="flex-row items-center">
               <Text className="text-lg font-semibold text-gray-800">Record #{i}</Text>
-              {/* {isToday && (
-                <View className="ml-2 rounded-full bg-orange-100 px-2 py-1">
-                  <Text className="text-xs font-medium text-orange-700">Today</Text>
-                </View>
-              )} */}
             </View>
             <Text className="mt-1 text-sm text-gray-500">
               {formatDateTime(record.date).date} {formatDateTime(record.date).time}
@@ -214,34 +90,19 @@ const CourseDetails = () => {
           </View>
 
           <View className="items-end">
-            {/* <View className={`rounded-full px-3 py-1 ${getRecordStatusColor(record.status)}`}>
-              <Text className="text-xs font-medium capitalize">{record.status.toLowerCase()}</Text>
-            </View> */}
             {record.lecturer && (
               <Text className="mt-1 text-xs text-gray-500">{record.lecturer}</Text>
             )}
           </View>
         </View>
-
-        {/* <View className="flex-row items-center justify-between">
-          <View className="flex-row items-center">
-            <Ionicons name="location-outline" size={16} color="#6B7280" />
-            <Text className="ml-1 text-sm text-gray-500">
-              Location: {record.location.latitude.toFixed(4)},{' '}
-              {record.location.longitude.toFixed(4)}
-            </Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#6B7280" />
-        </View> */}
       </TouchableOpacity>
     );
   };
 
   const getSessionStats = () => {
-    const totalSessions = courseSessions.length;
-    // const activeSessions = courseSessions.filter((s) => s.status === 'ACTIVE').length;
+    const totalSessions = recordSessions.length;
     const today = new Date();
-    const todaySessions = courseSessions.filter(
+    const todaySessions = recordSessions.filter(
       (s) => new Date(s.date).toDateString() === today.toDateString()
     ).length;
 
@@ -316,10 +177,6 @@ const CourseDetails = () => {
               <Text className="text-2xl font-bold text-blue-600">{stats.totalSessions}</Text>
               <Text className="text-sm text-gray-500">Total Sessions</Text>
             </View>
-            {/* <View className="items-center">
-              <Text className="text-2xl font-bold text-green-600">{stats.activeSessions}</Text>
-              <Text className="text-sm text-gray-500">Active</Text>
-            </View> */}
             <View className="items-center">
               <Text className="text-2xl font-bold text-orange-600">{stats.todaySessions}</Text>
               <Text className="text-sm text-gray-500">Today</Text>
@@ -332,7 +189,7 @@ const CourseDetails = () => {
           <Text className="text-xl font-bold text-gray-800">Your Sessions</Text>
           <TouchableOpacity
             activeOpacity={0.7}
-            onPress={() => !isLoadingSessions && loadCourseSessions()}
+            onPress={() => !isLoadingSessions && loadRecordSessions()}
             disabled={isLoadingSessions}>
             {isLoadingSessions ? (
               <ActivityIndicator size="small" color="#6B7280" />
@@ -343,9 +200,9 @@ const CourseDetails = () => {
         </View>
 
         {/* Show immediate filtered results while loading */}
-        {courseSessions.length > 0 ? (
+        {recordSessions.length > 0 ? (
           <View>
-            {courseSessions.map((courseSession, i) => renderRecordCard(courseSession, i))}
+            {recordSessions.map((courseSession, i) => renderRecordCard(courseSession, i))}
             {isLoadingSessions && (
               <View className="mt-4 items-center py-4">
                 <ActivityIndicator size="small" color="#3B82F6" />
