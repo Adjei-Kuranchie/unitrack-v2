@@ -77,7 +77,7 @@ const CourseDetails = () => {
     return (
       <TouchableOpacity
         activeOpacity={0.7}
-        key={String(i)}
+        key={String(++i)}
         className="mb-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
         <View className="mb-3 flex-row items-center justify-between">
           <View className="flex-1">
@@ -172,7 +172,7 @@ const CourseDetails = () => {
         {/* Session Stats Card */}
         <View className="mb-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
           <Text className="mb-4 text-lg font-semibold text-gray-800">Session Statistics</Text>
-          <View className="flex-row justify-between">
+          <View className="flex-row justify-around">
             <View className="items-center">
               <Text className="text-2xl font-bold text-blue-600">{stats.totalSessions}</Text>
               <Text className="text-sm text-gray-500">Total Sessions</Text>
