@@ -290,7 +290,11 @@ const AttendanceScreen = () => {
               <Text className="ml-2 text-gray-600">Loading attendance records...</Text>
             </View>
           ) : Array.isArray(attendance) && attendance.length > 0 ? (
-            <View>{attendance.map((record, index) => renderAttendanceRecord(record, index))}</View>
+            <View>
+              {attendance
+                .slice(0, 11)
+                .map((record, index) => renderAttendanceRecord(record, index))}
+            </View>
           ) : (
             <View className="items-center py-8">
               <Ionicons name="document-text-outline" size={48} color="#9ca3af" />

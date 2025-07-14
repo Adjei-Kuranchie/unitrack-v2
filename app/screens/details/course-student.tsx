@@ -39,16 +39,16 @@ import {
 import { formatDateTime } from '~/lib/utils';
 import { useApiStore } from '~/store/apiStore';
 import { useAuthStore } from '~/store/authStore';
-import { Course, Session } from '~/types/app';
+import { Attendance, Course, Session } from '~/types/app';
 
 const CourseDetails = () => {
   const params = useLocalSearchParams();
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
-  const [courseSessions, setCourseSessions] = useState<Session[]>([]);
+  const [courseSessions, setCourseSessions] = useState<Attendance[]>([]);
   const [isLoadingSessions, setIsLoadingSessions] = useState(false);
 
-  const { sessions, fetchSessions } = useApiStore();
+  const { sessions, fetchSessions, attendance } = useApiStore();
   const { user } = useAuthStore();
 
   const course: Course | undefined =
@@ -65,6 +65,9 @@ const CourseDetails = () => {
 
   const filterCourseSessions = () => {
     if (!course) return;
+    const filteredAttendance = attendance.filter(
+      (record) => record.courseName === course.courseName
+    );
 
     const filteredSessions = sessions
       .filter(
@@ -78,7 +81,7 @@ const CourseDetails = () => {
       (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
     );
 
-    setCourseSessions(sortedSessions);
+    setCourseSessions(filteredAttendance);
   };
 
   const loadCourseSessions = async () => {
@@ -183,15 +186,66 @@ const CourseDetails = () => {
     );
   };
 
+  const renderRecordCard = (record: Attendance, i: number) => {
+    // const startTime = new Date(session.startTime);
+    // const isToday = startTime.toDateString() === new Date().toDateString();
+    //TODO: Modify the renderRecordCard to show the session time(like yesterday, today, last 5 days, shows the date when it's been more than a week) and the session status whether absent or present for that session, no session number
+
+    //TODO: or change the whole courses.tsx UI to show the students courses in a grid view with the course name, code, and lecturer name, and then on click it shows the sessions for that course in a bottom sheet list view with the session time and status whether absent or present for that session
+
+    return (
+      <TouchableOpacity
+        activeOpacity={0.7}
+        key={String(i)}
+        className="mb-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+        <View className="mb-3 flex-row items-center justify-between">
+          <View className="flex-1">
+            <View className="flex-row items-center">
+              <Text className="text-lg font-semibold text-gray-800">Record #{i}</Text>
+              {/* {isToday && (
+                <View className="ml-2 rounded-full bg-orange-100 px-2 py-1">
+                  <Text className="text-xs font-medium text-orange-700">Today</Text>
+                </View>
+              )} */}
+            </View>
+            <Text className="mt-1 text-sm text-gray-500">
+              {formatDateTime(record.date).date} {formatDateTime(record.date).time}
+            </Text>
+          </View>
+
+          <View className="items-end">
+            {/* <View className={`rounded-full px-3 py-1 ${getRecordStatusColor(record.status)}`}>
+              <Text className="text-xs font-medium capitalize">{record.status.toLowerCase()}</Text>
+            </View> */}
+            {record.lecturer && (
+              <Text className="mt-1 text-xs text-gray-500">{record.lecturer}</Text>
+            )}
+          </View>
+        </View>
+
+        {/* <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center">
+            <Ionicons name="location-outline" size={16} color="#6B7280" />
+            <Text className="ml-1 text-sm text-gray-500">
+              Location: {record.location.latitude.toFixed(4)},{' '}
+              {record.location.longitude.toFixed(4)}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#6B7280" />
+        </View> */}
+      </TouchableOpacity>
+    );
+  };
+
   const getSessionStats = () => {
     const totalSessions = courseSessions.length;
-    const activeSessions = courseSessions.filter((s) => s.status === 'ACTIVE').length;
+    // const activeSessions = courseSessions.filter((s) => s.status === 'ACTIVE').length;
     const today = new Date();
     const todaySessions = courseSessions.filter(
-      (s) => new Date(s.startTime).toDateString() === today.toDateString()
+      (s) => new Date(s.date).toDateString() === today.toDateString()
     ).length;
 
-    return { totalSessions, activeSessions, todaySessions };
+    return { totalSessions, todaySessions };
   };
 
   if (!course) {
@@ -262,10 +316,10 @@ const CourseDetails = () => {
               <Text className="text-2xl font-bold text-blue-600">{stats.totalSessions}</Text>
               <Text className="text-sm text-gray-500">Total Sessions</Text>
             </View>
-            <View className="items-center">
+            {/* <View className="items-center">
               <Text className="text-2xl font-bold text-green-600">{stats.activeSessions}</Text>
               <Text className="text-sm text-gray-500">Active</Text>
-            </View>
+            </View> */}
             <View className="items-center">
               <Text className="text-2xl font-bold text-orange-600">{stats.todaySessions}</Text>
               <Text className="text-sm text-gray-500">Today</Text>
@@ -275,7 +329,7 @@ const CourseDetails = () => {
 
         {/* Sessions List */}
         <View className="mb-4 flex-row items-center justify-between">
-          <Text className="text-xl font-bold text-gray-800">Course Sessions</Text>
+          <Text className="text-xl font-bold text-gray-800">Your Sessions</Text>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => !isLoadingSessions && loadCourseSessions()}
@@ -291,7 +345,7 @@ const CourseDetails = () => {
         {/* Show immediate filtered results while loading */}
         {courseSessions.length > 0 ? (
           <View>
-            {courseSessions.map(renderSessionCard)}
+            {courseSessions.map((courseSession, i) => renderRecordCard(courseSession, i))}
             {isLoadingSessions && (
               <View className="mt-4 items-center py-4">
                 <ActivityIndicator size="small" color="#3B82F6" />
