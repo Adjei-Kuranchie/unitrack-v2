@@ -127,11 +127,12 @@ export default function SignInScreen() {
           <Text className="mb-2 font-medium text-gray-700">Username</Text>
           <TextInput
             className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
-            placeholder="Enter your username"
+            placeholder="Username"
             value={username}
             onChangeText={(text) => setUsername(text.trim())}
             autoCapitalize="none"
             editable={!isLoading}
+            autoComplete="username"
           />
         </View>
 
@@ -140,11 +141,12 @@ export default function SignInScreen() {
           <View className="relative">
             <TextInput
               className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
-              placeholder="Enter your password"
+              placeholder="Password"
               value={password}
               onChangeText={(text) => setPassword(text.trim())}
               secureTextEntry={!showPassword}
               editable={!isLoading}
+              autoComplete="password"
             />
             <Pressable
               onPress={() => setShowPassword((prev) => !prev)}

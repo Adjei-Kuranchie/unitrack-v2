@@ -164,6 +164,17 @@ const SessionScreen = () => {
                   <Ionicons name="people-outline" size={20} color="#6B7280" />
                   <Text className="ml-2 text-base font-medium text-gray-900">Students Present</Text>
                 </View>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/screens/details/export-lecturer',
+                      params: { session: JSON.stringify(sessionData) },
+                    })
+                  }
+                  className="mr-4 rounded-full bg-blue-100 px-3 py-1">
+                  <Text className="text-sm font-semibold text-blue-800">Export</Text>
+                </TouchableOpacity>
                 <Text className="text-xl font-bold text-blue-600">
                   {sessionData.attendance.studentList?.length || 0}
                 </Text>
