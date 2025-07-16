@@ -10,6 +10,8 @@
  * @property {string} [IndexNumber] - Index number, optional for students.
  */
 
+import { departmentName } from './app';
+
 /**
  * Represents the authentication state and actions.
  * @property {User | null} user - The currently authenticated user, or null if not authenticated.
@@ -43,6 +45,7 @@ interface User {
   role: 'LECTURER' | 'STUDENT' | 'ADMIN';
   program?: string; // Optional for lecturers/admins
   IndexNumber?: string; // Optional for students
+  department: departmentName;
 }
 
 interface AuthState {
@@ -65,7 +68,8 @@ interface RegisterData {
   firstName: string;
   lastName: string;
   email: string;
+  department: departmentName;
   role: 'LECTURER' | 'STUDENT' | 'ADMIN';
 }
 
-export type { AuthState, RegisterData };
+export type { AuthState, RegisterData, User };

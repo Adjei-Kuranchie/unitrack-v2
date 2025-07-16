@@ -34,12 +34,14 @@ import { ApiState, AttendanceRequest, SessionRequest } from '~/types/app';
 import Constants from 'expo-constants';
 const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 
-const getAuthHeaders = () => {
+const getAuthHeaders = (mark?: boolean) => {
   const token = useAuthStore.getState().token;
 
+  //TODO: Make sure to add the id when adding attendance
   return {
     'Content-Type': 'application/json',
     Authorization: token ? `Bearer ${token}` : '',
+    'X-Device_ID': mark ? 'your-device-id' : '',
   };
 };
 
@@ -199,13 +201,35 @@ export const useApiStore = create<ApiState>((set, get) => ({
     }
   },
 
+  fetchSingleAttendance: async (attendanceId: number) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/attendance/one?id=${attendanceId}`, {
+        headers: getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch attendance');
+      }
+
+      const attendance = await response.json();
+      set({ attendance, isLoading: false });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Failed to fetch attendance',
+        isLoading: false,
+      });
+    }
+  },
+
   markAttendance: async (attendanceReq: AttendanceRequest) => {
     set({ isLoading: true, error: null });
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/attendance/mark`, {
         method: 'POST',
-        headers: getAuthHeaders(),
+        headers: getAuthHeaders(true),
         body: JSON.stringify(attendanceReq),
       });
 

@@ -1,9 +1,33 @@
+import { User } from '~/types/auth';
+
+type departmentName = 'Art' | 'Science' | 'Economics' | 'Law';
+
 /**
  * Represents a course offered in the system.
  * @property courseName - The name of the course.
  * @property courseCode - The unique code identifying the course.
  * @property lecturerId - The ID of the lecturer assigned to the course.
  */
+interface Course {
+  courseName: string;
+  courseCode: string;
+  lecturerId: number;
+  department: string;
+}
+
+/**
+ * Represents a department within the system.
+ * @property id - The unique identifier for the department.
+ * @property departmentName - The name of the department.
+ * @property users - The list of users associated with the department.
+ * @property courses - The list of courses offered by the department.
+ */
+interface Department {
+  id: number;
+  departmentName: departmentName;
+  users: User[];
+  courses: Course[]; // List of courses offered by the department
+}
 
 /**
  * Request payload for creating a session.
@@ -11,12 +35,25 @@
  * @property location - The location where the session will be held.
  */
 
+interface SessionRequest {
+  courseName: string;
+  location: Location;
+}
+/*TODO: ask to make sure the student Index number is a string eg:"PS/CSC/21/0001"  
+  or are you making it to send the user id then you query the student table to find the index number?
+  it better if you don't query the db many times, i can just send the index number and then you add it to the response and then i can display it for the lecturer
+*/
 /**
  * Request payload for marking attendance.
  * @property sessionId - The ID of the session.
  * @property location - The location of the student during attendance marking.
  * @property studentId - (Optional) The index number of the student (e.g., "PS/CSC/21/0001").
  */
+
+interface AttendanceRequest {
+  sessionId: number;
+  location: Location;
+}
 
 /**
  * Represents a session for a course.
@@ -29,12 +66,26 @@
  * @property course - The course associated with the session.
  * @property attendance - The attendance record for the session.
  */
+interface Session {
+  id: number;
+  status: 'ACTIVE' | 'CLOSED';
+  startTime: string;
+  endTime: string;
+  location: Location;
+  lecturer: Lecturer;
+  course: Course;
+  attendance: Attendance;
+}
 
 /**
  * Represents a geographical location.
  * @property latitude - The latitude coordinate.
  * @property longitude - The longitude coordinate.
  */
+interface Location {
+  latitude: number;
+  longitude: number;
+}
 
 /**
  * Represents a lecturer in the system.
@@ -53,6 +104,25 @@
  * @property location - (Optional) The current location of the lecturer.
  */
 
+interface Lecturer {
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: 'LECTURER' | string;
+  department: string | null;
+  //TODO: extras?
+
+  id: number;
+  lecturerId: number;
+  name: string;
+  courses: Course[];
+  sessions: Session[];
+  attendance: Attendance[];
+  department: string;
+  location?: Location;
+}
+
 /**
  * Represents a student in the system.
  * @property username - The username of the student.
@@ -64,6 +134,15 @@
  * @property role - The role of the user (typically 'STUDENT').
  */
 
+interface Student {
+  username: string;
+  firstName: string;
+  lastName: string;
+  program: string;
+  IndexNumber: string;
+  email: string;
+  role: 'STUDENT' | string;
+}
 /**
  * Represents an attendance record for a session.
  * @property courseName - The name of the course.
@@ -72,6 +151,14 @@
  * @property lecturer - The name of the lecturer.
  * @property studentList - The list of students who attended the session.
  */
+
+interface Attendance {
+  courseName: string;
+  date: string;
+  time: string;
+  lecturer: string;
+  studentList: Student[];
+}
 
 /**
  * Represents the state and actions for API data management.
@@ -93,80 +180,6 @@
  * @property deleteUser - Deletes a user by ID.
  * @property clearError - Clears the current error state.
  */
-interface Course {
-  courseName: string;
-  courseCode: string;
-  lecturerId: number;
-}
-
-interface SessionRequest {
-  courseName: string;
-  location: Location;
-}
-/*TODO: ask to make sure the student Index number is a string eg:"PS/CSC/21/0001"  
-  or are you making it to send the user id then you query the student table to find the index number?
-  it better if you don't query the db many times, i can just send the index number and then you add it to the response and then i can display it for the lecturer
-*/
-interface AttendanceRequest {
-  sessionId: number;
-  location: Location;
-  studentId?: string;
-}
-
-interface Session {
-  id: number;
-  status: 'ACTIVE' | 'CLOSED';
-  startTime: string;
-  endTime: string;
-  location: Location;
-  lecturer: Lecturer;
-  course: Course;
-  attendance: Attendance;
-}
-
-interface Location {
-  latitude: number;
-  longitude: number;
-}
-
-//TODO: Ask what the attendance/lecturer and attendance/student does
-interface Lecturer {
-  username: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: 'LECTURER' | string;
-  department: string | null;
-  //TODO: extras?
-
-  id: number;
-  lecturerId: number;
-  name: string;
-  courses: Course[];
-  sessions: Session[];
-  attendance: Attendance[];
-  department: string;
-  location?: Location;
-}
-
-interface Student {
-  username: string;
-  firstName: string;
-  lastName: string;
-  program: string;
-  IndexNumber: string;
-  email: string;
-  role: 'STUDENT' | string;
-}
-
-interface Attendance {
-  courseName: string;
-  date: string;
-  time: string;
-  lecturer: string;
-  studentList: Student[];
-}
-
 interface ApiState {
   courses: Course[];
   sessions: Session[];
@@ -182,8 +195,10 @@ interface ApiState {
   // Session actions
   fetchSessions: () => Promise<void>;
   createSession: (sessionReq: SessionRequest) => Promise<void>;
+
   // Attendance actions
   fetchAttendance: () => Promise<void>;
+  fetchSingleAttendance: (attendanceId: number) => Promise<void>;
   markAttendance: (attendanceReq: AttendanceRequest) => Promise<void>;
 
   // User actions
@@ -194,11 +209,14 @@ interface ApiState {
 
   clearError: () => void;
 }
+
 export type {
   ApiState,
   Attendance,
   AttendanceRequest,
   Course,
+  Department,
+  departmentName,
   Lecturer,
   Location,
   Session,

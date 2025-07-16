@@ -46,6 +46,7 @@ export default function RegisterScreen() {
     lastName: '',
     email: '',
     role: 'LECTURER',
+    department: 'Science',
   });
 
   const { register, isLoading, error, clearError } = useAuthStore();
@@ -188,6 +189,24 @@ export default function RegisterScreen() {
                       enabled={!isLoading}>
                       <Picker.Item label="Student" value="STUDENT" />
                       <Picker.Item label="Lecturer" value="LECTURER" />
+                    </Picker>
+                  ) : null}
+                </View>
+              </View>
+              <View>
+                <Text className="mb-2 font-medium text-gray-700">Role</Text>
+                <View className="rounded-lg border border-gray-300">
+                  {Platform.OS === 'android' || Platform.OS === 'ios' ? (
+                    <Picker
+                      selectedValue={formData.department}
+                      onValueChange={(itemValue) =>
+                        setFormData({ ...formData, department: itemValue })
+                      }
+                      enabled={!isLoading}>
+                      <Picker.Item label="Science" value="Science" />
+                      <Picker.Item label="Arts" value="Arts" />
+                      <Picker.Item label="Economics" value="Economics" />
+                      <Picker.Item label="Law" value="Law" />
                     </Picker>
                   ) : null}
                 </View>
