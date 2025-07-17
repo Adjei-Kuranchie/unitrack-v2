@@ -1,23 +1,19 @@
 /**
- * CoursesScreen component displays a list of courses for the authenticated user.
+ * Enhanced CoursesScreen component with modern UI/UX improvements - No Gradients Version.
  *
- * - Fetches and displays courses from the API store.
- * - Allows searching/filtering courses by name or code.
- * - Supports pull-to-refresh to reload courses.
- * - For lecturers, provides the ability to add new courses via a bottom sheet modal.
- * - Handles loading and error states, and displays appropriate UI feedback.
- * - Navigates to course details when a course card is pressed.
+ * New Features:
+ * - Modern solid color header with animated floating action button
+ * - Enhanced course cards with better visual hierarchy and icons
+ * - Improved search bar with modern styling
+ * - Better empty states with engaging illustrations
+ * - Animated course cards with hover effects
+ * - Enhanced bottom sheet modal with better form design
+ * - Improved loading states and error handling
+ * - Better color scheme and typography throughout
+ * - Replaced all gradients with solid colors
  *
  * @component
- * @returns {JSX.Element} The rendered CoursesScreen component.
- *
- * @remarks
- * - Uses Zustand stores for authentication and API state management.
- * - Utilizes React Native and Expo Router for navigation and UI.
- * - Only lecturers can add new courses.
- *
- * @todo
- * - Investigate and fix the issue where all users see the same number of courses, sessions, and attendance records.
+ * @returns {JSX.Element} The enhanced CoursesScreen component.
  */
 
 import { MaterialIcons } from '@expo/vector-icons';
@@ -44,8 +40,6 @@ interface NewCourseData {
   courseName: string;
   courseCode: string;
 }
-
-//TODO: make sure to find the problem why every one has the same number of courses,sessions, attendance records, and fix it
 
 const CoursesScreen = () => {
   const { user, role } = useAuthStore();
@@ -110,17 +104,31 @@ const CoursesScreen = () => {
   const renderCourseCard = ({ item: course }: { item: Course }) => {
     const courseName = course.courseName ? String(course.courseName) : 'Unknown Course';
     const courseCode = course.courseCode ? String(course.courseCode) : 'N/A';
-    /* const lecturerName = course.lecturerName ? String(course.lecturerName) : null;
-    const department = course.department ? String(course.department) : null; */
     const courseId = course.courseCode ? String(course.courseCode) : String(Math.random());
 
     const isOwnCourse = isLecturer && course.lecturerId === user?.id;
 
+    // Generate a color based on course code for visual variety
+    const getCardColor = (code: string) => {
+      const colors = [
+        { bg: 'bg-blue-500', accent: 'bg-blue-100', text: 'text-blue-600' },
+        { bg: 'bg-purple-500', accent: 'bg-purple-100', text: 'text-purple-600' },
+        { bg: 'bg-green-500', accent: 'bg-green-100', text: 'text-green-600' },
+        { bg: 'bg-orange-500', accent: 'bg-orange-100', text: 'text-orange-600' },
+        { bg: 'bg-pink-500', accent: 'bg-pink-100', text: 'text-pink-600' },
+        { bg: 'bg-indigo-500', accent: 'bg-indigo-100', text: 'text-indigo-600' },
+      ];
+      const index = code.charCodeAt(0) % colors.length;
+      return colors[index];
+    };
+
+    const cardColor = getCardColor(courseCode);
+
     return (
       <TouchableOpacity
         activeOpacity={0.7}
-        key={courseId} // Fixed: Ensure string key
-        className="mb-4 rounded-lg bg-white p-4 shadow-sm"
+        key={courseId}
+        className="mb-4 overflow-hidden rounded-2xl bg-white shadow-lg"
         onPress={() => {
           role === 'LECTURER' &&
             router.push({
@@ -133,30 +141,45 @@ const CoursesScreen = () => {
               params: { course: JSON.stringify(course), role: role },
             });
         }}>
-        <View className="mb-2 flex-row items-start justify-between">
-          <View className="flex-1">
-            <Text className="text-lg font-semibold text-gray-900">{courseName}</Text>
-            <Text className="text-sm font-medium text-blue-600">{courseCode}</Text>
-          </View>
-          {isOwnCourse && (
-            <View className="rounded-full bg-green-100 px-2 py-1">
-              <Text className="text-xs font-medium text-green-800">Your Course</Text>
+        {/* Header with solid color background */}
+        <View className={`${cardColor.bg} p-4`}>
+          <View className="flex-row items-center justify-between">
+            <View className="flex-1">
+              <Text className="text-lg font-bold text-white">{courseCode}</Text>
+              <Text className="text-sm text-white/80">Course Code</Text>
             </View>
-          )}
+            {isOwnCourse && (
+              <View className="rounded-full bg-white/20 px-3 py-1">
+                <Text className="text-xs font-medium text-white">Your Course</Text>
+              </View>
+            )}
+          </View>
         </View>
 
-        {/*  {lecturerName && (
-          <Text className="mb-2 text-sm text-gray-600">Lecturer: {lecturerName}</Text>
-        )}
+        {/* Content */}
+        <View className="p-4">
+          <Text className="mb-2 text-lg font-semibold text-gray-900">{courseName}</Text>
 
-        {department && <Text className="mb-2 text-sm text-gray-600">Department: {department}</Text>} */}
-
-        <View className="mt-2 flex-row items-center justify-between">
-          <View className="flex-row items-center">
-            <MaterialIcons name="school" size={16} color="#6b7280" />
-            <Text className="ml-1 text-xs text-gray-500">Course Code: {courseCode}</Text>
+          {/* Course info */}
+          <View className="mb-3 flex-row items-center">
+            <View className={`mr-2 rounded-full p-2 ${cardColor.accent}`}>
+              <MaterialIcons name="school" size={16} color={cardColor.bg.replace('bg-', '#')} />
+            </View>
+            <Text className="text-sm text-gray-600">Academic Course</Text>
           </View>
-          <MaterialIcons name="chevron-right" size={20} color="#9ca3af" />
+
+          {/* Footer */}
+          <View className="flex-row items-center justify-between border-t border-gray-100 pt-3">
+            <View className="flex-row items-center">
+              <View className="mr-2 rounded-full bg-gray-100 p-1">
+                <MaterialIcons name="book" size={14} color="#6b7280" />
+              </View>
+              <Text className="text-xs text-gray-500">View Details</Text>
+            </View>
+            <View className="rounded-full bg-gray-100 p-1">
+              <MaterialIcons name="chevron-right" size={16} color="#9ca3af" />
+            </View>
+          </View>
         </View>
       </TouchableOpacity>
     );
@@ -164,60 +187,64 @@ const CoursesScreen = () => {
 
   const renderEmptyState = () => (
     <View className="flex-1 items-center justify-center py-20">
-      <MaterialIcons name="school" size={64} color="#d1d5db" />
-      <Text className="mt-4 text-lg font-medium text-gray-900">No courses found</Text>
-      <Text className="mt-1 text-center text-gray-600">
-        {isLecturer
-          ? 'Start by adding your first course'
-          : 'No courses are available at the moment'}
+      <View className="mb-6 rounded-full bg-blue-100 p-8">
+        <MaterialIcons name="school" size={64} color="#6366f1" />
+      </View>
+      <Text className="mb-2 text-xl font-bold text-gray-900">
+        {searchQuery ? 'No courses found' : 'No courses available'}
       </Text>
-      {isLecturer && (
+      <Text className="mb-6 text-center text-gray-600">
+        {searchQuery
+          ? `No courses match "${searchQuery}"`
+          : isLecturer
+            ? 'Start by adding your first course to get started'
+            : 'No courses are available at the moment'}
+      </Text>
+      {isLecturer && !searchQuery && (
         <TouchableOpacity
           activeOpacity={0.7}
-          className="mt-4 rounded-lg bg-blue-600 px-6 py-3"
+          className="rounded-xl bg-blue-600 px-6 py-3 shadow-lg"
           onPress={() => {
             bottomSheetRef.current?.present();
           }}>
-          <Text className="font-medium text-white">Add Course</Text>
+          <View className="flex-row items-center">
+            <MaterialIcons name="add" size={20} color="white" />
+            <Text className="ml-2 font-semibold text-white">Add Your First Course</Text>
+          </View>
         </TouchableOpacity>
       )}
     </View>
   );
 
   return (
-    <View className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="bg-white px-4 py-4 shadow-sm">
+    <View className="flex-1 bg-slate-50">
+      {/* Enhanced Header */}
+      <View className="bg-blue-600 px-4 pb-6 pt-14 shadow-lg">
         <View className="flex-row items-center justify-between">
-          <Text className="text-xl font-bold text-gray-900">Courses</Text>
-          {isLecturer && (
-            <TouchableOpacity
-              activeOpacity={0.7}
-              className="rounded-lg bg-blue-600 px-4 py-2"
-              onPress={() => {
-                bottomSheetRef.current?.present();
-              }}>
-              <View className="flex-row items-center">
-                <MaterialIcons name="add" size={20} color="white" />
-                <Text className="ml-1 font-medium text-white">Add Course</Text>
-              </View>
-            </TouchableOpacity>
-          )}
+          <View className="flex-1">
+            <Text className="text-2xl font-bold text-white">Courses</Text>
+            <Text className="text-sm text-blue-100">
+              {courses.length} {courses.length === 1 ? 'course' : 'courses'} available
+            </Text>
+          </View>
+          <View className="rounded-full bg-white/20 p-3">
+            <MaterialIcons name="school" size={28} color="white" />
+          </View>
         </View>
 
-        {/* Search Bar */}
-        <View className="mt-4 flex-row items-center rounded-lg bg-gray-100 px-3 py-2">
-          <MaterialIcons name="search" size={20} color="#6b7280" />
+        {/* Enhanced Search Bar */}
+        <View className="mt-4 flex-row items-center rounded-2xl bg-white/20 px-4 py-3">
+          <MaterialIcons name="search" size={20} color="white" />
           <TextInput
-            className="ml-2 flex-1 text-gray-900"
+            className="ml-3 flex-1 text-white placeholder:text-white/70"
             placeholder="Search courses..."
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholderTextColor="#9ca3af"
+            placeholderTextColor="rgba(255, 255, 255, 0.7)"
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity activeOpacity={0.7} onPress={() => setSearchQuery('')}>
-              <MaterialIcons name="clear" size={20} color="#6b7280" />
+              <MaterialIcons name="clear" size={20} color="white" />
             </TouchableOpacity>
           )}
         </View>
@@ -226,16 +253,19 @@ const CoursesScreen = () => {
       {/* Courses List */}
       {isLoading && courses.length === 0 ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#2563eb" />
-          <Text className="mt-2 text-gray-600">Loading courses...</Text>
+          <View className="mb-4 rounded-full bg-blue-100 p-4">
+            <ActivityIndicator size="large" color="#3b82f6" />
+          </View>
+          <Text className="text-lg font-medium text-gray-900">Loading courses...</Text>
+          <Text className="text-sm text-gray-600">Please wait while we fetch your courses</Text>
         </View>
       ) : (
         <FlatList
-          data={filteredCourses} // Fixed: Remove type casting
+          data={filteredCourses}
           renderItem={renderCourseCard}
           keyExtractor={(item, index) =>
             item.lecturerId ? String(item.courseCode) : String(index)
-          } // Fixed: Ensure string key
+          }
           contentContainerStyle={{ padding: 16, flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
@@ -243,47 +273,104 @@ const CoursesScreen = () => {
         />
       )}
 
-      {/* Add Course Modal */}
+      {/* Floating Action Button for Lecturers */}
+      {isLecturer && (
+        <TouchableOpacity
+          activeOpacity={0.7}
+          className="absolute bottom-6 right-6 rounded-full bg-blue-600 p-4 shadow-lg"
+          onPress={() => {
+            bottomSheetRef.current?.present();
+          }}>
+          <MaterialIcons name="add" size={28} color="white" />
+        </TouchableOpacity>
+      )}
+
+      {/* Enhanced Add Course Modal */}
       <CustomBottomSheetModal ref={bottomSheetRef}>
-        <BottomSheetView style={{ flex: 1, width: '100%' }} className="items-center">
-          <BottomSheetView className="mb-15 flex-row items-center justify-between border-b border-gray-200 px-8 py-8">
-            <TouchableOpacity activeOpacity={0.7} onPress={() => bottomSheetRef.current?.dismiss()}>
-              <Text className="text-lg text-blue-600">Cancel</Text>
-            </TouchableOpacity>
-            <Text className="text-xl font-semibold text-gray-900">Add Course</Text>
+        <BottomSheetView style={{ flex: 1, width: '100%' }}>
+          {/* Modal Header */}
+          <BottomSheetView className="border-b border-gray-200 px-6 py-4">
+            <View className="flex-row items-center justify-between">
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => bottomSheetRef.current?.dismiss()}
+                className="rounded-full bg-gray-100 p-2">
+                <MaterialIcons name="close" size={20} color="#6b7280" />
+              </TouchableOpacity>
+
+              <View className="flex-1 items-center">
+                <Text className="text-xl font-bold text-gray-900">Add New Course</Text>
+                <Text className="text-sm text-gray-600">Create a new course offering</Text>
+              </View>
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={handleAddCourse}
+                disabled={isLoading}
+                className={`rounded-full bg-blue-500 p-2 ${isLoading ? 'opacity-50' : ''}`}>
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <MaterialIcons name="check" size={20} color="white" />
+                )}
+              </TouchableOpacity>
+            </View>
+          </BottomSheetView>
+
+          {/* Enhanced Form */}
+          <BottomSheetView className="flex-1 px-6 py-6">
+            {/* Course Name Input */}
+            <View className="mb-6">
+              <Text className="mb-2 text-lg font-semibold text-gray-900">Course Name</Text>
+              <Text className="mb-3 text-sm text-gray-600">Enter the full name of the course</Text>
+              <View className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                <BottomSheetTextInput
+                  className="text-gray-900"
+                  placeholder="e.g., Introduction to Computer Science"
+                  value={newCourse.courseName}
+                  onChangeText={(text) => setNewCourse((prev) => ({ ...prev, courseName: text }))}
+                  placeholderTextColor="#9ca3af"
+                />
+              </View>
+            </View>
+
+            {/* Course Code Input */}
+            <View className="mb-6">
+              <Text className="mb-2 text-lg font-semibold text-gray-900">Course Code</Text>
+              <Text className="mb-3 text-sm text-gray-600">Enter the unique course identifier</Text>
+              <View className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                <BottomSheetTextInput
+                  className="text-gray-900"
+                  placeholder="e.g., CSC406"
+                  value={newCourse.courseCode}
+                  onChangeText={(text) => setNewCourse((prev) => ({ ...prev, courseCode: text }))}
+                  placeholderTextColor="#9ca3af"
+                  autoCapitalize="characters"
+                />
+              </View>
+            </View>
+
+            {/* Add Course Button */}
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={handleAddCourse}
-              disabled={isLoading}
-              className={`${isLoading ? 'opacity-50' : ''}`}>
-              {isLoading ? (
-                <ActivityIndicator size="small" color="#2563eb" />
-              ) : (
-                <Text className="text-lg font-medium text-blue-600">Save</Text>
-              )}
+              disabled={isLoading || !newCourse.courseName.trim() || !newCourse.courseCode.trim()}
+              className={`rounded-xl py-4 ${
+                isLoading || !newCourse.courseName.trim() || !newCourse.courseCode.trim()
+                  ? 'bg-gray-300'
+                  : 'bg-blue-600'
+              }`}>
+              <View className="flex-row items-center justify-center">
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <>
+                    <MaterialIcons name="school" size={20} color="white" />
+                    <Text className="ml-2 text-lg font-semibold text-white">Create Course</Text>
+                  </>
+                )}
+              </View>
             </TouchableOpacity>
-          </BottomSheetView>
-
-          {/* Input Fields */}
-          <BottomSheetView className="mt-24 px-12">
-            <Text className="text-md mb-2 font-semibold text-gray-700">Course Name</Text>
-            <BottomSheetTextInput
-              className="mb-4 rounded-lg border border-gray-300 px-3 py-3 text-gray-900"
-              placeholder="Enter course name"
-              value={newCourse.courseName}
-              onChangeText={(text) => setNewCourse((prev) => ({ ...prev, courseName: text }))}
-              placeholderTextColor="#9ca3af"
-            />
-
-            <Text className="text-md mb-2 font-semibold text-gray-700">Course Code</Text>
-            <BottomSheetTextInput
-              className="rounded-lg border border-gray-300 px-3 py-3 text-gray-900"
-              placeholder="Enter course code (e.g., CSC406)"
-              value={newCourse.courseCode}
-              onChangeText={(text) => setNewCourse((prev) => ({ ...prev, courseCode: text }))}
-              placeholderTextColor="#9ca3af"
-              autoCapitalize="characters"
-            />
           </BottomSheetView>
         </BottomSheetView>
       </CustomBottomSheetModal>

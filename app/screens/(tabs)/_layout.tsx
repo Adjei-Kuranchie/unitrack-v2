@@ -38,6 +38,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="courses"
         options={{
+          headerShown: false,
           title: 'Courses',
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="school" size={size} color={color} />
@@ -49,7 +50,9 @@ export default function TabLayout() {
         <Tabs.Screen
           name="sessions"
           options={{
+            headerShown: false,
             title: 'Sessions',
+
             tabBarIcon: ({ color, size }) => (
               <MaterialIcons name="event" size={size} color={color} />
             ),
@@ -68,6 +71,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="attendance"
           options={{
+            headerShown: false,
             title: 'Attendance',
             tabBarIcon: ({ color, size }) => (
               <MaterialIcons name="fact-check" size={size} color={color} />
@@ -87,6 +91,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
+          headerShown: false,
           title: 'Profile',
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="person" size={size} color={color} />

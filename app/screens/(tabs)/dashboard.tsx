@@ -1,37 +1,42 @@
-/**
- * DashboardScreen component displays the main dashboard for both lecturers and students.
- *
- * Features:
- * - Shows a personalized welcome message and user role.
- * - Displays statistics such as total courses, sessions, and attendance records.
- * - Provides quick actions based on user role (e.g., add course, create session, mark attendance).
- * - Lists recent activity (latest sessions).
- * - Handles user sign out with confirmation.
- * - Loads user profile and dashboard data on mount.
- *
- * Uses:
- * - `useAuthStore` for authentication and user state.
- * - `useApiStore` for fetching courses, sessions, attendance, and user profile.
- * - React Native components for layout and interactivity.
- * - Expo Router for navigation.
- *
- * @component
- * @returns {JSX.Element} The rendered dashboard screen.
- */
-
-import { MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { StatCard } from '~/components';
+import {
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { formatDate } from '~/lib/utils';
 import { useApiStore } from '~/store/apiStore';
 import { useAuthStore } from '~/store/authStore';
 
+const { width } = Dimensions.get('window');
+
+// Type definitions
+interface StatCardProps {
+  icon: keyof typeof MaterialIcons.glyphMap;
+  label: string;
+  value: number;
+  gradient: string;
+  onPress?: () => void;
+}
+
+interface QuickActionCardProps {
+  icon: keyof typeof MaterialIcons.glyphMap;
+  label: string;
+  description: string;
+  color: string;
+  onPress: () => void;
+}
+
 export default function DashboardScreen() {
   const { user, token, role } = useAuthStore();
   const fetchUserProfile = useApiStore((state) => state.fetchUserProfile);
-  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileLoading, setProfileLoading] = useState<boolean>(false);
 
   const signOut = useAuthStore((state) => state.signOut);
   const { courses, sessions, attendance, isLoading, fetchCourses, fetchSessions, fetchAttendance } =
@@ -44,7 +49,6 @@ export default function DashboardScreen() {
   }, []);
 
   useEffect(() => {
-    // Fetch user profile when component mounts if user is not already loaded
     if (token && !user) {
       loadUserProfile();
     }
@@ -68,9 +72,12 @@ export default function DashboardScreen() {
 
   if (isLoading && courses.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center bg-gray-50">
-        <ActivityIndicator size="large" color="#2563eb" />
-        <Text className="mt-2 text-gray-600">Loading dashboard...</Text>
+      <View className="flex-1 items-center justify-center bg-slate-50">
+        <View className="mb-4 rounded-full bg-blue-100 p-4">
+          <ActivityIndicator size="large" color="#3b82f6" />
+        </View>
+        <Text className="text-lg font-medium text-gray-900">Loading dashboard...</Text>
+        <Text className="text-sm text-gray-600">Please wait while we fetch your data</Text>
       </View>
     );
   }
@@ -88,146 +95,277 @@ export default function DashboardScreen() {
     }
   };
 
+  // Get greeting based on time of day
+  const getGreeting = (): string => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  };
+
+  // Enhanced stat card with gradient background
+  const EnhancedStatCard: React.FC<StatCardProps> = ({ icon, label, value, gradient, onPress }) => (
+    <TouchableOpacity activeOpacity={0.8} className="flex-1" onPress={onPress} disabled={!onPress}>
+      <View className={`rounded-2xl p-5 ${gradient}`}>
+        <View className="mb-3 flex-row items-center justify-between">
+          <View className="rounded-full bg-white/20 p-2">
+            <MaterialIcons name={icon} size={24} color="white" />
+          </View>
+          {onPress && <Ionicons name="arrow-forward" size={20} color="rgba(255,255,255,0.8)" />}
+        </View>
+        <Text className="text-3xl font-bold text-white">{value}</Text>
+        <Text className="text-sm text-white/80">{label}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
+  // Quick action card with better visual design
+  const QuickActionCard: React.FC<QuickActionCardProps> = ({
+    icon,
+    label,
+    description,
+    color,
+    onPress,
+  }) => (
+    <TouchableOpacity
+      activeOpacity={0.7}
+      className="mb-3 overflow-hidden rounded-2xl bg-white shadow-sm"
+      onPress={onPress}>
+      <View className="flex-row items-center p-4">
+        <View className={`mr-4 rounded-xl ${color} p-3`}>
+          <MaterialIcons name={icon} size={24} color="white" />
+        </View>
+        <View className="flex-1">
+          <Text className="text-base font-semibold text-gray-900">{label}</Text>
+          <Text className="text-sm text-gray-500">{description}</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+      </View>
+    </TouchableOpacity>
+  );
+
+  const recentSessions = sessions
+    .filter((session) => session.lecturer?.email === user?.email)
+    .slice(0, 3);
+
+  // Calculate active sessions
+  const activeSessions = sessions.filter((s) => s.status === 'ACTIVE').length;
+  const myCourses = isLecturer
+    ? courses.filter((c) => c.lecturerId === user?.id).length
+    : courses.length;
+
   return (
-    <ScrollView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="bg-blue-600 px-6 py-12 pb-6">
-        <View className="flex-row items-center justify-between">
-          <View>
-            <Text className="text-lg font-medium text-blue-100">Welcome back,</Text>
+    <ScrollView className="flex-1 bg-slate-50" showsVerticalScrollIndicator={false}>
+      {/* Enhanced Header with Gradient */}
+      <View className="bg-blue-600 px-6 pb-8 pt-12">
+        <View className="mb-6 flex-row items-center justify-between">
+          <View className="flex-1">
+            <Text className="text-base text-blue-100">{getGreeting()},</Text>
             <Text className="text-2xl font-bold text-white">
               {user?.firstName} {user?.lastName}
             </Text>
-            <Text className="text-blue-200">{isLecturer ? 'Lecturer' : 'Student'} Dashboard</Text>
+            <View className="mt-2 flex-row items-center">
+              <View className="rounded-full bg-white/20 px-3 py-1">
+                <Text className="text-xs font-medium text-white">
+                  {isLecturer ? 'Lecturer' : 'Student'}
+                </Text>
+              </View>
+            </View>
           </View>
           <TouchableOpacity
             activeOpacity={0.7}
-            className="rounded-full bg-blue-500 p-2"
+            className="rounded-full bg-white/20 p-3"
             onPress={handleSignOut}>
             <MaterialIcons name="logout" size={24} color="white" />
           </TouchableOpacity>
         </View>
-      </View>
 
-      <View className="px-6 py-6">
-        {/* Stats Grid */}
-        <View className="mb-6 flex-row gap-4 space-x-4">
-          <StatCard
-            title="Total Courses"
-            count={courses.length}
-            icon="school"
-            color="#10b981"
-            onPress={() => router.push('/screens/(tabs)/courses')}
-          />
+        {/* Overview Cards with icons on top right */}
+        <View className="flex-row gap-3">
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className="flex-1"
+            onPress={() => router.push('/screens/(tabs)/courses')}>
+            <View className="relative overflow-hidden rounded-2xl bg-white/10 p-5">
+              <View className="absolute right-4 top-4">
+                <View className="rounded-full bg-blue-100 p-2">
+                  <MaterialIcons name="school" size={20} color="#3b82f6" />
+                </View>
+              </View>
+              <View className="pr-12">
+                <Text className="text-5xl font-bold text-white">{courses.length}</Text>
+                <Text className="mt-1 text-sm font-medium text-white/70">Total Courses</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+
           {isLecturer ? (
-            <StatCard
-              title="Sessions"
-              count={sessions.length}
-              icon="event"
-              color="#f59e0b"
-              onPress={isLecturer ? () => router.push('/screens/(tabs)/sessions') : undefined}
-            />
+            <TouchableOpacity
+              activeOpacity={0.8}
+              className="flex-1"
+              onPress={() => router.push('/screens/(tabs)/sessions')}>
+              <View className="relative overflow-hidden rounded-2xl bg-white/10 p-5">
+                <View className="absolute right-4 top-4">
+                  <View className="rounded-full bg-orange-100 p-2">
+                    <MaterialIcons name="event" size={20} color="#f97316" />
+                  </View>
+                </View>
+                <View className="pr-12">
+                  <Text className="text-5xl font-bold text-white">{sessions.length}</Text>
+                  <Text className="mt-1 text-sm font-medium text-white/70">Total Sessions</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
           ) : (
-            <StatCard
-              title="Attendance Records"
-              count={attendance.length}
-              icon="fact-check"
-              color="#8b5cf6"
-              onPress={() => router.push('/screens/(tabs)/attendance')}
-            />
+            <TouchableOpacity
+              activeOpacity={0.8}
+              className="flex-1"
+              onPress={() => router.push('/screens/(tabs)/attendance')}>
+              <View className="relative overflow-hidden rounded-2xl bg-white/10 p-5">
+                <View className="absolute right-4 top-4">
+                  <View className="rounded-full bg-purple-100 p-2">
+                    <MaterialIcons name="fact-check" size={20} color="#9333ea" />
+                  </View>
+                </View>
+                <View className="pr-12">
+                  <Text className="text-5xl font-bold text-white">{attendance.length}</Text>
+                  <Text className="mt-1 text-sm font-medium text-white/70">Attendance</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
           )}
         </View>
-
-        <View className="mb-6 flex-row gap-4 space-x-4">
-          <StatCard
-            title="My Courses"
-            count={
-              isLecturer ? courses.filter((c) => c.lecturerId === user?.id).length : courses.length
-            }
-            icon="library-books"
-            color="#ef4444"
-          />
+      </View>
+      <View className="px-6 py-6">
+        {/* Activity Summary */}
+        <View className="mb-6 rounded-2xl bg-white p-5 shadow-sm">
+          <Text className="mb-4 text-lg font-semibold text-gray-900">Activity Summary</Text>
+          <View className="flex-row justify-between">
+            <View className="items-center">
+              <View className="mb-2 rounded-full bg-green-100 p-3">
+                <Ionicons name="checkmark-circle" size={24} color="#10b981" />
+              </View>
+              <Text className="text-xl font-bold text-gray-900">{activeSessions}</Text>
+              <Text className="text-xs text-gray-500">Active</Text>
+            </View>
+            <View className="items-center">
+              <View className="mb-2 rounded-full bg-blue-100 p-3">
+                <Ionicons name="book" size={24} color="#3b82f6" />
+              </View>
+              <Text className="text-xl font-bold text-gray-900">{myCourses}</Text>
+              <Text className="text-xs text-gray-500">My Courses</Text>
+            </View>
+            <View className="items-center">
+              <View className="mb-2 rounded-full bg-purple-100 p-3">
+                <Ionicons name="calendar" size={24} color="#8b5cf6" />
+              </View>
+              <Text className="text-xl font-bold text-gray-900">
+                {new Date().toLocaleDateString('en', { day: 'numeric' })}
+              </Text>
+              <Text className="text-xs text-gray-500">Today</Text>
+            </View>
+          </View>
         </View>
 
         {/* Quick Actions */}
         <View className="mb-6">
           <Text className="mb-4 text-lg font-semibold text-gray-900">Quick Actions</Text>
-          <View className="space-y-3">
-            {isLecturer && (
-              <>
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  className="flex-row items-center rounded-lg bg-white p-4 shadow-sm"
-                  onPress={() => router.push('/screens/(tabs)/courses')}>
-                  <MaterialIcons name="add-circle" size={24} color="#2563eb" />
-                  <Text className="ml-3 font-medium text-gray-900">Add New Course</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  className="flex-row items-center rounded-lg bg-white p-4 shadow-sm"
-                  onPress={() => router.push('/screens/(tabs)/sessions')}>
-                  <MaterialIcons name="event-note" size={24} color="#10b981" />
-                  <Text className="ml-3 font-medium text-gray-900">Create Session</Text>
-                </TouchableOpacity>
-              </>
-            )}
-            {role === 'STUDENT' && (
-              <TouchableOpacity
-                activeOpacity={0.7}
-                className="flex-row items-center rounded-lg bg-white p-4 shadow-sm"
-                onPress={() => router.push('/screens/(tabs)/attendance')}>
-                <MaterialIcons name="check-circle" size={24} color="#f59e0b" />
-                <Text className="ml-3 font-medium text-gray-900">
-                  {isLecturer ? 'View Attendance' : 'Mark Attendance'}
-                </Text>
-              </TouchableOpacity>
-            )}
-
-            {/* Uncomment this section when profile update is implemented */}
-            {/* <TouchableOpacity activeOpacity={0.7}
-              className="flex-row items-center rounded-lg bg-white p-4 shadow-sm"
-              onPress={() => router.push('/screens/(tabs)/profile')}>
-              <MaterialIcons name="person" size={24} color="#8b5cf6" />
-              <Text className="ml-3 font-medium text-gray-900">Update Profile</Text>
-            </TouchableOpacity> */}
-          </View>
+          {isLecturer ? (
+            <>
+              <QuickActionCard
+                icon="add-circle"
+                label="Create New Course"
+                description="Add a new course to your teaching portfolio"
+                color="bg-blue-500"
+                onPress={() => router.push('/screens/(tabs)/courses')}
+              />
+              <QuickActionCard
+                icon="event-note"
+                label="Start New Session"
+                description="Begin a class session for attendance"
+                color="bg-green-500"
+                onPress={() => router.push('/screens/(tabs)/sessions')}
+              />
+              {/* <QuickActionCard
+                icon="analytics"
+                label="View Analytics"
+                description="Check attendance patterns and insights"
+                color="bg-purple-500"
+                onPress={() => router.push('/screens/(tabs)/attendance')}
+              /> */}
+            </>
+          ) : (
+            <>
+              <QuickActionCard
+                icon="qr-code-scanner"
+                label="Mark Attendance"
+                description="Scan QR code to mark your attendance"
+                color="bg-orange-500"
+                onPress={() => router.push('/screens/(tabs)/attendance')}
+              />
+              <QuickActionCard
+                icon="history"
+                label="Attendance History"
+                description="View your attendance records"
+                color="bg-blue-500"
+                onPress={() => router.push('/screens/(tabs)/attendance')}
+              />
+            </>
+          )}
         </View>
 
-        {/* Recent Activity */}
-        <View>
-          <Text className="mb-4 text-lg font-semibold text-gray-900">Recent Activity</Text>
-          <View className="rounded-lg bg-white p-4 shadow-sm">
-            {sessions.length > 0 ? (
-              sessions
-                .filter((session) => session.lecturer?.email === user?.email)
-                .slice(0, 3)
-                .map((session, index) => (
+        {/* Recent Sessions */}
+        {recentSessions.length > 0 && (
+          <View>
+            <View className="mb-4 flex-row items-center justify-between">
+              <Text className="text-lg font-semibold text-gray-900">Recent Sessions</Text>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => router.push('/screens/(tabs)/sessions')}>
+                <Text className="text-sm font-medium text-blue-500">View All</Text>
+              </TouchableOpacity>
+            </View>
+            <View className="space-y-3">
+              {recentSessions.map((session) => {
+                const statusColor = session.status === 'ACTIVE' ? 'bg-green-500' : 'bg-gray-400';
+                return (
                   <TouchableOpacity
+                    key={session.id}
                     activeOpacity={0.7}
+                    className="overflow-hidden rounded-xl bg-white shadow-sm"
                     onPress={() =>
                       router.push({
                         pathname: '/screens/details/session',
                         params: { session: JSON.stringify(session) },
                       })
-                    }
-                    key={session.id}
-                    className={`${index > 0 ? 'mt-3 border-t border-gray-200 pt-3' : ''}`}>
-                    <Text className="font-medium text-gray-900">
-                      {typeof session.course.courseCode === 'string' && session.course.courseCode} -{' '}
-                      {typeof session.course.courseName === 'string' && session.course.courseName}
-                    </Text>
-
-                    <Text className="text-sm text-gray-600">
-                      Session created • {formatDate(session.startTime)}
-                    </Text>
+                    }>
+                    <View className="flex-row items-center p-4">
+                      <View className={`mr-3 h-12 w-1 rounded-full ${statusColor}`} />
+                      <View className="flex-1">
+                        <Text className="text-base font-semibold text-gray-900" numberOfLines={1}>
+                          {session.course.courseCode} - {session.course.courseName}
+                        </Text>
+                        <View className="mt-1 flex-row items-center">
+                          <Ionicons name="time-outline" size={14} color="#6b7280" />
+                          <Text className="ml-1 text-sm text-gray-500">
+                            {formatDate(session.startTime)}
+                          </Text>
+                          {session.status === 'ACTIVE' && (
+                            <View className="ml-3 flex-row items-center">
+                              <View className="mr-1 h-2 w-2 rounded-full bg-green-500" />
+                              <Text className="text-xs font-medium text-green-600">Live</Text>
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                      <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+                    </View>
                   </TouchableOpacity>
-                ))
-            ) : (
-              <Text className="text-center text-gray-500">No recent activity</Text>
-            )}
+                );
+              })}
+            </View>
           </View>
-        </View>
+        )}
       </View>
     </ScrollView>
   );

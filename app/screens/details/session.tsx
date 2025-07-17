@@ -1,31 +1,4 @@
-/**
- * Displays detailed information about a specific session, including course details,
- * session status, schedule, location, lecturer, and attendance summary.
- *
- * This screen expects a `session` parameter from the local search params, which should be
- * a JSON string representing the session data. The session data is parsed and used to
- * populate the UI with relevant information.
- *
- * Features:
- * - Header with navigation back button and session ID.
- * - Course information (code and name).
- * - Session status with color-coded badge.
- * - Schedule section showing start and end times.
- * - Location details with coordinates (if available).
- * - Lecturer information (if available).
- * - Attendance summary showing number of students present (if available).
- *
- * Utilizes:
- * - `expo-router` for navigation and parameter handling.
- * - `react-native-safe-area-context` for safe area insets.
- * - `@expo/vector-icons` for icons.
- * - Utility function `formatDateTime` for formatting date and time.
- *
- * @component
- * @returns {JSX.Element} The rendered session details screen.
- */
-
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { BottomSheetFlatList, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import * as FileSystem from 'expo-file-system';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -51,13 +24,11 @@ const SessionScreen = () => {
   const exportModalRef = useRef<BottomSheetModal>(null);
   const exportCSV = async () => {
     try {
-      // Check if there are students to export
       if (!sessionData.attendance.studentList || sessionData.attendance.studentList.length === 0) {
         alert('No students to export');
         return;
       }
 
-      // Create CSV headers
       const headers = [
         'Student ID',
         'Username',
@@ -68,9 +39,8 @@ const SessionScreen = () => {
         'Session Time',
       ];
 
-      // Create CSV rows
       const rows = sessionData.attendance.studentList.map((student) => [
-        student.IndexNumber || student.username, // Use IndexNumber if available, fallback to username
+        student.IndexNumber || student.username,
         student.username,
         student.email,
         sessionData.course.courseCode,
@@ -79,12 +49,10 @@ const SessionScreen = () => {
         startDateTime.time,
       ]);
 
-      // Combine headers and rows
       const csvContent = [headers, ...rows]
         .map((row) => row.map((field) => `"${field}"`).join(','))
         .join('\n');
 
-      // Create filename with course code and date
       const dateForFilename = formatDateForFilename(sessionData.startTime);
       const filename = `attendance_${sessionData.course.courseCode}_${dateForFilename}.csv`;
 
@@ -107,222 +75,308 @@ const SessionScreen = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusInfo = (status: string) => {
     switch (status) {
       case 'ACTIVE':
-        return 'bg-green-100 text-green-800';
+        return {
+          color: 'bg-green-500',
+          textColor: 'text-green-600',
+          bgColor: 'bg-green-50',
+          icon: 'radio-button-on',
+          label: 'Active Session',
+        };
       case 'CLOSED':
-        return 'bg-red-100 text-red-800';
+        return {
+          color: 'bg-red-500',
+          textColor: 'text-red-600',
+          bgColor: 'bg-red-50',
+          icon: 'stop-circle',
+          label: 'Session Ended',
+        };
       default:
-        return 'bg-gray-100 text-gray-800';
+        return {
+          color: 'bg-gray-500',
+          textColor: 'text-gray-600',
+          bgColor: 'bg-gray-50',
+          icon: 'schedule',
+          label: 'Scheduled',
+        };
     }
   };
 
+  const statusInfo = getStatusInfo(sessionData.status);
+
   return (
-    <View style={{ flex: 1, paddingTop: insets.top }} className="bg-gray-50">
-      {/* Header */}
-      <View className="flex-row items-center justify-between border-b border-gray-200 bg-white px-4 py-3 shadow-sm">
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => router.back()}
-          className="-ml-2 rounded-full p-2">
-          <Ionicons name="arrow-back" size={24} color="#374151" />
-        </TouchableOpacity>
-        <Text className="text-lg font-semibold text-gray-900">Session Details</Text>
-        <View className="rounded-full bg-blue-100 px-3 py-1">
-          <Text className="text-sm font-semibold text-blue-800">#{sessionData.id}</Text>
+    <View style={{ flex: 1, paddingTop: insets.top }} className="bg-slate-50">
+      {/* Enhanced Header */}
+      <View className="bg-blue-600 px-6 pb-6 pt-4">
+        <View className="mb-4 flex-row items-center justify-between">
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => router.back()}
+            className="rounded-full bg-white/20 p-2">
+            <Ionicons name="arrow-back" size={24} color="white" />
+          </TouchableOpacity>
+          <Text className="text-xl font-bold text-white">Session Details</Text>
+          <View className="rounded-full bg-white/20 px-4 py-2">
+            <Text className="text-sm font-semibold text-white">#{sessionData.id}</Text>
+          </View>
+        </View>
+
+        {/* Course Info in Header */}
+        <View className="rounded-2xl bg-white/10 p-4">
+          <Text className="text-center text-sm font-medium text-blue-100">COURSE</Text>
+          <Text className="text-center text-2xl font-bold text-white">
+            {sessionData.course?.courseCode}
+          </Text>
+          <Text className="text-center text-base text-blue-100">
+            {sessionData.course?.courseName}
+          </Text>
         </View>
       </View>
 
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Main Content */}
-        <View className="space-y-4 p-4">
-          {/* Course Header */}
-          <View className="rounded-2xl bg-blue-600 p-6 shadow-lg">
-            <View className="items-center">
-              <Text className="mb-2 text-sm font-medium text-white opacity-90">COURSE</Text>
-              <Text className="mb-2 text-center text-3xl font-bold text-white">
-                {sessionData.course?.courseCode}
-              </Text>
-              <Text className="text-center text-lg leading-6 text-white opacity-95">
-                {sessionData.course?.courseName}
-              </Text>
-            </View>
-          </View>
-
-          {/* Status */}
-          <View className="rounded-xl bg-white p-4 shadow-sm">
-            <View className="flex-row items-center justify-between">
-              <Text className="text-sm text-gray-500">Status</Text>
-              <View className={`rounded-full px-3 py-1 ${getStatusColor(sessionData.status)}`}>
-                <Text className="text-sm font-medium">{sessionData.status}</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Time Information */}
-          <View className="rounded-xl bg-white p-4 shadow-sm">
-            <Text className="mb-3 text-sm text-gray-500">Schedule</Text>
-            <View className="space-y-4">
-              {/* Start Time */}
-              <View className="flex-row items-center">
-                <View className="mr-3 h-3 w-3 rounded-full bg-green-500" />
-                <View className="flex-1">
-                  <Text className="text-sm text-gray-500">Start Time</Text>
-                  <Text className="text-base font-medium text-gray-900">{startDateTime.date}</Text>
-                  <Text className="text-lg font-semibold text-green-600">{startDateTime.time}</Text>
+      <ScrollView className="mt-2 flex-1" showsVerticalScrollIndicator={false}>
+        <View className="gap-6 space-y-4 px-6 pt-6">
+          {/* Status Card */}
+          <View
+            className=" rounded-2xl bg-white shadow-sm"
+            style={{
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 8,
+              elevation: 3,
+            }}>
+            <View className={`${statusInfo.bgColor} p-4`}>
+              <View className="flex-row items-center justify-center">
+                <View className={`mr-3 rounded-full ${statusInfo.color} p-2`}>
+                  <MaterialIcons name={statusInfo.icon as any} size={20} color="white" />
                 </View>
-              </View>
-
-              {/* Divider */}
-              <View className="ml-6 h-4 border-l-2 border-gray-200" />
-
-              {/* End Time */}
-              <View className="flex-row items-center">
-                <View className="mr-3 h-3 w-3 rounded-full bg-red-500" />
-                <View className="flex-1">
-                  <Text className="text-sm text-gray-500">End Time</Text>
-                  <Text className="text-base font-medium text-gray-900">{endDateTime.date}</Text>
-                  <Text className="text-lg font-semibold text-red-600">{endDateTime.time}</Text>
-                </View>
-              </View>
-            </View>
-          </View>
-
-          {/* Location */}
-          {sessionData.location && (
-            <View className="rounded-xl bg-white p-4 shadow-sm">
-              <Text className="mb-3 text-sm text-gray-500">Location</Text>
-              <View className="flex-row items-center">
-                <Ionicons name="location-outline" size={20} color="#6B7280" />
-                <View className="ml-2 flex-1">
-                  <Text className="text-sm text-gray-500">Coordinates</Text>
-                  <Text className="text-base font-medium text-gray-900">
-                    {sessionData.location.latitude.toFixed(6)},{' '}
-                    {sessionData.location.longitude.toFixed(6)}
+                <View>
+                  <Text className={`text-base font-semibold ${statusInfo.textColor}`}>
+                    {statusInfo.label}
                   </Text>
+                  <Text className="text-sm text-gray-500">Current status</Text>
                 </View>
               </View>
             </View>
-          )}
+          </View>
 
-          {/* Lecturer Information */}
-          {sessionData.lecturer && (
-            <View className="rounded-xl bg-white p-4 shadow-sm">
-              <Text className="mb-3 text-sm text-gray-500">Lecturer</Text>
-              <View className="space-y-2">
-                <Text className="text-lg font-semibold text-gray-900">
-                  {sessionData.lecturer.firstName} {sessionData.lecturer.lastName}
-                </Text>
-                <Text className="text-sm text-gray-600">{sessionData.lecturer.email}</Text>
-                {sessionData.lecturer.department.id && (
-                  <Text className="text-sm text-gray-500">
-                    {sessionData.lecturer.department.departmentName}
-                  </Text>
+          {/* Enhanced Attendance Summary */}
+          {sessionData.attendance && (
+            <View
+              className="overflow-hidden rounded-2xl bg-white shadow-sm"
+              style={{
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 8,
+                elevation: 3,
+              }}>
+              {/* Header */}
+              <View className="bg-blue-500 p-6">
+                <View className="flex-row items-center justify-between">
+                  <View>
+                    <Text className="text-white/80">Attendance Summary</Text>
+                    <Text className="text-3xl font-bold text-white">
+                      {sessionData.attendance.studentList?.length || 0}
+                    </Text>
+                    <Text className="text-white/80">Students Present</Text>
+                  </View>
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() => exportModalRef.current?.present()}
+                    className="rounded-full bg-white/20 p-3">
+                    <Ionicons name="download" size={24} color="white" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Content */}
+              <View className="p-6">
+                {sessionData.attendance.studentList &&
+                sessionData.attendance.studentList.length > 0 ? (
+                  <View>
+                    <View className="mb-4 flex-row items-center justify-between">
+                      <Text className="text-base font-semibold text-gray-900">
+                        Students Present
+                      </Text>
+                      <TouchableOpacity
+                        activeOpacity={0.7}
+                        onPress={() => exportModalRef.current?.present()}
+                        className="flex-row items-center rounded-lg bg-blue-50 px-3 py-2">
+                        <Text className="text-sm font-medium text-blue-600">View All</Text>
+                        <Ionicons name="chevron-forward" size={16} color="#2563eb" />
+                      </TouchableOpacity>
+                    </View>
+
+                    {/* Student Preview */}
+                    <View className="space-y-3">
+                      {sessionData.attendance.studentList.slice(0, 3).map((student, index) => (
+                        <View
+                          key={`${student.username}-${index}`}
+                          className="flex-row items-center rounded-xl bg-green-50 p-4">
+                          <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-green-500">
+                            <MaterialIcons name="check" size={20} color="white" />
+                          </View>
+                          <View className="flex-1">
+                            <Text className="font-semibold text-gray-900">{student.username}</Text>
+                            <Text className="text-sm text-gray-500">{student.email}</Text>
+                          </View>
+                        </View>
+                      ))}
+                    </View>
+
+                    {sessionData.attendance.studentList.length > 3 && (
+                      <TouchableOpacity
+                        activeOpacity={0.7}
+                        onPress={() => exportModalRef.current?.present()}
+                        className="mt-4 items-center rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 py-4">
+                        <Text className="font-medium text-gray-600">
+                          +{sessionData.attendance.studentList.length - 3} more students
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                ) : (
+                  <View className="items-center py-8">
+                    <View className="mb-4 rounded-full bg-gray-100 p-6">
+                      <MaterialIcons name="people-outline" size={48} color="#9CA3AF" />
+                    </View>
+                    <Text className="text-lg font-medium text-gray-900">No Attendance Yet</Text>
+                    <Text className="text-center text-sm text-gray-500">
+                      Students haven&apos;t marked attendance for this session
+                    </Text>
+                  </View>
                 )}
               </View>
             </View>
           )}
 
-          {/* Attendance Summary */}
-          {sessionData.attendance && (
-            <View className="rounded-xl bg-white p-6 shadow-sm">
-              <View className="mb-4 flex-row items-center justify-between">
-                <Text className="text-lg font-semibold text-gray-900">Attendance Summary</Text>
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => exportModalRef.current?.present()}
-                  className="flex-row items-center rounded-lg bg-blue-50 px-3 py-2">
-                  <Ionicons name="download-outline" size={16} color="#2563eb" />
-                  <Text className="ml-1 text-sm font-medium text-blue-600">Export</Text>
-                </TouchableOpacity>
+          {/* Enhanced Timeline */}
+          <View
+            className="overflow-hidden rounded-2xl bg-white p-6 shadow-sm"
+            style={{
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 8,
+              elevation: 3,
+            }}>
+            <View className="mb-4 flex-row items-center">
+              <View className="mr-3 rounded-full bg-blue-100 p-2">
+                <Ionicons name="time" size={20} color="#3b82f6" />
+              </View>
+              <Text className="text-lg font-semibold text-gray-900">Session Timeline</Text>
+            </View>
+
+            <View className="relative">
+              {/* Start Time */}
+              <View className="mb-8 flex-row items-start">
+                <View className="relative mr-4 mt-2">
+                  <View className="h-3 w-3 rounded-full bg-green-500 ring-4 ring-green-100" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-sm font-medium text-green-600">START TIME</Text>
+                  <Text className="mt-1 text-2xl font-bold text-gray-900">
+                    {startDateTime.time}
+                  </Text>
+                  <Text className="text-sm text-gray-500">{startDateTime.date}</Text>
+                </View>
               </View>
 
-              {/* Stats Overview */}
-              <View className="mb-4 flex-row items-center justify-between rounded-lg bg-gray-50 p-4">
-                <View className="flex-row items-center">
-                  <View className="mr-3 h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-                    <Ionicons name="people" size={24} color="#2563eb" />
-                  </View>
-                  <View>
-                    <Text className="text-sm text-gray-500">Total Present</Text>
-                    <Text className="text-2xl font-bold text-gray-900">
-                      {sessionData.attendance.studentList?.length || 0}
-                    </Text>
-                  </View>
+              {/* End Time */}
+              <View className="flex-row items-start">
+                <View className="relative mr-4 mt-2">
+                  <View className="h-3 w-3 rounded-full bg-red-500 ring-4 ring-red-100" />
                 </View>
-                <View className="items-end">
-                  <Text className="text-sm text-gray-500">Session Date</Text>
-                  <Text className="text-sm font-medium text-gray-900">{startDateTime.date}</Text>
+                <View className="flex-1">
+                  <Text className="text-sm font-medium text-red-600">END TIME</Text>
+                  <Text className="mt-1 text-2xl font-bold text-gray-900">{endDateTime.time}</Text>
+                  <Text className="text-sm text-gray-500">{endDateTime.date}</Text>
                 </View>
               </View>
+            </View>
+          </View>
 
-              {/* Students Preview */}
-              {sessionData.attendance.studentList &&
-              sessionData.attendance.studentList.length > 0 ? (
-                <View>
-                  <View className="mb-3 flex-row items-center justify-between">
-                    <Text className="text-base font-medium text-gray-700">Students Present</Text>
-                    <TouchableOpacity
-                      activeOpacity={0.7}
-                      onPress={() => exportModalRef.current?.present()}
-                      className="flex-row items-center">
-                      <Text className="text-sm font-medium text-blue-600">View All</Text>
-                      <Ionicons name="chevron-forward" size={16} color="#2563eb" />
-                    </TouchableOpacity>
-                  </View>
-
-                  {/* Show first 3 students */}
-                  <View className="space-y-2">
-                    {sessionData.attendance.studentList.slice(0, 3).map((student, index) => (
-                      <View
-                        key={`${student.username}-${index}`}
-                        className="flex-row items-center rounded-lg bg-gray-50 p-3">
-                        <View className="mr-3 h-8 w-8 items-center justify-center rounded-full bg-green-100">
-                          <Ionicons name="checkmark" size={16} color="#059669" />
-                        </View>
-                        <View className="flex-1">
-                          <Text className="text-sm font-medium text-gray-900">
-                            {student.username}
-                          </Text>
-                          <Text className="text-xs text-gray-500">{student.email}</Text>
-                        </View>
-                      </View>
-                    ))}
-                  </View>
-
-                  {/* Show more indicator */}
-                  {sessionData.attendance.studentList.length > 3 && (
-                    <TouchableOpacity
-                      activeOpacity={0.7}
-                      onPress={() => exportModalRef.current?.present()}
-                      className="mt-3 items-center rounded-lg border border-gray-200 bg-gray-50 py-3">
-                      <Text className="text-sm font-medium text-gray-600">
-                        +{sessionData.attendance.studentList.length - 3} more students
-                      </Text>
-                    </TouchableOpacity>
-                  )}
+          {/* Location Card */}
+          {sessionData.location && (
+            <View
+              className="overflow-hidden rounded-2xl bg-white p-6 shadow-sm"
+              style={{
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 8,
+                elevation: 3,
+              }}>
+              <View className="mb-4 flex-row items-center">
+                <View className="mr-3 rounded-full bg-purple-100 p-3">
+                  <Ionicons name="location" size={24} color="#8b5cf6" />
                 </View>
-              ) : (
-                <View className="items-center rounded-lg bg-gray-50 py-6">
-                  <Ionicons name="people-outline" size={32} color="#9CA3AF" />
-                  <Text className="mt-2 text-sm text-gray-500">No students present</Text>
-                </View>
-              )}
+                <Text className="text-lg font-semibold text-gray-900">Session Location</Text>
+              </View>
+              <View className="rounded-xl bg-gray-50 p-4">
+                <Text className="text-sm text-gray-500">GPS Coordinates</Text>
+                <Text className="font-mono text-lg font-semibold text-gray-900">
+                  {sessionData.location.latitude.toFixed(6)},{' '}
+                  {sessionData.location.longitude.toFixed(6)}
+                </Text>
+              </View>
             </View>
           )}
 
-          {/* Export CSV modal */}
+          {/* Lecturer Card */}
+          {sessionData.lecturer && (
+            <View
+              className="overflow-hidden rounded-2xl bg-white p-6 shadow-sm"
+              style={{
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 8,
+                elevation: 3,
+              }}>
+              <View className="mb-4 flex-row items-center">
+                <View className="mr-3 rounded-full bg-blue-100 p-3">
+                  <MaterialIcons name="person" size={24} color="#3b82f6" />
+                </View>
+                <Text className="text-lg font-semibold text-gray-900">Lecturer Information</Text>
+              </View>
+
+              <View className="space-y-3">
+                <View>
+                  <Text className="text-sm text-gray-500">Name</Text>
+                  <Text className="text-xl font-bold text-gray-900">
+                    {sessionData.lecturer.firstName} {sessionData.lecturer.lastName}
+                  </Text>
+                </View>
+                <View>
+                  <Text className="text-sm text-gray-500">Email</Text>
+                  <Text className="text-base text-gray-700">{sessionData.lecturer.email}</Text>
+                </View>
+                {sessionData.lecturer.department.departmentName && (
+                  <View>
+                    <Text className="text-sm text-gray-500">Department</Text>
+                    <Text className="text-base text-gray-700">
+                      {sessionData.lecturer.department.departmentName}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </View>
+          )}
+
+          {/* Export Modal */}
           <CustomBottomSheetModal ref={exportModalRef}>
             <BottomSheetView style={{ flex: 1, paddingHorizontal: 16 }}>
-              {/* Header */}
               <View className="mb-4 flex-row items-center justify-between border-b border-gray-200 pb-4">
                 <TouchableOpacity
                   activeOpacity={0.7}
                   onPress={() => exportModalRef.current?.dismiss()}>
-                  <Text className="text-lg text-blue-600">Cancel</Text>
+                  <Text className="text-lg text-gray-600">Cancel</Text>
                 </TouchableOpacity>
-                <Text className="text-xl font-semibold text-gray-900">Export Session</Text>
+                <Text className="text-xl font-bold text-gray-900">Export Attendance</Text>
                 <TouchableOpacity
                   activeOpacity={0.7}
                   onPress={() => {
@@ -330,30 +384,25 @@ const SessionScreen = () => {
                     exportModalRef.current?.dismiss();
                   }}
                   disabled={isLoading}
-                  className={`${isLoading ? 'opacity-50' : ''}`}>
+                  className={`rounded-lg bg-blue-500 px-4 py-2 ${isLoading ? 'opacity-50' : ''}`}>
                   {isLoading ? (
-                    <ActivityIndicator size="small" color="#2563eb" />
+                    <ActivityIndicator size="small" color="white" />
                   ) : (
-                    <Text className="text-lg font-medium text-blue-600">Export</Text>
+                    <Text className="font-semibold text-white">Export CSV</Text>
                   )}
                 </TouchableOpacity>
               </View>
 
-              {/* Students List */}
-              <View className="mb-4">
-                <Text className="mb-2 text-lg font-semibold text-gray-900">
-                  Students Present ({sessionData.attendance.studentList?.length || 0})
-                </Text>
-              </View>
-
-              {/* FlatList for students */}
               <BottomSheetFlatList
                 data={sessionData.attendance.studentList || []}
                 keyExtractor={(item, index) => `${item.username}-${index}`}
                 renderItem={({ item }) => (
-                  <View className="flex-row items-center justify-between border-b border-gray-100 py-3">
+                  <View className="flex-row items-center border-b border-gray-100 py-4">
+                    <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-green-100">
+                      <MaterialIcons name="person" size={20} color="#10b981" />
+                    </View>
                     <View className="flex-1">
-                      <Text className="text-base font-medium text-gray-900">{item.username}</Text>
+                      <Text className="font-semibold text-gray-900">{item.username}</Text>
                       <Text className="text-sm text-gray-500">{item.email}</Text>
                     </View>
                   </View>
@@ -361,8 +410,9 @@ const SessionScreen = () => {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 20 }}
                 ListEmptyComponent={
-                  <View className="items-center justify-center py-8">
-                    <Text className="text-gray-500">No students present in this session</Text>
+                  <View className="items-center justify-center py-12">
+                    <MaterialIcons name="people-outline" size={48} color="#9CA3AF" />
+                    <Text className="mt-4 text-gray-500">No students present</Text>
                   </View>
                 }
               />
