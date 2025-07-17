@@ -34,7 +34,7 @@ import { useRef } from 'react';
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomBottomSheetModal from '~/components/CustomBottomSheetModal';
-import { formatDateTime } from '~/lib/utils';
+import { formatDateForFilename, formatDateTime } from '~/lib/utils';
 import { useApiStore } from '~/store/apiStore';
 import { Session } from '~/types/app';
 
@@ -42,7 +42,7 @@ const SessionScreen = () => {
   const { session } = useLocalSearchParams();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { isLoading, fetchSingleAttendance } = useApiStore();
+  const { isLoading } = useApiStore();
   const sessionData: Session = JSON.parse(session as string);
   const startDateTime = formatDateTime(sessionData.startTime);
   const endDateTime = formatDateTime(sessionData.endTime);
@@ -85,7 +85,7 @@ const SessionScreen = () => {
         .join('\n');
 
       // Create filename with course code and date
-      const dateForFilename = new Date(sessionData.startTime).toISOString().split('T')[0]; // YYYY-MM-DD format
+      const dateForFilename = formatDateForFilename(sessionData.startTime);
       const filename = `attendance_${sessionData.course.courseCode}_${dateForFilename}.csv`;
 
       const fileUri = FileSystem.documentDirectory + filename;

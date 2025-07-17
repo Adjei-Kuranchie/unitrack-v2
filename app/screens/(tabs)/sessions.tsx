@@ -122,7 +122,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
     }
   };
 
-  const handleSessionPress = (session: any) => {
+  const handleSessionPress = (session: Session) => {
     router.push({
       pathname: '/screens/details/session',
       params: { session: JSON.stringify(session) },

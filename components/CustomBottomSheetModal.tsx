@@ -12,7 +12,7 @@ interface Props {
 const CustomBottomSheetModal = forwardRef<BottomSheetModal, Props>(
   function CustomBottomSheetModal(props, ref) {
     // variables
-    const snapPoints = useMemo(() => ['55%', '75%'], []);
+    const snapPoints = useMemo(() => ['60%', '90%'], []);
 
     // callbacks
     const handleSheetChange = useCallback((index: any) => {

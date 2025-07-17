@@ -39,12 +39,6 @@ export default function ScreensLayout() {
           headerShown: false,
         }}
       />
-      <Stack.Screen
-        name="details/export-lecturer"
-        options={{
-          headerShown: false,
-        }}
-      />
     </Stack>
   );
 }
