@@ -29,7 +29,7 @@
 
 import { create } from 'zustand';
 import { useAuthStore } from '~/store/authStore';
-import { ApiState, AttendanceRequest, SessionRequest } from '~/types/app';
+import { ApiState, Attendance, AttendanceRequest, SessionRequest } from '~/types/app';
 
 import Constants from 'expo-constants';
 const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
@@ -191,7 +191,7 @@ export const useApiStore = create<ApiState>((set, get) => ({
         throw new Error('Failed to fetch attendance');
       }
 
-      const attendance = await response.json();
+      const attendance: Attendance[] = await response.json();
       set({ attendance, isLoading: false });
     } catch (error) {
       set({
@@ -213,8 +213,9 @@ export const useApiStore = create<ApiState>((set, get) => ({
         throw new Error('Failed to fetch attendance');
       }
 
-      const attendance = await response.json();
-      set({ attendance, isLoading: false });
+      const attendance: Attendance = await response.json();
+      set({ isLoading: false });
+      return attendance;
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'Failed to fetch attendance',

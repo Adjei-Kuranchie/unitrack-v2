@@ -89,6 +89,7 @@ const CoursesScreen = () => {
         lecturerId: user?.id || 0,
         courseName: newCourse.courseName.trim(),
         courseCode: newCourse.courseCode.trim(),
+        department: user?.department || '',
       });
 
       bottomSheetRef.current?.dismiss();

@@ -26,20 +26,48 @@
  */
 
 import { Ionicons } from '@expo/vector-icons';
+import { BottomSheetFlatList, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
+import * as FileSystem from 'expo-file-system';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import * as Sharing from 'expo-sharing';
+import { useRef } from 'react';
+import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { formatDateTime } from '~/lib/utils';
+import CustomBottomSheetModal from '~/components/CustomBottomSheetModal';
+import { formatDate, formatDateTime } from '~/lib/utils';
+import { useApiStore } from '~/store/apiStore';
+import { Session } from '~/types/app';
 
 const SessionScreen = () => {
   const { session } = useLocalSearchParams();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-
-  const sessionData = JSON.parse(session as string);
-
+  const { isLoading, fetchSingleAttendance } = useApiStore();
+  const sessionData: Session = JSON.parse(session as string);
   const startDateTime = formatDateTime(sessionData.startTime);
   const endDateTime = formatDateTime(sessionData.endTime);
+
+  //export functionality
+  const exportModalRef = useRef<BottomSheetModal>(null);
+  const exportCSV = async () => {
+    const record = await fetchSingleAttendance(Number(sessionData.id));
+    const csv =
+      `ID,Name,Date\n` +
+      (record ? `${session},${record.courseName},${(formatDate(record.date), true)}` : '');
+
+    const fileUri =
+      FileSystem.documentDirectory +
+      `attendance_records_${sessionData.course.courseCode}:${startDateTime.date}.csv`;
+    await FileSystem.writeAsStringAsync(fileUri, csv, {
+      encoding: FileSystem.EncodingType.UTF8,
+    });
+
+    await Sharing.shareAsync(fileUri, {
+      mimeType: 'text/csv',
+      dialogTitle: 'Export Attendance Records',
+      UTI: 'public.comma-separated-values-text',
+    });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -51,6 +79,9 @@ const SessionScreen = () => {
         return 'bg-gray-100 text-gray-800';
     }
   };
+
+  console.log(sessionData.attendance.studentList);
+
   return (
     <View style={{ flex: 1, paddingTop: insets.top }} className="bg-gray-50">
       {/* Header */}
@@ -167,10 +198,11 @@ const SessionScreen = () => {
                 <TouchableOpacity
                   activeOpacity={0.7}
                   onPress={() =>
-                    router.push({
-                      pathname: '/screens/details/export-lecturer',
-                      params: { session: JSON.stringify(sessionData) },
-                    })
+                    // router.push({
+                    //   pathname: '/screens/details/export-lecturer',
+                    //   params: { session: JSON.stringify(sessionData) },
+                    // })
+                    exportModalRef.current?.present()
                   }
                   className="mr-4 rounded-full bg-blue-100 px-3 py-1">
                   <Text className="text-sm font-semibold text-blue-800">Export</Text>
@@ -181,6 +213,49 @@ const SessionScreen = () => {
               </View>
             </View>
           )}
+
+          {/* Export CSV modal */}
+          <CustomBottomSheetModal ref={exportModalRef}>
+            <BottomSheetView style={{ flex: 1, width: '100%' }} className="items-center px-4">
+              <BottomSheetView className="mb-15 flex-row items-center justify-between border-b border-gray-200 px-8 py-8">
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => exportModalRef.current?.dismiss()}>
+                  <Text className="text-lg text-blue-600">Cancel</Text>
+                </TouchableOpacity>
+                <Text className="text-xl font-semibold text-gray-900">Export Session</Text>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    exportCSV();
+                  }}
+                  disabled={isLoading}
+                  className={`${isLoading ? 'opacity-50' : ''}`}>
+                  {isLoading ? (
+                    <ActivityIndicator size="small" color="#2563eb" />
+                  ) : (
+                    <Text className="text-lg font-medium text-blue-600">Export</Text>
+                  )}
+                </TouchableOpacity>
+              </BottomSheetView>
+
+              {/* Render all students present */}
+              <BottomSheetView className="flex-1">
+                <BottomSheetFlatList
+                  data={sessionData.attendance.studentList}
+                  keyExtractor={(item: (typeof sessionData.attendance.studentList)[number]) =>
+                    item.username
+                  }
+                  renderItem={({ item }) => (
+                    <BottomSheetView className="flex-row items-center justify-between border-b border-gray-200 py-4">
+                      <Text className="text-sm text-gray-900">{item.username}</Text>
+                      <Text className="text-sm text-gray-500">{item.email}</Text>
+                    </BottomSheetView>
+                  )}
+                />
+              </BottomSheetView>
+            </BottomSheetView>
+          </CustomBottomSheetModal>
         </View>
       </ScrollView>
     </View>

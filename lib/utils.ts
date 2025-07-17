@@ -29,8 +29,14 @@ const formatDate = (dateString: string) => {
  * @returns The formatted time string.
  */
 
-const formatTime = (dateString: string) => {
-  return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+const formatTime = (dateString: string, exportFormat?: boolean) => {
+  const timeString = new Date(dateString).toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  // If you want to format the time as "1-01-1025", you can use:
+  const exportString = `${new Date(dateString).getHours()}-${String(new Date(dateString).getMinutes()).padStart(2, '0')}-${String(new Date(dateString).getFullYear()).padStart(4, '0')}`;
+  return exportFormat ? exportString : timeString;
 };
 
 /**

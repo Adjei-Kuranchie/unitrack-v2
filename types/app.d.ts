@@ -198,7 +198,7 @@ interface ApiState {
 
   // Attendance actions
   fetchAttendance: () => Promise<void>;
-  fetchSingleAttendance: (attendanceId: number) => Promise<void>;
+  fetchSingleAttendance: (attendanceId: number) => Promise<Attendance | undefined>;
   markAttendance: (attendanceReq: AttendanceRequest) => Promise<void>;
 
   // User actions
