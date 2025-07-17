@@ -34,7 +34,7 @@ import { useRef } from 'react';
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomBottomSheetModal from '~/components/CustomBottomSheetModal';
-import { formatDate, formatDateTime } from '~/lib/utils';
+import { formatDateTime } from '~/lib/utils';
 import { useApiStore } from '~/store/apiStore';
 import { Session } from '~/types/app';
 
@@ -50,23 +50,61 @@ const SessionScreen = () => {
   //export functionality
   const exportModalRef = useRef<BottomSheetModal>(null);
   const exportCSV = async () => {
-    const record = await fetchSingleAttendance(Number(sessionData.id));
-    const csv =
-      `ID,Name,Date\n` +
-      (record ? `${session},${record.courseName},${(formatDate(record.date), true)}` : '');
+    try {
+      // Check if there are students to export
+      if (!sessionData.attendance.studentList || sessionData.attendance.studentList.length === 0) {
+        alert('No students to export');
+        return;
+      }
 
-    const fileUri =
-      FileSystem.documentDirectory +
-      `attendance_records_${sessionData.course.courseCode}:${startDateTime.date}.csv`;
-    await FileSystem.writeAsStringAsync(fileUri, csv, {
-      encoding: FileSystem.EncodingType.UTF8,
-    });
+      // Create CSV headers
+      const headers = [
+        'Student ID',
+        'Username',
+        'Email',
+        'Course Code',
+        'Course Name',
+        'Session Date',
+        'Session Time',
+      ];
 
-    await Sharing.shareAsync(fileUri, {
-      mimeType: 'text/csv',
-      dialogTitle: 'Export Attendance Records',
-      UTI: 'public.comma-separated-values-text',
-    });
+      // Create CSV rows
+      const rows = sessionData.attendance.studentList.map((student) => [
+        student.IndexNumber || student.username, // Use IndexNumber if available, fallback to username
+        student.username,
+        student.email,
+        sessionData.course.courseCode,
+        sessionData.course.courseName,
+        startDateTime.date,
+        startDateTime.time,
+      ]);
+
+      // Combine headers and rows
+      const csvContent = [headers, ...rows]
+        .map((row) => row.map((field) => `"${field}"`).join(','))
+        .join('\n');
+
+      // Create filename with course code and date
+      const dateForFilename = new Date(sessionData.startTime).toISOString().split('T')[0]; // YYYY-MM-DD format
+      const filename = `attendance_${sessionData.course.courseCode}_${dateForFilename}.csv`;
+
+      const fileUri = FileSystem.documentDirectory + filename;
+
+      await FileSystem.writeAsStringAsync(fileUri, csvContent, {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
+
+      await Sharing.shareAsync(fileUri, {
+        mimeType: 'text/csv',
+        dialogTitle: 'Export Attendance Records',
+        UTI: 'public.comma-separated-values-text',
+      });
+
+      exportModalRef.current?.dismiss();
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+      alert('Failed to export CSV. Please try again.');
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -79,8 +117,6 @@ const SessionScreen = () => {
         return 'bg-gray-100 text-gray-800';
     }
   };
-
-  console.log(sessionData.attendance.studentList);
 
   return (
     <View style={{ flex: 1, paddingTop: insets.top }} className="bg-gray-50">
@@ -179,8 +215,10 @@ const SessionScreen = () => {
                   {sessionData.lecturer.firstName} {sessionData.lecturer.lastName}
                 </Text>
                 <Text className="text-sm text-gray-600">{sessionData.lecturer.email}</Text>
-                {sessionData.lecturer.department && (
-                  <Text className="text-sm text-gray-500">{sessionData.lecturer.department}</Text>
+                {sessionData.lecturer.department.id && (
+                  <Text className="text-sm text-gray-500">
+                    {sessionData.lecturer.department.departmentName}
+                  </Text>
                 )}
               </View>
             </View>
@@ -188,36 +226,97 @@ const SessionScreen = () => {
 
           {/* Attendance Summary */}
           {sessionData.attendance && (
-            <View className="rounded-xl bg-white p-4 shadow-sm">
-              <Text className="mb-3 text-sm text-gray-500">Attendance</Text>
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center">
-                  <Ionicons name="people-outline" size={20} color="#6B7280" />
-                  <Text className="ml-2 text-base font-medium text-gray-900">Students Present</Text>
-                </View>
+            <View className="rounded-xl bg-white p-6 shadow-sm">
+              <View className="mb-4 flex-row items-center justify-between">
+                <Text className="text-lg font-semibold text-gray-900">Attendance Summary</Text>
                 <TouchableOpacity
                   activeOpacity={0.7}
-                  onPress={() =>
-                    // router.push({
-                    //   pathname: '/screens/details/export-lecturer',
-                    //   params: { session: JSON.stringify(sessionData) },
-                    // })
-                    exportModalRef.current?.present()
-                  }
-                  className="mr-4 rounded-full bg-blue-100 px-3 py-1">
-                  <Text className="text-sm font-semibold text-blue-800">Export</Text>
+                  onPress={() => exportModalRef.current?.present()}
+                  className="flex-row items-center rounded-lg bg-blue-50 px-3 py-2">
+                  <Ionicons name="download-outline" size={16} color="#2563eb" />
+                  <Text className="ml-1 text-sm font-medium text-blue-600">Export</Text>
                 </TouchableOpacity>
-                <Text className="text-xl font-bold text-blue-600">
-                  {sessionData.attendance.studentList?.length || 0}
-                </Text>
               </View>
+
+              {/* Stats Overview */}
+              <View className="mb-4 flex-row items-center justify-between rounded-lg bg-gray-50 p-4">
+                <View className="flex-row items-center">
+                  <View className="mr-3 h-12 w-12 items-center justify-center rounded-full bg-blue-100">
+                    <Ionicons name="people" size={24} color="#2563eb" />
+                  </View>
+                  <View>
+                    <Text className="text-sm text-gray-500">Total Present</Text>
+                    <Text className="text-2xl font-bold text-gray-900">
+                      {sessionData.attendance.studentList?.length || 0}
+                    </Text>
+                  </View>
+                </View>
+                <View className="items-end">
+                  <Text className="text-sm text-gray-500">Session Date</Text>
+                  <Text className="text-sm font-medium text-gray-900">{startDateTime.date}</Text>
+                </View>
+              </View>
+
+              {/* Students Preview */}
+              {sessionData.attendance.studentList &&
+              sessionData.attendance.studentList.length > 0 ? (
+                <View>
+                  <View className="mb-3 flex-row items-center justify-between">
+                    <Text className="text-base font-medium text-gray-700">Students Present</Text>
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      onPress={() => exportModalRef.current?.present()}
+                      className="flex-row items-center">
+                      <Text className="text-sm font-medium text-blue-600">View All</Text>
+                      <Ionicons name="chevron-forward" size={16} color="#2563eb" />
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Show first 3 students */}
+                  <View className="space-y-2">
+                    {sessionData.attendance.studentList.slice(0, 3).map((student, index) => (
+                      <View
+                        key={`${student.username}-${index}`}
+                        className="flex-row items-center rounded-lg bg-gray-50 p-3">
+                        <View className="mr-3 h-8 w-8 items-center justify-center rounded-full bg-green-100">
+                          <Ionicons name="checkmark" size={16} color="#059669" />
+                        </View>
+                        <View className="flex-1">
+                          <Text className="text-sm font-medium text-gray-900">
+                            {student.username}
+                          </Text>
+                          <Text className="text-xs text-gray-500">{student.email}</Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+
+                  {/* Show more indicator */}
+                  {sessionData.attendance.studentList.length > 3 && (
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      onPress={() => exportModalRef.current?.present()}
+                      className="mt-3 items-center rounded-lg border border-gray-200 bg-gray-50 py-3">
+                      <Text className="text-sm font-medium text-gray-600">
+                        +{sessionData.attendance.studentList.length - 3} more students
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              ) : (
+                <View className="items-center rounded-lg bg-gray-50 py-6">
+                  <Ionicons name="people-outline" size={32} color="#9CA3AF" />
+                  <Text className="mt-2 text-sm text-gray-500">No students present</Text>
+                </View>
+              )}
             </View>
           )}
 
           {/* Export CSV modal */}
           <CustomBottomSheetModal ref={exportModalRef}>
-            <BottomSheetView style={{ flex: 1, width: '100%' }} className="items-center px-4">
-              <BottomSheetView className="mb-15 flex-row items-center justify-between border-b border-gray-200 px-8 py-8">
+            <BottomSheetView style={{ flex: 1, paddingHorizontal: 16 }}>
+              {/* Header */}
+              <View className="mb-4 flex-row items-center justify-between border-b border-gray-200 pb-4">
                 <TouchableOpacity
                   activeOpacity={0.7}
                   onPress={() => exportModalRef.current?.dismiss()}>
@@ -228,6 +327,7 @@ const SessionScreen = () => {
                   activeOpacity={0.7}
                   onPress={() => {
                     exportCSV();
+                    exportModalRef.current?.dismiss();
                   }}
                   disabled={isLoading}
                   className={`${isLoading ? 'opacity-50' : ''}`}>
@@ -237,23 +337,35 @@ const SessionScreen = () => {
                     <Text className="text-lg font-medium text-blue-600">Export</Text>
                   )}
                 </TouchableOpacity>
-              </BottomSheetView>
+              </View>
 
-              {/* Render all students present */}
-              <BottomSheetView className="flex-1">
-                <BottomSheetFlatList
-                  data={sessionData.attendance.studentList}
-                  keyExtractor={(item: (typeof sessionData.attendance.studentList)[number]) =>
-                    item.username
-                  }
-                  renderItem={({ item }) => (
-                    <BottomSheetView className="flex-row items-center justify-between border-b border-gray-200 py-4">
-                      <Text className="text-sm text-gray-900">{item.username}</Text>
+              {/* Students List */}
+              <View className="mb-4">
+                <Text className="mb-2 text-lg font-semibold text-gray-900">
+                  Students Present ({sessionData.attendance.studentList?.length || 0})
+                </Text>
+              </View>
+
+              {/* FlatList for students */}
+              <BottomSheetFlatList
+                data={sessionData.attendance.studentList || []}
+                keyExtractor={(item, index) => `${item.username}-${index}`}
+                renderItem={({ item }) => (
+                  <View className="flex-row items-center justify-between border-b border-gray-100 py-3">
+                    <View className="flex-1">
+                      <Text className="text-base font-medium text-gray-900">{item.username}</Text>
                       <Text className="text-sm text-gray-500">{item.email}</Text>
-                    </BottomSheetView>
-                  )}
-                />
-              </BottomSheetView>
+                    </View>
+                  </View>
+                )}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 20 }}
+                ListEmptyComponent={
+                  <View className="items-center justify-center py-8">
+                    <Text className="text-gray-500">No students present in this session</Text>
+                  </View>
+                }
+              />
             </BottomSheetView>
           </CustomBottomSheetModal>
         </View>

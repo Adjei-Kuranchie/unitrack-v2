@@ -110,7 +110,7 @@ interface Lecturer {
   lastName: string;
   email: string;
   role: 'LECTURER' | string;
-  department: string | null;
+  department: Department;
   //TODO: extras?
 
   id: number;

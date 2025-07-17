@@ -3,6 +3,66 @@ import { useEffect } from 'react';
 import { useAuthStore } from '~/store/authStore';
 
 /**
+ * Formats a date string for CSV export in a clean format.
+ * Example output: "2024-01-15"
+ *
+ * @param dateString - The date string to format.
+ * @returns The formatted date string for CSV.
+ */
+const formatDateForCSV = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toISOString().split('T')[0]; // YYYY-MM-DD format
+};
+
+/**
+ * Formats a time string for CSV export in a clean format.
+ * Example output: "10:30 AM"
+ *
+ * @param dateString - The date string to format.
+ * @returns The formatted time string for CSV.
+ */
+const formatTimeForCSV = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+};
+
+/**
+ * Formats a date string for filename usage (safe characters only).
+ * Example output: "2024-01-15_10-30"
+ *
+ * @param dateString - The date string to format.
+ * @returns The formatted date string safe for filenames.
+ */
+const formatDateForFilename = (dateString: string) => {
+  const date = new Date(dateString);
+  const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD
+  const timeStr = date.toTimeString().split(' ')[0].substring(0, 5).replace(':', '-'); // HH-MM
+  return `${dateStr}_${timeStr}`;
+};
+
+/**
+ * Escapes CSV field values to handle commas, quotes, and newlines.
+ *
+ * @param field - The field value to escape.
+ * @returns The escaped field value.
+ */
+const escapeCSVField = (field: string | number | null | undefined): string => {
+  if (field === null || field === undefined) return '';
+
+  const stringField = String(field);
+
+  // If the field contains comma, quote, or newline, wrap it in quotes and escape internal quotes
+  if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n')) {
+    return `"${stringField.replace(/"/g, '""')}"`;
+  }
+
+  return stringField;
+};
+/**
  * Formats a date string into a human-readable date and time string.
  * Example output: "Jan 1, 2024, 10:30 AM"
  *
@@ -10,15 +70,30 @@ import { useAuthStore } from '~/store/authStore';
  * @returns The formatted date and time string.
  */
 
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+const formatDate = (dateString: string, includeTime: boolean = true) => {
+  try {
+    const date = new Date(dateString);
+
+    if (isNaN(date.getTime())) {
+      return 'Invalid Date';
+    }
+
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    };
+
+    if (includeTime) {
+      options.hour = '2-digit';
+      options.minute = '2-digit';
+    }
+
+    return date.toLocaleDateString('en-US', options);
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return 'Invalid Date';
+  }
 };
 
 /**
@@ -138,4 +213,14 @@ const useTokenWatcher = (token: string | null) => {
   }, [token]);
 };
 
-export { formatDate, formatDateTime, formatTime, isJWTExpired, useTokenWatcher };
+export {
+  escapeCSVField,
+  formatDate,
+  formatDateForCSV,
+  formatDateForFilename,
+  formatDateTime,
+  formatTime,
+  formatTimeForCSV,
+  isJWTExpired,
+  useTokenWatcher,
+};
