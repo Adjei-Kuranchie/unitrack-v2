@@ -27,22 +27,70 @@
  * @see useAuthStore
  */
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
+import uuid from 'react-native-uuid';
 import { create } from 'zustand';
 import { useAuthStore } from '~/store/authStore';
 import { ApiState, Attendance, AttendanceRequest, SessionRequest } from '~/types/app';
-
-import Constants from 'expo-constants';
 const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 
-const getAuthHeaders = (mark?: boolean) => {
+const DEVICE_ID_KEY = 'device_id';
+
+/**
+ * Gets or generates a unique device ID
+ * @returns Promise<string> - The device ID
+ */
+const getDeviceId = async (): Promise<string> => {
+  try {
+    // Try to get existing device ID from AsyncStorage
+    let deviceId = await AsyncStorage.getItem(DEVICE_ID_KEY);
+
+    // If no device ID exists, generate a new one
+    if (!deviceId) {
+      // deviceId = randomUUID(); // Using expo-crypto
+      deviceId = uuid.v4(); // if using react-native-uuid
+
+      // Store the new device ID
+      await AsyncStorage.setItem(DEVICE_ID_KEY, deviceId);
+    }
+
+    return deviceId;
+  } catch (error) {
+    console.error('Error getting/generating device ID:', error);
+    // Fallback to a random UUID if AsyncStorage fails
+    return uuid.v4();
+  }
+};
+/**
+ * Generates authentication headers with optional device ID
+ * @param mark - Whether to include device ID (for attendance marking)
+ * @returns Promise<object> - Headers object
+ */
+const getAuthHeaders = async (
+  mark?: boolean
+): Promise<{
+  'Content-Type': string;
+  Authorization: string;
+  'X-Device_ID'?: string;
+}> => {
   const token = useAuthStore.getState().token;
 
-  //TODO: Make sure to add the id when adding attendance
-  return {
+  const headers: {
+    'Content-Type': string;
+    Authorization: string;
+    'X-Device_ID'?: string;
+  } = {
     'Content-Type': 'application/json',
     Authorization: token ? `Bearer ${token}` : '',
-    'X-Device_ID': mark ? 'your-device-id' : '',
   };
+
+  // Add device ID if marking attendance
+  if (mark) {
+    headers['X-Device_ID'] = await getDeviceId();
+  }
+
+  return headers;
 };
 
 export const useApiStore = create<ApiState>((set, get) => ({
@@ -58,7 +106,7 @@ export const useApiStore = create<ApiState>((set, get) => ({
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/users/profile`, {
-        headers: getAuthHeaders(),
+        headers: await getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -85,7 +133,7 @@ export const useApiStore = create<ApiState>((set, get) => ({
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/courses`, {
-        headers: getAuthHeaders(),
+        headers: await getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -109,7 +157,7 @@ export const useApiStore = create<ApiState>((set, get) => ({
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/courses/add`, {
         method: 'POST',
-        headers: getAuthHeaders(),
+        headers: await getAuthHeaders(),
         body: JSON.stringify(course),
       });
 
@@ -138,7 +186,7 @@ export const useApiStore = create<ApiState>((set, get) => ({
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/session`, {
-        headers: getAuthHeaders(),
+        headers: await getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -161,7 +209,7 @@ export const useApiStore = create<ApiState>((set, get) => ({
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/session/create`, {
         method: 'POST',
-        headers: getAuthHeaders(),
+        headers: await getAuthHeaders(),
         body: JSON.stringify(sessionReq),
       });
 
@@ -184,7 +232,7 @@ export const useApiStore = create<ApiState>((set, get) => ({
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/attendance`, {
-        headers: getAuthHeaders(),
+        headers: await getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -206,7 +254,7 @@ export const useApiStore = create<ApiState>((set, get) => ({
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/attendance/one?id=${attendanceId}`, {
-        headers: getAuthHeaders(),
+        headers: await getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -230,7 +278,7 @@ export const useApiStore = create<ApiState>((set, get) => ({
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/attendance/mark`, {
         method: 'POST',
-        headers: getAuthHeaders(true),
+        headers: await getAuthHeaders(true),
         body: JSON.stringify(attendanceReq),
       });
 
@@ -253,7 +301,7 @@ export const useApiStore = create<ApiState>((set, get) => ({
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/users`, {
-        headers: getAuthHeaders(),
+        headers: await getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -276,7 +324,7 @@ export const useApiStore = create<ApiState>((set, get) => ({
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/users/update`, {
         method: 'PUT',
-        headers: getAuthHeaders(),
+        headers: await getAuthHeaders(),
         body: JSON.stringify(userData),
       });
 
@@ -303,7 +351,7 @@ export const useApiStore = create<ApiState>((set, get) => ({
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/users/delete/${userId}`, {
         method: 'DELETE',
-        headers: getAuthHeaders(),
+        headers: await getAuthHeaders(),
       });
 
       if (!response.ok) {

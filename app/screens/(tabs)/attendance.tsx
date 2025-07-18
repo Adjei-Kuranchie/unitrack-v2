@@ -1,21 +1,3 @@
-/**
- * Enhanced AttendanceScreen component with modern UI/UX improvements - No Gradients Version.
- *
- * New Features:
- * - Solid color backgrounds and modern card designs
- * - Improved visual hierarchy with better spacing and typography
- * - Enhanced location status with better visual feedback
- * - Animated attendance records with status badges
- * - Better color scheme and consistent design patterns
- * - Improved loading states and empty states
- * - Enhanced button designs with better disabled states
- * - Courses-style header design
- * - Replaced all gradients with solid colors
- *
- * @component
- * @returns {JSX.Element} The enhanced AttendanceScreen component.
- */
-
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import * as Location from 'expo-location';
@@ -51,6 +33,13 @@ const AttendanceScreen = () => {
 
   useEffect(() => {
     Promise.all([loadInitialData(), requestLocationPermission()]);
+
+    // Check for new sessions after 5 seconds
+    const timer = setTimeout(() => {
+      fetchSessions();
+    }, 5000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const loadInitialData = async () => {

@@ -98,26 +98,10 @@ export default function DashboardScreen() {
   // Get greeting based on time of day
   const getGreeting = (): string => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 18) return 'Good afternoon';
+    if (hour > 3 && hour < 12) return 'Good morning';
+    if (hour >= 12 && hour < 18) return 'Good afternoon';
     return 'Good evening';
   };
-
-  // Enhanced stat card with gradient background
-  const EnhancedStatCard: React.FC<StatCardProps> = ({ icon, label, value, gradient, onPress }) => (
-    <TouchableOpacity activeOpacity={0.8} className="flex-1" onPress={onPress} disabled={!onPress}>
-      <View className={`rounded-2xl p-5 ${gradient}`}>
-        <View className="mb-3 flex-row items-center justify-between">
-          <View className="rounded-full bg-white/20 p-2">
-            <MaterialIcons name={icon} size={24} color="white" />
-          </View>
-          {onPress && <Ionicons name="arrow-forward" size={20} color="rgba(255,255,255,0.8)" />}
-        </View>
-        <Text className="text-3xl font-bold text-white">{value}</Text>
-        <Text className="text-sm text-white/80">{label}</Text>
-      </View>
-    </TouchableOpacity>
-  );
 
   // Quick action card with better visual design
   const QuickActionCard: React.FC<QuickActionCardProps> = ({
@@ -156,7 +140,7 @@ export default function DashboardScreen() {
 
   return (
     <ScrollView className="flex-1 bg-slate-50" showsVerticalScrollIndicator={false}>
-      {/* Enhanced Header with Gradient */}
+      {/*  Header  */}
       <View className="bg-blue-600 px-6 pb-8 pt-12">
         <View className="mb-6 flex-row items-center justify-between">
           <View className="flex-1">
@@ -180,7 +164,7 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Overview Cards with icons on top right */}
+        {/* Overview Cards  */}
         <View className="flex-row gap-3">
           <TouchableOpacity
             activeOpacity={0.8}

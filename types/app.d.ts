@@ -221,4 +221,5 @@ export type {
   Location,
   Session,
   SessionRequest,
+  Student,
 };

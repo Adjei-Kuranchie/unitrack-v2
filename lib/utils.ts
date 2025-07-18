@@ -213,6 +213,179 @@ const useTokenWatcher = (token: string | null) => {
   }, [token]);
 };
 
+/**
+ * Checks if a student was present in a given session based on the student list
+ * @param studentList - Array of students who were present in the session
+ * @param studentId - ID of the student to check for presence
+ * @param studentName - Optional: Name of the student to check for presence
+ * @returns Object containing presence status and additional info
+ */
+export const checkStudentPresence = (
+  studentList: string[] | number[] | { id: string | number; name: string }[],
+  studentId: string | number,
+  studentName?: string
+): {
+  isPresent: boolean;
+  matchType: 'id' | 'name' | 'both' | 'none';
+  foundStudent?: any;
+} => {
+  if (!studentList || studentList.length === 0) {
+    return { isPresent: false, matchType: 'none' };
+  }
+
+  // Handle array of primitive values (IDs or names)
+  if (typeof studentList[0] === 'string' || typeof studentList[0] === 'number') {
+    const primitiveList = studentList as (string | number)[];
+
+    // Check by ID first
+    if (primitiveList.includes(studentId)) {
+      return { isPresent: true, matchType: 'id', foundStudent: studentId };
+    }
+
+    // Check by name if provided
+    if (studentName && primitiveList.includes(studentName)) {
+      return { isPresent: true, matchType: 'name', foundStudent: studentName };
+    }
+
+    return { isPresent: false, matchType: 'none' };
+  }
+
+  // Handle array of objects with id and name properties
+  if (typeof studentList[0] === 'object' && studentList[0] !== null) {
+    const objectList = studentList as { id: string | number; name: string }[];
+
+    const foundStudent = objectList.find((student) => {
+      const idMatch = student.id === studentId;
+      const nameMatch = studentName ? student.name === studentName : false;
+
+      return idMatch || nameMatch;
+    });
+
+    if (foundStudent) {
+      const idMatch = foundStudent.id === studentId;
+      const nameMatch = studentName ? foundStudent.name === studentName : false;
+
+      let matchType: 'id' | 'name' | 'both' = 'id';
+      if (idMatch && nameMatch) matchType = 'both';
+      else if (nameMatch) matchType = 'name';
+
+      return { isPresent: true, matchType, foundStudent };
+    }
+  }
+
+  return { isPresent: false, matchType: 'none' };
+};
+
+/**
+ * Checks if multiple students were present in a session
+ * @param studentList - Array of students who were present in the session
+ * @param studentsToCheck - Array of students to check for presence
+ * @returns Array of results for each student checked
+ */
+export const checkMultipleStudentsPresence = (
+  studentList: string[] | number[] | { id: string | number; name: string }[],
+  studentsToCheck: { id: string | number; name?: string }[]
+): Array<{
+  studentId: string | number;
+  studentName?: string;
+  isPresent: boolean;
+  matchType: 'id' | 'name' | 'both' | 'none';
+  foundStudent?: any;
+}> => {
+  return studentsToCheck.map((student) => ({
+    studentId: student.id,
+    studentName: student.name,
+    ...checkStudentPresence(studentList, student.id, student.name),
+  }));
+};
+
+/**
+ * Gets attendance statistics for a list of students
+ * @param studentList - Array of students who were present in the session
+ * @param totalExpectedStudents - Total number of students expected to attend
+ * @returns Attendance statistics
+ */
+export const getAttendanceStats = (
+  studentList: string[] | number[] | { id: string | number; name: string }[],
+  totalExpectedStudents: number
+): {
+  totalPresent: number;
+  totalAbsent: number;
+  attendanceRate: number;
+  attendancePercentage: string;
+} => {
+  const totalPresent = studentList.length;
+  const totalAbsent = totalExpectedStudents - totalPresent;
+  const attendanceRate = totalExpectedStudents > 0 ? totalPresent / totalExpectedStudents : 0;
+  const attendancePercentage = (attendanceRate * 100).toFixed(1);
+
+  return {
+    totalPresent,
+    totalAbsent,
+    attendanceRate,
+    attendancePercentage,
+  };
+};
+
+/**
+ * Filters attendance records to show only sessions where a specific student was present
+ * @param attendanceRecords - Array of attendance records
+ * @param studentId - ID of the student to filter by
+ * @param studentName - Optional: Name of the student to filter by
+ * @returns Filtered attendance records where the student was present
+ */
+export const filterAttendanceByStudent = (
+  attendanceRecords: Array<{
+    id: string | number;
+    date: string;
+    courseName: string;
+    studentList: string[] | number[] | { id: string | number; name: string }[];
+    [key: string]: any;
+  }>,
+  studentId: string | number,
+  studentName?: string
+): Array<{
+  id: string | number;
+  date: string;
+  courseName: string;
+  studentList: string[] | number[] | { id: string | number; name: string }[];
+  [key: string]: any;
+}> => {
+  return attendanceRecords.filter((record) => {
+    const { isPresent } = checkStudentPresence(record.studentList, studentId, studentName);
+    return isPresent;
+  });
+};
+
+// Example usage:
+/*
+// Example 1: Check if student with ID "123" was present
+const studentList1 = ["123", "456", "789"];
+const result1 = checkStudentPresence(studentList1, "123");
+console.log(result1); // { isPresent: true, matchType: 'id', foundStudent: "123" }
+
+// Example 2: Check with object array
+const studentList2 = [
+  { id: "123", name: "John Doe" },
+  { id: "456", name: "Jane Smith" },
+  { id: "789", name: "Bob Johnson" }
+];
+const result2 = checkStudentPresence(studentList2, "123", "John Doe");
+console.log(result2); // { isPresent: true, matchType: 'both', foundStudent: { id: "123", name: "John Doe" } }
+
+// Example 3: Check multiple students
+const studentsToCheck = [
+  { id: "123", name: "John Doe" },
+  { id: "999", name: "Missing Student" }
+];
+const results = checkMultipleStudentsPresence(studentList2, studentsToCheck);
+console.log(results);
+
+// Example 4: Get attendance statistics
+const stats = getAttendanceStats(studentList2, 25);
+console.log(stats); // { totalPresent: 3, totalAbsent: 22, attendanceRate: 0.12, attendancePercentage: "12.0" }
+*/
+
 export {
   escapeCSVField,
   formatDate,

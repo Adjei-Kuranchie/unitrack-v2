@@ -1,8 +1,9 @@
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Modal,
   RefreshControl,
   ScrollView,
   Text,
@@ -20,6 +21,7 @@ const CourseDetails = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [courseSessions, setCourseSessions] = useState<Session[]>([]);
   const [isLoadingSessions, setIsLoadingSessions] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const { sessions, fetchSessions } = useApiStore();
   const { user } = useAuthStore();
@@ -27,6 +29,18 @@ const CourseDetails = () => {
   const course: Course | undefined =
     typeof params.course === 'string' ? JSON.parse(params.course) : undefined;
   const role = params.role as 'STUDENT' | 'LECTURER' | undefined;
+
+  // Reset navigation state when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      setIsNavigating(false);
+
+      // Cleanup function
+      return () => {
+        setIsNavigating(false);
+      };
+    }, [])
+  );
 
   useEffect(() => {
     if (sessions.length === 0) {
@@ -111,55 +125,40 @@ const CourseDetails = () => {
     };
   };
 
-  const getAttendanceStatus = (session: Session) => {
-    // This is mock data - you'll need to implement actual attendance checking
-    // based on your backend data structure
-    const mockAttendance = Math.random() > 0.3; // 70% attendance rate for demo
+  const handleSessionPress = async (session: Session) => {
+    if (isNavigating) return; // Prevent multiple presses
 
-    if (session.status === 'ACTIVE') {
-      return { status: 'Ongoing', color: 'bg-blue-100 text-blue-600', icon: 'radio-button-on' };
+    setIsNavigating(true);
+    try {
+      await fetchSessions(); // Ensure latest data is fetched
+
+      // Navigate and reset state after a short delay
+      router.push({
+        pathname: '/screens/details/session',
+        params: { session: JSON.stringify(session) },
+      });
+
+      // Reset after navigation starts
+      setTimeout(() => {
+        setIsNavigating(false);
+      }, 500);
+    } catch (error) {
+      console.error('Error navigating to session:', error);
+      setIsNavigating(false);
     }
-
-    if (new Date(session.startTime) > new Date()) {
-      return { status: 'Upcoming', color: 'bg-gray-100 text-gray-600', icon: 'schedule' };
-    }
-
-    return mockAttendance
-      ? { status: 'Present', color: 'bg-green-100 text-green-600', icon: 'check-circle' }
-      : { status: 'Absent', color: 'bg-red-100 text-red-600', icon: 'cancel' };
-  };
-
-  const handleSessionPress = (session: Session) => {
-    router.push({
-      pathname: '/screens/details/session',
-      params: { session: JSON.stringify(session) },
-    });
   };
 
   const renderSessionCard = (session: Session) => {
     const relativeTime = getRelativeTime(session.startTime);
-    const attendance = getAttendanceStatus(session);
 
     return (
       <TouchableOpacity
         activeOpacity={0.7}
         key={session.id}
         className="mb-3 overflow-hidden rounded-2xl bg-white shadow-sm"
-        onPress={() => role === 'LECTURER' && handleSessionPress(session)}>
+        onPress={() => role === 'LECTURER' && !isNavigating && handleSessionPress(session)}
+        disabled={isNavigating}>
         <View className="flex-row items-center p-4">
-          {/* Status indicator bar */}
-          <View
-            className={`mr-3 h-12 w-1 rounded-full ${
-              attendance.status === 'Present'
-                ? 'bg-green-500'
-                : attendance.status === 'Absent'
-                  ? 'bg-red-500'
-                  : attendance.status === 'Ongoing'
-                    ? 'bg-blue-500'
-                    : 'bg-gray-400'
-            }`}
-          />
-
           {/* Content */}
           <View className="flex-1">
             <View className="flex-row items-center justify-between">
@@ -168,14 +167,8 @@ const CourseDetails = () => {
                   {relativeTime.text}
                 </Text>
                 <Text className="mt-1 text-xs text-gray-500">
-                  {formatDateTime(session.startTime).time}
+                  {formatDateTime(session.startTime).date} {formatDateTime(session.startTime).time}
                 </Text>
-              </View>
-
-              {/* Attendance Status */}
-              <View className={`flex-row items-center rounded-full px-3 py-1 ${attendance.color}`}>
-                <MaterialIcons name={attendance.icon as any} size={16} />
-                <Text className="ml-1 text-xs font-medium">{attendance.status}</Text>
               </View>
             </View>
           </View>
@@ -221,6 +214,19 @@ const CourseDetails = () => {
 
   return (
     <View className="flex-1 bg-slate-50">
+      {/* Loading Modal - Only show if navigating */}
+      {isNavigating && (
+        <Modal transparent visible={isNavigating} animationType="fade">
+          <View className="flex-1 items-center justify-center bg-black/50">
+            <View className="rounded-2xl bg-white p-6 shadow-xl">
+              <ActivityIndicator size="large" color="#3B82F6" />
+              <Text className="mt-4 text-center text-gray-700">Loading session details...</Text>
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      {/* Rest of your component remains the same... */}
       {/* Enhanced Header */}
       <View className="mb-6 bg-blue-600 px-6 pb-6 pt-12">
         <TouchableOpacity

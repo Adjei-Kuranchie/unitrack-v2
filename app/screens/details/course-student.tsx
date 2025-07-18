@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { getAttendanceStatusDisplay, getStudentAttendanceStats } from '~/lib/attendanceUtils'; // Import your new functions
 import { formatDateTime } from '~/lib/utils';
 import { useApiStore } from '~/store/apiStore';
 import { useAuthStore } from '~/store/authStore';
@@ -112,14 +113,19 @@ const CourseDetails = () => {
     const relativeTime = getRelativeTime(record.date);
     const recordNumber = recordSessions.length - index; // Reverse numbering so newest is highest
 
+    // Get attendance status for current user
+    const attendanceStatus = user ? getAttendanceStatusDisplay(record, user) : null;
+
     return (
       <TouchableOpacity
         activeOpacity={0.7}
         key={index}
         className="mb-3 overflow-hidden rounded-2xl bg-white shadow-sm">
         <View className="flex-row items-center p-4">
-          {/* Status indicator bar - green for attendance records */}
-          <View className="mr-3 h-12 w-1 rounded-full bg-green-500" />
+          {/* Status indicator bar - color based on attendance */}
+          <View
+            className={`mr-3 h-12 w-1 rounded-full ${attendanceStatus?.statusBarColor || 'bg-gray-300'}`}
+          />
 
           {/* Content */}
           <View className="flex-1">
@@ -139,16 +145,30 @@ const CourseDetails = () => {
               </View>
 
               {/* Attendance Status Badge */}
-              <View className="flex-row items-center rounded-full bg-green-100 px-3 py-1 text-green-600">
-                <MaterialIcons name="check-circle" size={16} color="#10b981" />
-                <Text className="ml-1 text-xs font-medium text-green-600">Present</Text>
-              </View>
+              {attendanceStatus && (
+                <View
+                  className={`flex-row items-center rounded-full px-3 py-1 ${attendanceStatus.badgeColor}`}>
+                  <MaterialIcons
+                    name={attendanceStatus.iconName as any}
+                    size={16}
+                    color={attendanceStatus.iconColor}
+                  />
+                  <Text className={`ml-1 text-xs font-medium ${attendanceStatus.textColor}`}>
+                    {attendanceStatus.statusText}
+                  </Text>
+                </View>
+              )}
             </View>
 
             {/* Lecturer info if available */}
             {record.lecturer && (
               <Text className="mt-2 text-xs text-gray-500">Lecturer: {record.lecturer}</Text>
             )}
+
+            {/* Student count info */}
+            <Text className="mt-1 text-xs text-gray-500">
+              {record.studentList?.length || 0} students attended
+            </Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -156,20 +176,17 @@ const CourseDetails = () => {
   };
 
   const getSessionStats = () => {
-    const totalSessions = recordSessions.length;
-    const today = new Date();
-    const todaySessions = recordSessions.filter(
-      (s) => new Date(s.date).toDateString() === today.toDateString()
-    ).length;
+    if (!user)
+      return { totalSessions: 0, attendedSessions: 0, missedSessions: 0, attendanceRate: 0 };
 
-    // Calculate this week's sessions
-    const weekStart = new Date(today);
-    weekStart.setDate(today.getDate() - today.getDay());
-    weekStart.setHours(0, 0, 0, 0);
-
-    const thisWeekSessions = recordSessions.filter((s) => new Date(s.date) >= weekStart).length;
-
-    return { totalSessions, todaySessions, thisWeekSessions };
+    // Use the new attendance stats function
+    const stats = getStudentAttendanceStats(recordSessions, user);
+    return {
+      totalSessions: stats.totalSessions,
+      attendedSessions: stats.attendedSessions,
+      missedSessions: stats.missedSessions,
+      attendanceRate: stats.attendanceRate,
+    };
   };
 
   if (!course) {
@@ -219,7 +236,7 @@ const CourseDetails = () => {
         className="flex-1"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         showsVerticalScrollIndicator={false}>
-        {/* Stats Cards */}
+        {/* Updated Stats Cards */}
         <View className="mx-6 -mt-4 mb-6 flex-row gap-3">
           <View className="relative flex-1 rounded-xl bg-white p-4 py-8 shadow-sm">
             <View className="absolute right-2 top-6 mb-2 self-end rounded-full bg-blue-100 p-2">
@@ -231,18 +248,42 @@ const CourseDetails = () => {
 
           <View className="relative flex-1 rounded-xl bg-white p-8 shadow-sm">
             <View className="absolute right-2 top-6 mb-2 self-end rounded-full bg-green-100 p-2">
-              <Ionicons name="today" size={20} color="#10b981" />
+              <Ionicons name="checkmark-circle" size={20} color="#10b981" />
             </View>
-            <Text className="text-2xl font-bold text-gray-900">{stats.todaySessions}</Text>
-            <Text className="text-xs text-gray-500">Today</Text>
+            <Text className="text-2xl font-bold text-gray-900">{stats.attendedSessions}</Text>
+            <Text className="text-xs text-gray-500">Attended</Text>
           </View>
 
           <View className="relative flex-1 rounded-xl bg-white p-8 shadow-sm">
-            <View className="absolute right-2 top-6 mb-2 self-end rounded-full bg-orange-100 p-2">
-              <Ionicons name="calendar-outline" size={20} color="#f97316" />
+            <View className="absolute right-2 top-6 mb-2 self-end rounded-full bg-red-100 p-2">
+              <Ionicons name="close-circle" size={20} color="#ef4444" />
             </View>
-            <Text className="text-2xl font-bold text-gray-900">{stats.thisWeekSessions}</Text>
-            <Text className="text-xs text-gray-500">This Week</Text>
+            <Text className="text-2xl font-bold text-gray-900">{stats.missedSessions}</Text>
+            <Text className="text-xs text-gray-500">Missed</Text>
+          </View>
+        </View>
+
+        {/* Attendance Rate Card */}
+        <View className="mx-6 mb-6 rounded-xl bg-white p-4 shadow-sm">
+          <View className="flex-row items-center justify-between">
+            <View>
+              <Text className="text-lg font-semibold text-gray-900">Attendance Rate</Text>
+              <Text className="text-xs text-gray-500">Your overall attendance percentage</Text>
+            </View>
+            <View className="items-center">
+              <Text className="text-2xl font-bold text-blue-600">{stats.attendanceRate}%</Text>
+              <View
+                className={`mt-1 rounded-full px-2 py-1 ${stats.attendanceRate >= 75 ? 'bg-green-100' : stats.attendanceRate >= 50 ? 'bg-yellow-100' : 'bg-red-100'}`}>
+                <Text
+                  className={`text-xs font-medium ${stats.attendanceRate >= 75 ? 'text-green-600' : stats.attendanceRate >= 50 ? 'text-yellow-600' : 'text-red-600'}`}>
+                  {stats.attendanceRate >= 75
+                    ? 'Good'
+                    : stats.attendanceRate >= 50
+                      ? 'Fair'
+                      : 'Poor'}
+                </Text>
+              </View>
+            </View>
           </View>
         </View>
 
@@ -288,7 +329,7 @@ const CourseDetails = () => {
               </View>
               <Text className="text-lg font-semibold text-gray-900">No Attendance Records</Text>
               <Text className="mt-2 px-8 text-center text-sm text-gray-500">
-                You haven&apos;t attended any sessions for this course yet
+                No sessions have been recorded for this course yet
               </Text>
             </View>
           )}

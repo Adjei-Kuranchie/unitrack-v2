@@ -3,8 +3,15 @@ import { BottomSheetFlatList, BottomSheetModal, BottomSheetView } from '@gorhom/
 import * as FileSystem from 'expo-file-system';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
-import { useRef } from 'react';
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomBottomSheetModal from '~/components/CustomBottomSheetModal';
 import { formatDateForFilename, formatDateTime } from '~/lib/utils';
@@ -15,10 +22,87 @@ const SessionScreen = () => {
   const { session } = useLocalSearchParams();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { isLoading } = useApiStore();
-  const sessionData: Session = JSON.parse(session as string);
+  const { isLoading, fetchSessions, sessions } = useApiStore();
+
+  // Parse initial session data
+  const initialSessionData: Session = JSON.parse(session as string);
+
+  // State for current session data
+  const [sessionData, setSessionData] = useState<Session>(initialSessionData);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
   const startDateTime = formatDateTime(sessionData.startTime);
   const endDateTime = formatDateTime(sessionData.endTime);
+
+  // Function to update session data from store
+  const updateSessionData = useCallback(() => {
+    const updatedSession = sessions.find((s) => s.id === sessionData.id);
+    if (updatedSession) {
+      setSessionData(updatedSession);
+      setLastUpdated(new Date());
+    }
+  }, [sessions, sessionData.id]);
+
+  // Real-time updates
+  useEffect(() => {
+    // Don't poll if session is closed
+    if (sessionData.status === 'CLOSED') {
+      return;
+    }
+    const fetchAndUpdate = async () => {
+      setIsUpdating(true);
+      try {
+        await fetchSessions();
+        updateSessionData();
+      } catch (error) {
+        console.error('Failed to update session:', error);
+      } finally {
+        setIsUpdating(false);
+      }
+    };
+
+    // Initial fetch
+    fetchAndUpdate();
+
+    // Set up polling
+    const interval = setInterval(fetchAndUpdate, 5000); // 5 seconds for better real-time feel
+
+    return () => clearInterval(interval);
+  }, [fetchSessions, updateSessionData, sessionData.status]);
+
+  // Manual refresh
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetchSessions();
+      updateSessionData();
+    } catch (error) {
+      console.error('Error refreshing:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  // Get attendance stats
+  const getAttendanceStats = () => {
+    const studentList = sessionData.attendance?.studentList || [];
+    const total = studentList.length;
+
+    return {
+      total,
+      newStudents: studentList.filter((s) => {
+        // Check if student joined in last 5 minutes
+        const joinTime = new Date(sessionData.startTime);
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        return joinTime > fiveMinutesAgo;
+      }).length,
+    };
+  };
+
+  const stats = getAttendanceStats();
 
   //export functionality
   const exportModalRef = useRef<BottomSheetModal>(null);
@@ -133,9 +217,22 @@ const SessionScreen = () => {
             {sessionData.course?.courseName}
           </Text>
         </View>
+
+        {/* Live Update Indicator */}
+        <View className="mt-3 flex-row items-center justify-center">
+          <View
+            className={`mr-2 h-2 w-2 rounded-full ${isUpdating ? 'bg-yellow-400' : 'bg-green-400'}`}
+          />
+          <Text className="text-xs text-white/80">
+            {isUpdating ? 'Updating...' : `Last updated: ${lastUpdated.toLocaleTimeString()}`}
+          </Text>
+        </View>
       </View>
 
-      <ScrollView className="mt-2 flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="mt-2 flex-1"
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <View className="gap-6 space-y-4 px-6 pt-6">
           {/* Status Card */}
           <View
@@ -178,9 +275,16 @@ const SessionScreen = () => {
                 <View className="flex-row items-center justify-between">
                   <View>
                     <Text className="text-white/80">Attendance Summary</Text>
-                    <Text className="text-3xl font-bold text-white">
-                      {sessionData.attendance.studentList?.length || 0}
-                    </Text>
+                    <View className="flex-row items-baseline">
+                      <Text className="text-3xl font-bold text-white">
+                        {sessionData.attendance.studentList?.length || 0}
+                      </Text>
+                      {stats.newStudents > 0 && (
+                        <Text className="ml-2 text-sm text-yellow-300">
+                          (+{stats.newStudents} new)
+                        </Text>
+                      )}
+                    </View>
                     <Text className="text-white/80">Students Present</Text>
                   </View>
                   <TouchableOpacity
@@ -329,7 +433,7 @@ const SessionScreen = () => {
           {/* Lecturer Card */}
           {sessionData.lecturer && (
             <View
-              className="overflow-hidden rounded-2xl bg-white p-6 shadow-sm"
+              className="mb-4 overflow-hidden rounded-2xl bg-white p-6 shadow-sm"
               style={{
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 2 },

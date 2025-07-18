@@ -274,7 +274,7 @@ const CoursesScreen = () => {
       )}
 
       {/* Floating Action Button for Lecturers */}
-      {isLecturer && (
+      {false && ( //change to isLecturer when implemented
         <TouchableOpacity
           activeOpacity={0.7}
           className="absolute bottom-6 right-6 rounded-full bg-blue-600 p-4 shadow-lg"

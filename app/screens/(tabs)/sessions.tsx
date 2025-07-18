@@ -526,7 +526,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
         </View>
       ) : (
         <FlatList
-          data={filteredSessions}
+          data={filteredSessions.slice(0, 20)} // Limit to 20 sessions for performance
           renderItem={renderSessionCard}
           keyExtractor={(item) => String(item.id)}
           contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}
