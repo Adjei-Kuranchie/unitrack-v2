@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -41,7 +41,12 @@ const CourseDetails = () => {
       (record) => record.courseName === course.courseName
     );
 
-    setRecordSessions(filteredAttendance);
+    // Sort by date, newest first
+    const sortedAttendance = filteredAttendance.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+
+    setRecordSessions(sortedAttendance);
   };
 
   const loadRecordSessions = async () => {
@@ -73,25 +78,76 @@ const CourseDetails = () => {
     }
   };
 
-  const renderRecordCard = (record: Attendance, i: number) => {
+  const getRelativeTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    // Check if today
+    if (date.toDateString() === now.toDateString()) {
+      return { text: 'Today', color: 'text-green-600' };
+    }
+
+    // Check if yesterday
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (date.toDateString() === yesterday.toDateString()) {
+      return { text: 'Yesterday', color: 'text-blue-600' };
+    }
+
+    // Check if within last 5 days
+    if (diffDays <= 5 && date < now) {
+      return { text: `${diffDays} days ago`, color: 'text-gray-600' };
+    }
+
+    // Otherwise show date
+    return {
+      text: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      color: 'text-gray-600',
+    };
+  };
+
+  const renderRecordCard = (record: Attendance, index: number) => {
+    const relativeTime = getRelativeTime(record.date);
+    const recordNumber = recordSessions.length - index; // Reverse numbering so newest is highest
+
     return (
       <TouchableOpacity
         activeOpacity={0.7}
-        key={String(++i)}
-        className="mb-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-        <View className="mb-3 flex-row items-center justify-between">
-          <View className="flex-1">
-            <View className="flex-row items-center">
-              <Text className="text-lg font-semibold text-gray-800">Record #{i}</Text>
-            </View>
-            <Text className="mt-1 text-sm text-gray-500">
-              {formatDateTime(record.date).date} {formatDateTime(record.date).time}
-            </Text>
-          </View>
+        key={index}
+        className="mb-3 overflow-hidden rounded-2xl bg-white shadow-sm">
+        <View className="flex-row items-center p-4">
+          {/* Status indicator bar - green for attendance records */}
+          <View className="mr-3 h-12 w-1 rounded-full bg-green-500" />
 
-          <View className="items-end">
+          {/* Content */}
+          <View className="flex-1">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1">
+                <View className="flex-row items-center">
+                  <Text className="text-lg font-semibold text-gray-800">
+                    Record #{recordNumber}
+                  </Text>
+                  <Text className={`ml-2 text-sm font-semibold ${relativeTime.color}`}>
+                    • {relativeTime.text}
+                  </Text>
+                </View>
+                <Text className="mt-1 text-xs text-gray-500">
+                  {formatDateTime(record.date).time}
+                </Text>
+              </View>
+
+              {/* Attendance Status Badge */}
+              <View className="flex-row items-center rounded-full bg-green-100 px-3 py-1 text-green-600">
+                <MaterialIcons name="check-circle" size={16} color="#10b981" />
+                <Text className="ml-1 text-xs font-medium text-green-600">Present</Text>
+              </View>
+            </View>
+
+            {/* Lecturer info if available */}
             {record.lecturer && (
-              <Text className="mt-1 text-xs text-gray-500">{record.lecturer}</Text>
+              <Text className="mt-2 text-xs text-gray-500">Lecturer: {record.lecturer}</Text>
             )}
           </View>
         </View>
@@ -106,31 +162,30 @@ const CourseDetails = () => {
       (s) => new Date(s.date).toDateString() === today.toDateString()
     ).length;
 
-    return { totalSessions, todaySessions };
+    // Calculate this week's sessions
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - today.getDay());
+    weekStart.setHours(0, 0, 0, 0);
+
+    const thisWeekSessions = recordSessions.filter((s) => new Date(s.date) >= weekStart).length;
+
+    return { totalSessions, todaySessions, thisWeekSessions };
   };
 
   if (!course) {
     return (
-      <View className="flex-1 bg-gray-50 px-6 py-8">
+      <View className="flex-1 items-center justify-center bg-slate-50 px-6">
+        <View className="mb-6 rounded-full bg-red-100 p-8">
+          <Ionicons name="alert-circle-outline" size={64} color="#ef4444" />
+        </View>
+        <Text className="mb-2 text-xl font-bold text-gray-900">No Course Found</Text>
+        <Text className="mb-6 text-center text-gray-600">Course details could not be loaded.</Text>
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={() => router.back()}
-          className="mb-6 flex-row items-center">
-          <Ionicons name="arrow-back" size={24} color="#374151" />
-          <Text className="ml-2 text-lg font-medium text-gray-700">Back</Text>
+          className="rounded-xl bg-gray-900 px-6 py-3">
+          <Text className="font-semibold text-white">Go Back</Text>
         </TouchableOpacity>
-
-        <View className="flex-1 items-center justify-center">
-          <View className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
-            <Ionicons name="alert-circle-outline" size={48} color="#EF4444" />
-            <Text className="mt-4 text-center text-xl font-semibold text-gray-800">
-              No Course Found
-            </Text>
-            <Text className="mt-2 text-center text-gray-600">
-              Course details could not be loaded.
-            </Text>
-          </View>
-        </View>
       </View>
     );
   }
@@ -138,94 +193,108 @@ const CourseDetails = () => {
   const stats = getSessionStats();
 
   return (
-    <ScrollView
-      className="flex-1 bg-gray-50"
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      showsVerticalScrollIndicator={false}>
-      <View className="px-6 py-8">
-        {/* Header with Back Button */}
-        <View className="mb-6 flex-row items-center justify-between">
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => router.back()}
-            className="flex-row items-center rounded-full border border-gray-200 bg-white px-4 py-2 shadow-sm">
-            <Ionicons name="arrow-back" size={20} color="#374151" />
-            <Text className="ml-2 text-base font-medium text-gray-700">Back</Text>
-          </TouchableOpacity>
+    <View className="flex-1 bg-slate-50">
+      {/* Enhanced Header */}
+      <View className="mb-6 bg-blue-600 px-6 pb-6 pt-12">
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => router.back()}
+          className="mb-4 flex-row items-center">
+          <Ionicons name="arrow-back" size={24} color="white" />
+          <Text className="ml-2 text-base font-medium text-white">Back</Text>
+        </TouchableOpacity>
+
+        <View className="flex-row items-center">
+          <View className="mr-4 rounded-full bg-white/20 p-3">
+            <Ionicons name="book" size={28} color="white" />
+          </View>
+          <View className="flex-1">
+            <Text className="text-2xl font-bold text-white">{course.courseName}</Text>
+            <Text className="mt-1 font-mono text-base text-blue-100">{course.courseCode}</Text>
+          </View>
+        </View>
+      </View>
+
+      <ScrollView
+        className="flex-1"
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        showsVerticalScrollIndicator={false}>
+        {/* Stats Cards */}
+        <View className="mx-6 -mt-4 mb-6 flex-row gap-3">
+          <View className="relative flex-1 rounded-xl bg-white p-4 py-8 shadow-sm">
+            <View className="absolute right-2 top-6 mb-2 self-end rounded-full bg-blue-100 p-2">
+              <Ionicons name="calendar" size={20} color="#3b82f6" />
+            </View>
+            <Text className="text-2xl font-bold text-gray-900">{stats.totalSessions}</Text>
+            <Text className="text-xs text-gray-500">Total Sessions</Text>
+          </View>
+
+          <View className="relative flex-1 rounded-xl bg-white p-8 shadow-sm">
+            <View className="absolute right-2 top-6 mb-2 self-end rounded-full bg-green-100 p-2">
+              <Ionicons name="today" size={20} color="#10b981" />
+            </View>
+            <Text className="text-2xl font-bold text-gray-900">{stats.todaySessions}</Text>
+            <Text className="text-xs text-gray-500">Today</Text>
+          </View>
+
+          <View className="relative flex-1 rounded-xl bg-white p-8 shadow-sm">
+            <View className="absolute right-2 top-6 mb-2 self-end rounded-full bg-orange-100 p-2">
+              <Ionicons name="calendar-outline" size={20} color="#f97316" />
+            </View>
+            <Text className="text-2xl font-bold text-gray-900">{stats.thisWeekSessions}</Text>
+            <Text className="text-xs text-gray-500">This Week</Text>
+          </View>
         </View>
 
-        {/* Course Header Card */}
-        <View className="mb-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-          <View className="mb-4 flex-row items-center">
-            <View className="mr-4 rounded-full bg-blue-500 p-3">
-              <Ionicons name="book" size={24} color="white" />
+        <View className="px-6 pb-6">
+          {/* Sessions Header */}
+          <View className="mb-4 flex-row items-center justify-between">
+            <Text className="text-lg font-semibold text-gray-900">Your Attendance Records</Text>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => !isLoadingSessions && loadRecordSessions()}
+              disabled={isLoadingSessions}
+              className="rounded-full bg-gray-100 p-2">
+              {isLoadingSessions ? (
+                <ActivityIndicator size="small" color="#6B7280" />
+              ) : (
+                <Ionicons name="refresh" size={16} color="#6B7280" />
+              )}
+            </TouchableOpacity>
+          </View>
+
+          {/* Sessions List */}
+          {recordSessions.length > 0 ? (
+            <View>
+              {recordSessions.map((record, i) => renderRecordCard(record, i))}
+              {isLoadingSessions && (
+                <View className="mt-4 items-center py-4">
+                  <ActivityIndicator size="small" color="#3B82F6" />
+                  <Text className="mt-2 text-sm text-gray-500">Updating records...</Text>
+                </View>
+              )}
             </View>
-            <View className="flex-1">
-              <Text className="text-2xl font-bold text-gray-800">{course.courseName}</Text>
-              <Text className="mt-1 font-mono text-lg font-semibold text-blue-600">
-                {course.courseCode}
+          ) : isLoadingSessions ? (
+            <View className="flex-1 items-center justify-center py-12">
+              <View className="mb-4 rounded-full bg-blue-100 p-4">
+                <ActivityIndicator size="large" color="#3B82F6" />
+              </View>
+              <Text className="text-gray-500">Loading attendance records...</Text>
+            </View>
+          ) : (
+            <View className="items-center justify-center rounded-2xl bg-white py-16 shadow-sm">
+              <View className="mb-4 rounded-full bg-gray-100 p-6">
+                <Ionicons name="calendar-outline" size={48} color="#6B7280" />
+              </View>
+              <Text className="text-lg font-semibold text-gray-900">No Attendance Records</Text>
+              <Text className="mt-2 px-8 text-center text-sm text-gray-500">
+                You haven&apos;t attended any sessions for this course yet
               </Text>
             </View>
-          </View>
+          )}
         </View>
-
-        {/* Session Stats Card */}
-        <View className="mb-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-          <Text className="mb-4 text-lg font-semibold text-gray-800">Session Statistics</Text>
-          <View className="flex-row justify-around">
-            <View className="items-center">
-              <Text className="text-2xl font-bold text-blue-600">{stats.totalSessions}</Text>
-              <Text className="text-sm text-gray-500">Total Sessions</Text>
-            </View>
-            <View className="items-center">
-              <Text className="text-2xl font-bold text-orange-600">{stats.todaySessions}</Text>
-              <Text className="text-sm text-gray-500">Today</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Sessions List */}
-        <View className="mb-4 flex-row items-center justify-between">
-          <Text className="text-xl font-bold text-gray-800">Your Sessions</Text>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => !isLoadingSessions && loadRecordSessions()}
-            disabled={isLoadingSessions}>
-            {isLoadingSessions ? (
-              <ActivityIndicator size="small" color="#6B7280" />
-            ) : (
-              <Ionicons name="refresh" size={20} color="#6B7280" />
-            )}
-          </TouchableOpacity>
-        </View>
-
-        {/* Show immediate filtered results while loading */}
-        {recordSessions.length > 0 ? (
-          <View>
-            {recordSessions.map((courseSession, i) => renderRecordCard(courseSession, i))}
-            {isLoadingSessions && (
-              <View className="mt-4 items-center py-4">
-                <ActivityIndicator size="small" color="#3B82F6" />
-                <Text className="mt-2 text-sm text-gray-500">Updating sessions...</Text>
-              </View>
-            )}
-          </View>
-        ) : isLoadingSessions ? (
-          <View className="flex-1 items-center justify-center py-12">
-            <ActivityIndicator size="large" color="#3B82F6" />
-            <Text className="mt-2 text-gray-500">Loading sessions...</Text>
-          </View>
-        ) : (
-          <View className="items-center justify-center rounded-2xl border border-gray-100 bg-white py-12 shadow-sm">
-            <Ionicons name="calendar-outline" size={48} color="#6B7280" />
-            <Text className="mt-4 text-lg font-medium text-gray-600">No Sessions Yet</Text>
-            <Text className="mt-2 px-8 text-center text-gray-500">
-              No sessions have been created for this course
-            </Text>
-          </View>
-        )}
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
