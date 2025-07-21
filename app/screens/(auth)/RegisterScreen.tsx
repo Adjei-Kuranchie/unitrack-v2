@@ -193,7 +193,9 @@ export default function RegisterScreen() {
                   ) : null}
                 </View>
               </View>
-              <View>
+
+              {/*TODO: Enable when other departments are implemented */}
+              {/* <View>
                 <Text className="mb-2 font-medium text-gray-700">Role</Text>
                 <View className="rounded-lg border border-gray-300">
                   {Platform.OS === 'android' || Platform.OS === 'ios' ? (
@@ -210,7 +212,7 @@ export default function RegisterScreen() {
                     </Picker>
                   ) : null}
                 </View>
-              </View>
+              </View> */}
 
               {/* TODO:ask to make the registerData take in program and indexNumber */}
               {/*

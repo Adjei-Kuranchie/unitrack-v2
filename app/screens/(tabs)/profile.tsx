@@ -168,7 +168,9 @@ export default function ProfileScreen() {
         style: 'destructive',
         onPress: () => {
           signOut();
-          router.replace('/screens/(auth)/SignInScreen');
+          setTimeout(() => {
+            router.replace('/screens/(auth)/SignInScreen');
+          }, 100);
         },
       },
     ]);

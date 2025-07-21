@@ -1,8 +1,6 @@
-import { router, useRouter } from 'expo-router';
-import { useCallback, useEffect, useRef } from 'react';
-import { Alert, InteractionManager } from 'react-native';
+import { router } from 'expo-router';
+import { useEffect } from 'react';
 import { useAuthStore } from '~/store/authStore';
-import { autoLogout } from './logoutUtils';
 
 /**
  * Formats a date string for CSV export in a clean format.
@@ -64,6 +62,7 @@ const escapeCSVField = (field: string | number | null | undefined): string => {
 
   return stringField;
 };
+
 /**
  * Formats a date string into a human-readable date and time string.
  * Example output: "Jan 1, 2024, 10:30 AM"
@@ -71,7 +70,6 @@ const escapeCSVField = (field: string | number | null | undefined): string => {
  * @param dateString - The date string to format.
  * @returns The formatted date and time string.
  */
-
 const formatDate = (dateString: string, includeTime: boolean = true) => {
   try {
     const date = new Date(dateString);
@@ -105,7 +103,6 @@ const formatDate = (dateString: string, includeTime: boolean = true) => {
  * @param dateString - The date string to format.
  * @returns The formatted time string.
  */
-
 const formatTime = (dateString: string, exportFormat?: boolean) => {
   const timeString = new Date(dateString).toLocaleTimeString([], {
     hour: '2-digit',
@@ -123,7 +120,6 @@ const formatTime = (dateString: string, exportFormat?: boolean) => {
  * @param dateString - The date string to format.
  * @returns An object with formatted `date` and `time` strings.
  */
-
 const formatDateTime = (dateString: string) => {
   const date = new Date(dateString);
   return {
@@ -149,34 +145,32 @@ const formatDateTime = (dateString: string) => {
 const isJWTExpired = (token: string | null): boolean => {
   try {
     if (!token) {
-      return true;
+      throw new Error('Token is null or undefined');
     }
 
     const parts = token.split('.');
     if (parts.length !== 3) {
-      return true;
+      throw new Error('Invalid JWT format');
     }
 
     const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
 
     if (!payload.exp) {
-      return true;
+      throw new Error('No expiration time found in token');
     }
-
     const currentTime = Math.floor(Date.now() / 1000);
     return payload.exp < currentTime;
   } catch (error) {
+    //TODO: Remove console.error in production
     console.error('Error checking JWT expiration:', error);
     return true;
   }
 };
 
 /**
- * Logs out the user by clearing authentication state with proper cleanup.
- * Uses InteractionManager to ensure smooth transitions.
+ * Logs out the user by clearing authentication state and redirects to the Register screen.
  */
 const logoutAndRedirect = () => {
-  // Clear auth state immediately
   useAuthStore.setState({
     token: null,
     user: null,
@@ -185,140 +179,35 @@ const logoutAndRedirect = () => {
     error: 'Session expired. Please log in again.',
   });
 
-  // Use InteractionManager to ensure all interactions are complete before navigating
-  InteractionManager.runAfterInteractions(() => {
-    // Add a small delay to ensure state updates are processed
-    setTimeout(() => {
-      try {
-        // Use push instead of replace to avoid potential navigation conflicts
-        router.push('/screens/(auth)/RegisterScreen');
-      } catch (error) {
-        console.error('Logout navigation error:', error);
-        // Fallback: try with replace after a longer delay
-        setTimeout(() => {
-          try {
-            router.replace('/screens/(auth)/RegisterScreen');
-          } catch (fallbackError) {
-            console.error('Fallback logout navigation error:', fallbackError);
-          }
-        }, 500);
-      }
-    }, 100);
-  });
+  router.replace('/screens/(auth)/RegisterScreen');
 };
 
 /**
  * React hook that watches a JWT token and logs out the user if the token expires.
+ * Checks token expiration on mount and every 10 seconds.
+ *
+ * @param token - The JWT token string to watch.
  */
+
 const useTokenWatcher = (token: string | null) => {
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const lastTokenRef = useRef<string | null>(null);
-
   useEffect(() => {
-    // Clear any existing interval
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
+    // Initial check on mount
+    if (token && isJWTExpired(token)) {
+      logoutAndRedirect();
     }
 
-    // Only set up watcher if we have a token
-    if (token) {
-      // Check immediately if token is expired
-      if (isJWTExpired(token)) {
-        // Only logout if this is a different token or first check
-        if (lastTokenRef.current !== token) {
-          autoLogout();
+    // Periodically check token every 10 seconds
+    const interval = setInterval(
+      () => {
+        if (token && isJWTExpired(token)) {
+          logoutAndRedirect();
         }
-      } else {
-        // Set up periodic checking for valid tokens
-        intervalRef.current = setInterval(
-          () => {
-            if (token && isJWTExpired(token)) {
-              autoLogout();
-            }
-          },
-          1000 * 60 * 5
-        ); // Check every 5 minutes (reduced from 10)
-      }
-    }
+      },
+      1000 * 60 * 10
+    ); // 10 minutes
 
-    // Update last token reference
-    lastTokenRef.current = token;
-
-    // Cleanup function
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
+    return () => clearInterval(interval); // Clean up
   }, [token]);
-};
-
-const useLogout = () => {
-  const router = useRouter();
-  const isLoggingOut = useRef(false);
-
-  const logout = useCallback(async () => {
-    // Prevent multiple logout attempts
-    if (isLoggingOut.current) {
-      return;
-    }
-
-    isLoggingOut.current = true;
-
-    try {
-      // Clear auth state
-      useAuthStore.setState({
-        token: null,
-        user: null,
-        role: null,
-        resMessage: null,
-        error: null,
-      });
-
-      // Wait for all interactions to complete
-      await new Promise((resolve) => {
-        InteractionManager.runAfterInteractions(() => {
-          resolve(void 0);
-        });
-      });
-
-      // Additional delay to ensure state is cleared
-      await new Promise((resolve) => setTimeout(resolve, 150));
-
-      // Navigate to auth screen
-      router.replace('/screens/(auth)/RegisterScreen');
-    } catch (error) {
-      console.error('Logout error:', error);
-
-      // Show error alert and try fallback navigation
-      Alert.alert('Logout Error', 'There was an issue logging out. The app will restart.', [
-        {
-          text: 'OK',
-          onPress: () => {
-            // Force navigation after user acknowledges
-            setTimeout(() => {
-              try {
-                router.replace('/screens/(auth)/RegisterScreen');
-              } catch (fallbackError) {
-                console.error('Fallback logout error:', fallbackError);
-                // Last resort: reload the app
-                // You might need to implement app reload based on your setup
-              }
-            }, 100);
-          },
-        },
-      ]);
-    } finally {
-      // Reset the flag after a delay
-      setTimeout(() => {
-        isLoggingOut.current = false;
-      }, 2000);
-    }
-  }, [router]);
-
-  return { logout, isLoggingOut: isLoggingOut.current };
 };
 
 /**
@@ -328,7 +217,7 @@ const useLogout = () => {
  * @param studentName - Optional: Name of the student to check for presence
  * @returns Object containing presence status and additional info
  */
-const checkStudentPresence = (
+export const checkStudentPresence = (
   studentList: string[] | number[] | { id: string | number; name: string }[],
   studentId: string | number,
   studentName?: string
@@ -390,16 +279,16 @@ const checkStudentPresence = (
  * @param studentsToCheck - Array of students to check for presence
  * @returns Array of results for each student checked
  */
-const checkMultipleStudentsPresence = (
+export const checkMultipleStudentsPresence = (
   studentList: string[] | number[] | { id: string | number; name: string }[],
   studentsToCheck: { id: string | number; name?: string }[]
-): Array<{
+): {
   studentId: string | number;
   studentName?: string;
   isPresent: boolean;
   matchType: 'id' | 'name' | 'both' | 'none';
   foundStudent?: any;
-}> => {
+}[] => {
   return studentsToCheck.map((student) => ({
     studentId: student.id,
     studentName: student.name,
@@ -413,7 +302,7 @@ const checkMultipleStudentsPresence = (
  * @param totalExpectedStudents - Total number of students expected to attend
  * @returns Attendance statistics
  */
-const getAttendanceStats = (
+export const getAttendanceStats = (
   studentList: string[] | number[] | { id: string | number; name: string }[],
   totalExpectedStudents: number
 ): {
@@ -442,23 +331,23 @@ const getAttendanceStats = (
  * @param studentName - Optional: Name of the student to filter by
  * @returns Filtered attendance records where the student was present
  */
-const filterAttendanceByStudent = (
-  attendanceRecords: Array<{
+export const filterAttendanceByStudent = (
+  attendanceRecords: {
     id: string | number;
     date: string;
     courseName: string;
     studentList: string[] | number[] | { id: string | number; name: string }[];
     [key: string]: any;
-  }>,
+  }[],
   studentId: string | number,
   studentName?: string
-): Array<{
+): {
   id: string | number;
   date: string;
   courseName: string;
   studentList: string[] | number[] | { id: string | number; name: string }[];
   [key: string]: any;
-}> => {
+}[] => {
   return attendanceRecords.filter((record) => {
     const { isPresent } = checkStudentPresence(record.studentList, studentId, studentName);
     return isPresent;
@@ -475,10 +364,4 @@ export {
   formatTimeForCSV,
   isJWTExpired,
   useTokenWatcher,
-  logoutAndRedirect,
-  useLogout,
-  checkStudentPresence,
-  checkMultipleStudentsPresence,
-  getAttendanceStats,
-  filterAttendanceByStudent,
 };
