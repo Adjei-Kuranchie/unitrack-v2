@@ -43,22 +43,17 @@ const DEVICE_ID_KEY = 'device_id';
  */
 const getDeviceId = async (): Promise<string> => {
   try {
-    // Try to get existing device ID from AsyncStorage
     let deviceId = await AsyncStorage.getItem(DEVICE_ID_KEY);
 
-    // If no device ID exists, generate a new one
     if (!deviceId) {
-      // deviceId = randomUUID(); // Using expo-crypto
-      deviceId = uuid.v4(); // if using react-native-uuid
+      deviceId = uuid.v4();
 
-      // Store the new device ID
       await AsyncStorage.setItem(DEVICE_ID_KEY, deviceId);
     }
 
     return deviceId;
   } catch (error) {
     console.error('Error getting/generating device ID:', error);
-    // Fallback to a random UUID if AsyncStorage fails
     return uuid.v4();
   }
 };
@@ -89,6 +84,7 @@ const getAuthHeaders = async (
   if (mark) {
     headers['X-Device_ID'] = await getDeviceId();
   }
+  console.log(headers);
 
   return headers;
 };
