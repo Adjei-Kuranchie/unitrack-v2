@@ -1,29 +1,10 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Dimensions,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { formatDate } from '~/lib/utils';
 import { useApiStore } from '~/store/apiStore';
 import { useAuthStore } from '~/store/authStore';
-
-const { width } = Dimensions.get('window');
-
-// Type definitions
-interface StatCardProps {
-  icon: keyof typeof MaterialIcons.glyphMap;
-  label: string;
-  value: number;
-  gradient: string;
-  onPress?: () => void;
-}
 
 interface QuickActionCardProps {
   icon: keyof typeof MaterialIcons.glyphMap;
@@ -224,7 +205,7 @@ export default function DashboardScreen() {
         {/* Activity Summary */}
         <View className="mb-6 rounded-2xl bg-white p-5 shadow-sm">
           <Text className="mb-4 text-lg font-semibold text-gray-900">Activity Summary</Text>
-          <View className="flex-row justify-between">
+          <View className="flex-row justify-around">
             <View className="items-center">
               <View className="mb-2 rounded-full bg-green-100 p-3">
                 <Ionicons name="checkmark-circle" size={24} color="#10b981" />
@@ -238,15 +219,6 @@ export default function DashboardScreen() {
               </View>
               <Text className="text-xl font-bold text-gray-900">{myCourses}</Text>
               <Text className="text-xs text-gray-500">My Courses</Text>
-            </View>
-            <View className="items-center">
-              <View className="mb-2 rounded-full bg-purple-100 p-3">
-                <Ionicons name="calendar" size={24} color="#8b5cf6" />
-              </View>
-              <Text className="text-xl font-bold text-gray-900">
-                {new Date().toLocaleDateString('en', { day: 'numeric' })}
-              </Text>
-              <Text className="text-xs text-gray-500">Today</Text>
             </View>
           </View>
         </View>

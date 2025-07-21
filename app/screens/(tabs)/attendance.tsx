@@ -50,6 +50,7 @@ const AttendanceScreen = () => {
   const onRefresh = async () => {
     setRefreshing(true);
     await loadInitialData();
+    await requestLocationPermission();
     setRefreshing(false);
   };
 
@@ -90,9 +91,11 @@ const AttendanceScreen = () => {
     setMarking(true);
 
     try {
-      await markAttendance({ sessionId: selectedSession, location });
-      Alert.alert('Success', 'Attendance marked successfully!');
-      await fetchAttendance();
+      const success = await markAttendance({ sessionId: selectedSession, location });
+      if (success) {
+        Alert.alert('Success', 'Attendance marked successfully!');
+        await fetchAttendance();
+      }
     } catch (error) {
       Alert.alert('Error', 'Failed to mark attendance.\n Try again!');
     } finally {

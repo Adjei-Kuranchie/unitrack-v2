@@ -78,13 +78,10 @@ const getAuthHeaders = async (
   } = {
     'Content-Type': 'application/json',
     Authorization: token ? `Bearer ${token}` : '',
+    'X-Device_ID': mark ? await getDeviceId() : '',
   };
 
-  // Add device ID if marking attendance
-  if (mark) {
-    headers['X-Device_ID'] = await getDeviceId();
-  }
-  console.log(headers);
+  // console.log(headers['X-Device_ID']);
 
   return headers;
 };
@@ -278,12 +275,20 @@ export const useApiStore = create<ApiState>((set, get) => ({
         body: JSON.stringify(attendanceReq),
       });
 
+      console.log('Request body:', JSON.stringify(attendanceReq));
+      console.log('Request headers:', await getAuthHeaders(true));
+      console.log('Response status:', response.status);
+      console.log('Response body:', await response.text());
+
       if (!response.ok) {
-        throw new Error('Failed to mark attendance');
+        console.log('Response not OK:', response.status, response.statusText);
+        return;
       }
 
-      // Refresh attendance after marking
-      await get().fetchAttendance();
+      // Add a small delay to ensure backend processing completes
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      return true; // Indicate success
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'Failed to mark attendance',

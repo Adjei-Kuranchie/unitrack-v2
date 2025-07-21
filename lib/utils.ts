@@ -1,6 +1,8 @@
-import { router } from 'expo-router';
-import { useEffect } from 'react';
+import { router, useRouter } from 'expo-router';
+import { useCallback, useEffect, useRef } from 'react';
+import { Alert, InteractionManager } from 'react-native';
 import { useAuthStore } from '~/store/authStore';
+import { autoLogout } from './logoutUtils';
 
 /**
  * Formats a date string for CSV export in a clean format.
@@ -144,36 +146,37 @@ const formatDateTime = (dateString: string) => {
  * @param token - The JWT token string to check.
  * @returns `true` if the token is expired or invalid, otherwise `false`.
  */
-
 const isJWTExpired = (token: string | null): boolean => {
   try {
     if (!token) {
-      throw new Error('Token is null or undefined');
+      return true;
     }
 
     const parts = token.split('.');
     if (parts.length !== 3) {
-      throw new Error('Invalid JWT format');
+      return true;
     }
 
     const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
 
     if (!payload.exp) {
-      throw new Error('No expiration time found in token');
+      return true;
     }
+
     const currentTime = Math.floor(Date.now() / 1000);
     return payload.exp < currentTime;
   } catch (error) {
-    //TODO: Remove console.error in production
     console.error('Error checking JWT expiration:', error);
     return true;
   }
 };
 
 /**
- * Logs out the user by clearing authentication state and redirects to the Register screen.
+ * Logs out the user by clearing authentication state with proper cleanup.
+ * Uses InteractionManager to ensure smooth transitions.
  */
 const logoutAndRedirect = () => {
+  // Clear auth state immediately
   useAuthStore.setState({
     token: null,
     user: null,
@@ -182,35 +185,140 @@ const logoutAndRedirect = () => {
     error: 'Session expired. Please log in again.',
   });
 
-  router.replace('/screens/(auth)/RegisterScreen');
+  // Use InteractionManager to ensure all interactions are complete before navigating
+  InteractionManager.runAfterInteractions(() => {
+    // Add a small delay to ensure state updates are processed
+    setTimeout(() => {
+      try {
+        // Use push instead of replace to avoid potential navigation conflicts
+        router.push('/screens/(auth)/RegisterScreen');
+      } catch (error) {
+        console.error('Logout navigation error:', error);
+        // Fallback: try with replace after a longer delay
+        setTimeout(() => {
+          try {
+            router.replace('/screens/(auth)/RegisterScreen');
+          } catch (fallbackError) {
+            console.error('Fallback logout navigation error:', fallbackError);
+          }
+        }, 500);
+      }
+    }, 100);
+  });
 };
 
 /**
  * React hook that watches a JWT token and logs out the user if the token expires.
- * Checks token expiration on mount and every 10 seconds.
- *
- * @param token - The JWT token string to watch.
  */
-
 const useTokenWatcher = (token: string | null) => {
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastTokenRef = useRef<string | null>(null);
+
   useEffect(() => {
-    // Initial check on mount
-    if (token && isJWTExpired(token)) {
-      logoutAndRedirect();
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
 
-    // Periodically check token every 10 seconds
-    const interval = setInterval(
-      () => {
-        if (token && isJWTExpired(token)) {
-          logoutAndRedirect();
+    // Only set up watcher if we have a token
+    if (token) {
+      // Check immediately if token is expired
+      if (isJWTExpired(token)) {
+        // Only logout if this is a different token or first check
+        if (lastTokenRef.current !== token) {
+          autoLogout();
         }
-      },
-      1000 * 60 * 10
-    ); // 10 minutes
+      } else {
+        // Set up periodic checking for valid tokens
+        intervalRef.current = setInterval(
+          () => {
+            if (token && isJWTExpired(token)) {
+              autoLogout();
+            }
+          },
+          1000 * 60 * 5
+        ); // Check every 5 minutes (reduced from 10)
+      }
+    }
 
-    return () => clearInterval(interval); // Clean up
+    // Update last token reference
+    lastTokenRef.current = token;
+
+    // Cleanup function
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
   }, [token]);
+};
+
+const useLogout = () => {
+  const router = useRouter();
+  const isLoggingOut = useRef(false);
+
+  const logout = useCallback(async () => {
+    // Prevent multiple logout attempts
+    if (isLoggingOut.current) {
+      return;
+    }
+
+    isLoggingOut.current = true;
+
+    try {
+      // Clear auth state
+      useAuthStore.setState({
+        token: null,
+        user: null,
+        role: null,
+        resMessage: null,
+        error: null,
+      });
+
+      // Wait for all interactions to complete
+      await new Promise((resolve) => {
+        InteractionManager.runAfterInteractions(() => {
+          resolve(void 0);
+        });
+      });
+
+      // Additional delay to ensure state is cleared
+      await new Promise((resolve) => setTimeout(resolve, 150));
+
+      // Navigate to auth screen
+      router.replace('/screens/(auth)/RegisterScreen');
+    } catch (error) {
+      console.error('Logout error:', error);
+
+      // Show error alert and try fallback navigation
+      Alert.alert('Logout Error', 'There was an issue logging out. The app will restart.', [
+        {
+          text: 'OK',
+          onPress: () => {
+            // Force navigation after user acknowledges
+            setTimeout(() => {
+              try {
+                router.replace('/screens/(auth)/RegisterScreen');
+              } catch (fallbackError) {
+                console.error('Fallback logout error:', fallbackError);
+                // Last resort: reload the app
+                // You might need to implement app reload based on your setup
+              }
+            }, 100);
+          },
+        },
+      ]);
+    } finally {
+      // Reset the flag after a delay
+      setTimeout(() => {
+        isLoggingOut.current = false;
+      }, 2000);
+    }
+  }, [router]);
+
+  return { logout, isLoggingOut: isLoggingOut.current };
 };
 
 /**
@@ -220,7 +328,7 @@ const useTokenWatcher = (token: string | null) => {
  * @param studentName - Optional: Name of the student to check for presence
  * @returns Object containing presence status and additional info
  */
-export const checkStudentPresence = (
+const checkStudentPresence = (
   studentList: string[] | number[] | { id: string | number; name: string }[],
   studentId: string | number,
   studentName?: string
@@ -282,7 +390,7 @@ export const checkStudentPresence = (
  * @param studentsToCheck - Array of students to check for presence
  * @returns Array of results for each student checked
  */
-export const checkMultipleStudentsPresence = (
+const checkMultipleStudentsPresence = (
   studentList: string[] | number[] | { id: string | number; name: string }[],
   studentsToCheck: { id: string | number; name?: string }[]
 ): Array<{
@@ -305,7 +413,7 @@ export const checkMultipleStudentsPresence = (
  * @param totalExpectedStudents - Total number of students expected to attend
  * @returns Attendance statistics
  */
-export const getAttendanceStats = (
+const getAttendanceStats = (
   studentList: string[] | number[] | { id: string | number; name: string }[],
   totalExpectedStudents: number
 ): {
@@ -334,7 +442,7 @@ export const getAttendanceStats = (
  * @param studentName - Optional: Name of the student to filter by
  * @returns Filtered attendance records where the student was present
  */
-export const filterAttendanceByStudent = (
+const filterAttendanceByStudent = (
   attendanceRecords: Array<{
     id: string | number;
     date: string;
@@ -357,35 +465,6 @@ export const filterAttendanceByStudent = (
   });
 };
 
-// Example usage:
-/*
-// Example 1: Check if student with ID "123" was present
-const studentList1 = ["123", "456", "789"];
-const result1 = checkStudentPresence(studentList1, "123");
-console.log(result1); // { isPresent: true, matchType: 'id', foundStudent: "123" }
-
-// Example 2: Check with object array
-const studentList2 = [
-  { id: "123", name: "John Doe" },
-  { id: "456", name: "Jane Smith" },
-  { id: "789", name: "Bob Johnson" }
-];
-const result2 = checkStudentPresence(studentList2, "123", "John Doe");
-console.log(result2); // { isPresent: true, matchType: 'both', foundStudent: { id: "123", name: "John Doe" } }
-
-// Example 3: Check multiple students
-const studentsToCheck = [
-  { id: "123", name: "John Doe" },
-  { id: "999", name: "Missing Student" }
-];
-const results = checkMultipleStudentsPresence(studentList2, studentsToCheck);
-console.log(results);
-
-// Example 4: Get attendance statistics
-const stats = getAttendanceStats(studentList2, 25);
-console.log(stats); // { totalPresent: 3, totalAbsent: 22, attendanceRate: 0.12, attendancePercentage: "12.0" }
-*/
-
 export {
   escapeCSVField,
   formatDate,
@@ -396,4 +475,10 @@ export {
   formatTimeForCSV,
   isJWTExpired,
   useTokenWatcher,
+  logoutAndRedirect,
+  useLogout,
+  checkStudentPresence,
+  checkMultipleStudentsPresence,
+  getAttendanceStats,
+  filterAttendanceByStudent,
 };

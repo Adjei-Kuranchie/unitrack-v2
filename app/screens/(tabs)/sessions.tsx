@@ -74,6 +74,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
 
   const onRefresh = async () => {
     setRefreshing(true);
+    await requestLocationPermission();
     await loadData();
     setRefreshing(false);
   };
