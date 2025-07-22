@@ -1,11 +1,9 @@
 import { Feather } from '@expo/vector-icons';
 import { showToast } from 'au-react-native-toast';
-import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Dimensions,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -18,9 +16,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '~/store/authStore';
-
-const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
-const { height } = Dimensions.get('window');
 
 export default function SignInScreen() {
   const [username, setUsername] = useState('');
@@ -53,7 +48,7 @@ export default function SignInScreen() {
       return;
     }
 
-    await signIn(username, password);
+    await signIn(username.trim(), password.trim());
 
     const { user, resMessage } = useAuthStore.getState();
     if (resMessage) {

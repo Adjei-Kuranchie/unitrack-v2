@@ -32,7 +32,7 @@ const AttendanceScreen = () => {
   const filteredSessions = sessions.filter((session) => session.status === 'ACTIVE');
 
   useEffect(() => {
-    Promise.all([loadInitialData(), requestLocationPermission()]);
+    Promise.all([requestLocationPermission(), loadInitialData()]);
 
     // Check for new sessions after 5 seconds
     const timer = setTimeout(() => {
@@ -49,8 +49,8 @@ const AttendanceScreen = () => {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadInitialData();
     await requestLocationPermission();
+    await loadInitialData();
     setRefreshing(false);
   };
 
@@ -65,7 +65,7 @@ const AttendanceScreen = () => {
       }
 
       const currentLocation = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Highest,
+        accuracy: Location.Accuracy.High,
       });
 
       setLocation({

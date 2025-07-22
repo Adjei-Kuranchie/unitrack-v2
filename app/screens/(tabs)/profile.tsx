@@ -353,7 +353,7 @@ export default function ProfileScreen() {
                   </View>
                 </TouchableOpacity>
               ) : (
-                <View className="flex-row gap-2">
+                <View className="flex-col gap-2">
                   <TouchableOpacity
                     activeOpacity={0.7}
                     onPress={handleCancel}
