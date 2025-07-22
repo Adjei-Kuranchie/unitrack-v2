@@ -65,7 +65,7 @@ const AttendanceScreen = () => {
       }
 
       const currentLocation = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
+        accuracy: Location.Accuracy.Highest,
       });
 
       setLocation({

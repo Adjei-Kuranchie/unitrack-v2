@@ -1,29 +1,3 @@
-/**
- * SignInScreen component provides a user interface for signing in to the UniTrack application.
- *
- * Features:
- * - Allows users to input their username and password.
- * - Toggles password visibility.
- * - Handles sign-in logic with validation and error handling.
- * - Displays loading indicator during authentication.
- * - Navigates to the dashboard upon successful sign-in.
- * - Provides a link to the registration screen for new users.
- * - Includes a temporary function for testing API connectivity.
- *
- * State:
- * - `username`: The username input by the user.
- * - `password`: The password input by the user.
- * - `showPassword`: Boolean to toggle password visibility.
- *
- * Store:
- * - Uses `useAuthStore` for authentication logic, loading state, and error handling.
- *
- * Side Effects:
- * - Displays an alert if an authentication error occurs.
- *
- * @component
- * @returns {JSX.Element} The rendered sign-in screen.
- */
 import { Feather } from '@expo/vector-icons';
 import { showToast } from 'au-react-native-toast';
 import Constants from 'expo-constants';
@@ -31,155 +5,234 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
+  Dimensions,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '~/store/authStore';
+
 const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
+const { height } = Dimensions.get('window');
 
 export default function SignInScreen() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+
   const { signIn, isLoading, error, clearError } = useAuthStore();
 
   const handleSignIn = async () => {
+    Keyboard.dismiss();
+
     if (!username.trim() || !password.trim()) {
       showToast(
-        'Please fill in all fields',
+        'Please enter your username and password',
         3000,
         true,
-        { backgroundColor: 'pink', padding: 5 },
-        { color: 'red', fontSize: 15 }
+        {
+          backgroundColor: '#FEF2F2',
+          padding: 14,
+          borderRadius: 12,
+          marginHorizontal: 20,
+        },
+        {
+          color: '#DC2626',
+          fontSize: 14,
+          fontWeight: '600',
+        }
       );
       return;
     }
 
     await signIn(username, password);
 
-    // Check if sign in was successful
     const { user, resMessage } = useAuthStore.getState();
     if (resMessage) {
+      showToast(
+        'Welcome back!',
+        2000,
+        true,
+        {
+          backgroundColor: '#F0FDF4',
+          padding: 14,
+          borderRadius: 12,
+          marginHorizontal: 20,
+        },
+        {
+          color: '#16A34A',
+          fontSize: 14,
+          fontWeight: '600',
+        }
+      );
       router.replace('/screens/(tabs)/dashboard');
     }
   };
 
-  // Add this function to your SignInScreen component for testing
-  const testApiConnection = async () => {
-    try {
-      console.log('Testing connection to:', API_BASE_URL);
+  const getInputStyle = (fieldName: string) => {
+    const isFocused = focusedField === fieldName;
+    const baseStyle = 'rounded-2xl px-5 py-5 text-base text-gray-900';
 
-      // Test basic connectivity
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: 'Julie901',
-          password: 'julie0990',
-          firstName: 'Julie',
-          lastName: 'Dona',
-          email: 'tapose9852@jeanssi.com',
-          role: 'STUDENT',
-        }),
-      });
-
-      console.log('Connection test - Status:', response.status);
-      console.log('Connection test - OK:', response.ok);
-
-      // Also log the response text to see what the server is returning
-      const responseText = await response.text();
-      console.log('Response:', responseText);
-
-      Alert.alert(
-        'Connection Test',
-        `Status: ${response.status}\nResponse: ${responseText}\nURL: ${API_BASE_URL}`
-      );
-    } catch (error) {
-      console.error('Connection test failed:', error);
-      Alert.alert(
-        'Connection Failed',
-        `Error: ${error instanceof Error ? error.message : 'Unknown error'}\nURL: ${API_BASE_URL}`
-      );
+    if (isFocused) {
+      return `${baseStyle} bg-white border-2 border-blue-500`;
     }
+    return `${baseStyle} bg-gray-50 border-2 border-transparent`;
   };
 
   useEffect(() => {
     if (error) {
-      Alert.alert('Error', error, [{ text: 'OK', onPress: clearError }]);
+      showToast(
+        error,
+        4000,
+        true,
+        {
+          backgroundColor: '#FEF2F2',
+          padding: 14,
+          borderRadius: 12,
+          marginHorizontal: 20,
+        },
+        {
+          color: '#DC2626',
+          fontSize: 14,
+          fontWeight: '600',
+        }
+      );
+      clearError();
     }
   }, [error]);
 
   return (
-    <View className="flex-1 justify-center bg-white px-6">
-      <View className="mb-8">
-        <Text className="mb-2 text-center text-3xl font-bold text-blue-600">UniTrack</Text>
-        <Text className="text-center text-gray-600">Sign in to your account</Text>
-      </View>
+    <SafeAreaView className="flex-1 bg-white">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1">
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled">
+          <View className="flex-1 justify-center px-8 ">
+            {/* Logo and Welcome Section */}
+            <View className="mb-12 items-center">
+              <Text className="mb-3 text-4xl font-bold text-gray-900">UniTrack</Text>
+              <Text className="text-lg text-gray-600">Welcome back!</Text>
+              <Text className="mt-1 text-base text-gray-500">Sign in to continue</Text>
+            </View>
 
-      <View className="flex flex-col gap-4 space-y-4">
-        <View>
-          <Text className="mb-2 font-medium text-gray-700">Username</Text>
-          <TextInput
-            className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
-            placeholder="Enter your username"
-            value={username}
-            onChangeText={(text) => setUsername(text.trim())}
-            autoCapitalize="none"
-            editable={!isLoading}
-          />
-        </View>
+            {/* Form Section */}
+            <View className="space-y-5">
+              {/* Username Field */}
+              <View>
+                <Text className="mb-3 ml-2 text-sm font-semibold text-gray-700">USERNAME</Text>
+                <View className="relative">
+                  <View className="absolute left-5 top-5 z-10">
+                    <Feather
+                      name="user"
+                      size={22}
+                      color={focusedField === 'username' ? '#3B82F6' : '#9CA3AF'}
+                    />
+                  </View>
+                  <TextInput
+                    className={`${getInputStyle('username')} pl-14 text-base`}
+                    placeholder="Enter your username"
+                    placeholderTextColor="#9CA3AF"
+                    value={username}
+                    onChangeText={setUsername}
+                    onFocus={() => setFocusedField('username')}
+                    onBlur={() => setFocusedField(null)}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    editable={!isLoading}
+                    returnKeyType="next"
+                  />
+                </View>
+              </View>
 
-        <View>
-          <Text className="mb-2 font-medium text-gray-700">Password</Text>
-          <View className="relative">
-            <TextInput
-              className="rounded-lg border border-gray-300 px-4 py-3 text-gray-900"
-              placeholder="Enter your Password"
-              value={password}
-              onChangeText={(text) => setPassword(text.trim())}
-              secureTextEntry={!showPassword}
-              editable={!isLoading}
-            />
-            <Pressable
-              onPress={() => setShowPassword((prev) => !prev)}
-              className="absolute right-2 h-12 w-12 items-center justify-center rounded-full ">
-              <Feather name={showPassword ? 'eye-off' : 'eye'} size={20} color="gray" />
-            </Pressable>
+              {/* Password Field */}
+              <View>
+                <Text className="mb-3 ml-2 text-sm font-semibold text-gray-700">PASSWORD</Text>
+                <View className="relative">
+                  <View className="absolute left-5 top-5 z-10">
+                    <Feather
+                      name="lock"
+                      size={22}
+                      color={focusedField === 'password' ? '#3B82F6' : '#9CA3AF'}
+                    />
+                  </View>
+                  <TextInput
+                    className={`${getInputStyle('password')} pl-14 pr-14 text-base`}
+                    placeholder="Enter your password"
+                    placeholderTextColor="#9CA3AF"
+                    value={password}
+                    onChangeText={setPassword}
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={() => setFocusedField(null)}
+                    secureTextEntry={!showPassword}
+                    editable={!isLoading}
+                    returnKeyType="done"
+                    onSubmitEditing={handleSignIn}
+                  />
+                  <Pressable
+                    onPress={() => setShowPassword(!showPassword)}
+                    className="absolute right-5 top-5 h-8 w-8 items-center justify-center"
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                    <Feather name={showPassword ? 'eye-off' : 'eye'} size={22} color="#9CA3AF" />
+                  </Pressable>
+                </View>
+              </View>
+
+              {/* Sign In Button */}
+              <TouchableOpacity
+                activeOpacity={0.9}
+                className={`mt-8 overflow-hidden rounded-2xl shadow-lg ${
+                  isLoading ? 'opacity-70' : ''
+                }`}
+                onPress={handleSignIn}
+                disabled={isLoading}
+                style={{
+                  shadowColor: '#3B82F6',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 8,
+                  elevation: 5,
+                }}>
+                <View className="bg-blue-600 px-8 py-5">
+                  {isLoading ? (
+                    <View className="flex-row items-center justify-center">
+                      <ActivityIndicator color="white" size="small" />
+                      <Text className="ml-3 text-center text-lg font-semibold text-white">
+                        Signing in...
+                      </Text>
+                    </View>
+                  ) : (
+                    <Text className="text-center text-lg font-semibold text-white">Sign In</Text>
+                  )}
+                </View>
+              </TouchableOpacity>
+
+              {/* Create Account Section */}
+              <View className="mt-10 items-center">
+                <Text className="mb-3 text-base text-gray-600">Don&apos;t have an account?</Text>
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => router.push('/screens/(auth)/RegisterScreen')}
+                  disabled={isLoading}
+                  className="rounded-2xl border-2 border-blue-600 bg-blue-50 px-8 py-4">
+                  <Text className="text-base font-bold text-blue-600">Create New Account</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
-        </View>
-
-        <TouchableOpacity
-          activeOpacity={0.7}
-          className={`mt-6 rounded-lg bg-blue-600 py-4 ${isLoading ? 'opacity-50' : ''}`}
-          onPress={handleSignIn}
-          disabled={isLoading}>
-          {isLoading ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <Text className="text-center text-lg font-semibold text-white">Sign In</Text>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          activeOpacity={0.7}
-          className="mt-4"
-          onPress={() => router.push('/screens/(auth)/RegisterScreen')}
-          disabled={isLoading}>
-          <Text className="text-center text-blue-600">
-            Don&apos;t have an account? Register here
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Add a test button in your JSX (temporarily): */}
-      {/*
-       */}
-    </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

@@ -81,7 +81,7 @@ const getAuthHeaders = async (
     'X-Device_ID': mark ? await getDeviceId() : '',
   };
 
-  // console.log(headers['X-Device_ID']);
+  console.log(headers['X-Device_ID']);
 
   return headers;
 };
