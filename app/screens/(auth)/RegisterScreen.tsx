@@ -5,7 +5,6 @@ import React, { useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Dimensions,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -19,8 +18,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '~/store/authStore';
 import { RegisterData } from '~/types/auth';
-
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default function RegisterScreen() {
   const [showPassword, setShowPassword] = useState(false);
@@ -89,8 +86,17 @@ export default function RegisterScreen() {
     if (!validateForm()) return;
 
     await register(formData);
+    //TODO: Uncomment the following line to navigate to OTP screen after registration when implemented
+    // router.push({
+    //   pathname: '/screens/(auth)/OTPScreen',
+    //   params: {
+    //     verificationType: 'registration',
+    //     email: formData.email,
+    //   },
+    // });
 
     const { error: registrationError } = useAuthStore.getState();
+
     if (!registrationError) {
       showToast(
         'Account created successfully!',
@@ -108,48 +114,6 @@ export default function RegisterScreen() {
       Alert.alert('Registration Error', error, [{ text: 'OK', onPress: clearError }]);
     }
   }, [error]);
-
-  const InputField = ({
-    label,
-    value,
-    onChangeText,
-    placeholder,
-    secureTextEntry,
-    keyboardType,
-    autoCapitalize,
-    fieldName,
-    icon,
-  }: any) => (
-    <View className="mb-5">
-      <Text className="mb-2 text-sm font-semibold text-gray-700">{label}</Text>
-      <View className="relative">
-        {icon && (
-          <View className="pointer-events-none absolute left-3 top-3.5 z-10">
-            <MaterialIcons name={icon} size={20} color="#9CA3AF" />
-          </View>
-        )}
-        <TextInput
-          className={`rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3.5 text-base text-gray-900 ${icon ? 'pl-12' : ''}`}
-          placeholder={placeholder}
-          placeholderTextColor="#9CA3AF"
-          value={value}
-          onChangeText={onChangeText}
-          secureTextEntry={secureTextEntry}
-          keyboardType={keyboardType}
-          autoCapitalize={autoCapitalize}
-          editable={!isLoading}
-        />
-        {fieldName === 'password' && (
-          <Pressable
-            onPress={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-3.5"
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Feather name={showPassword ? 'eye-off' : 'eye'} size={20} color="#9CA3AF" />
-          </Pressable>
-        )}
-      </View>
-    </View>
-  );
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
@@ -213,7 +177,7 @@ export default function RegisterScreen() {
               <InputField
                 label="Email Address"
                 value={formData.email}
-                onChangeText={(text: string) => setFormData({ ...formData, email: text.trim() })}
+                onChangeText={(email: string) => setFormData({ ...formData, email: email.trim() })}
                 placeholder="john.doe@university.edu"
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -234,11 +198,13 @@ export default function RegisterScreen() {
               <InputField
                 label="Password"
                 value={formData.password}
-                onChangeText={(text: string) => setFormData({ ...formData, password: text.trim() })}
+                onChangeText={(password: string) => setFormData({ ...formData, password })}
                 placeholder="Enter a secure password"
                 secureTextEntry={!showPassword}
                 fieldName="password"
                 icon="lock"
+                setShowPassword={setShowPassword}
+                showPassword={showPassword}
               />
 
               {/* Role Selection */}
@@ -328,8 +294,7 @@ export default function RegisterScreen() {
                 By creating an account, you agree to our{'\n'}
                 <Text className="text-blue-600">Terms of Service</Text> and{' '}
                 <Text className="text-blue-600">Privacy Policy</Text>
-              </Text> 
-              */}
+              </Text> */}
             </View>
           </View>
         </ScrollView>
@@ -337,3 +302,47 @@ export default function RegisterScreen() {
     </SafeAreaView>
   );
 }
+
+const InputField = ({
+  label,
+  value,
+  onChangeText,
+  placeholder,
+  secureTextEntry,
+  keyboardType,
+  autoCapitalize,
+  fieldName,
+  icon,
+  setShowPassword,
+  showPassword,
+}: any) => (
+  <View className="mb-5">
+    <Text className="mb-2 text-sm font-semibold text-gray-700">{label}</Text>
+    <View className="relative">
+      {icon && (
+        <View className="pointer-events-none absolute left-3 top-3.5 z-10">
+          <MaterialIcons name={icon} size={20} color="#9CA3AF" />
+        </View>
+      )}
+      <TextInput
+        className={`rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3.5 text-base text-gray-900 ${icon ? 'pl-12' : ''}`}
+        placeholder={placeholder}
+        placeholderTextColor="#9CA3AF"
+        value={value}
+        onChangeText={onChangeText}
+        secureTextEntry={secureTextEntry}
+        keyboardType={keyboardType}
+        autoCapitalize={autoCapitalize}
+        editable={true}
+      />
+      {fieldName === 'password' && (
+        <Pressable
+          onPress={() => setShowPassword(!showPassword)}
+          className="absolute right-3 top-3.5"
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <Feather name={showPassword ? 'eye-off' : 'eye'} size={20} color="#9CA3AF" />
+        </Pressable>
+      )}
+    </View>
+  </View>
+);

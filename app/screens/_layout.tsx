@@ -16,6 +16,12 @@ export default function ScreensLayout() {
         }}
       />
       <Stack.Screen
+        name="(auth)/OTPScreen"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
         name="(tabs)"
         options={{
           headerShown: false,

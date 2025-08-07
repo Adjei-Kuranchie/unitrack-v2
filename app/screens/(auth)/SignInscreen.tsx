@@ -1,4 +1,4 @@
-import { Feather } from '@expo/vector-icons';
+import { Feather, MaterialIcons } from '@expo/vector-icons';
 import { showToast } from 'au-react-native-toast';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -117,6 +117,9 @@ export default function SignInScreen() {
           <View className="flex-1 justify-center px-8 ">
             {/* Logo and Welcome Section */}
             <View className="mb-12 items-center">
+              <View className="mb-4 h-16 w-16 items-center justify-center self-center rounded-full bg-blue-100">
+                <MaterialIcons name="school" size={32} color="#2563EB" />
+              </View>
               <Text className="mb-3 text-4xl font-bold text-gray-900">UniTrack</Text>
               <Text className="text-lg text-gray-600">Welcome back!</Text>
               <Text className="mt-1 text-base text-gray-500">Sign in to continue</Text>
@@ -126,7 +129,7 @@ export default function SignInScreen() {
             <View className="space-y-5">
               {/* Username Field */}
               <View>
-                <Text className="mb-3 ml-2 text-sm font-semibold text-gray-700">USERNAME</Text>
+                <Text className="mb-3 ml-2 text-sm font-semibold text-gray-700">Username</Text>
                 <View className="relative">
                   <View className="absolute left-5 top-5 z-10">
                     <Feather
@@ -153,7 +156,7 @@ export default function SignInScreen() {
 
               {/* Password Field */}
               <View>
-                <Text className="mb-3 ml-2 text-sm font-semibold text-gray-700">PASSWORD</Text>
+                <Text className="mb-3 ml-2 text-sm font-semibold text-gray-700">Password</Text>
                 <View className="relative">
                   <View className="absolute left-5 top-5 z-10">
                     <Feather

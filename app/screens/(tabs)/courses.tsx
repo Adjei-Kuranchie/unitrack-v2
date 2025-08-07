@@ -1,21 +1,3 @@
-/**
- * Enhanced CoursesScreen component with modern UI/UX improvements - No Gradients Version.
- *
- * New Features:
- * - Modern solid color header with animated floating action button
- * - Enhanced course cards with better visual hierarchy and icons
- * - Improved search bar with modern styling
- * - Better empty states with engaging illustrations
- * - Animated course cards with hover effects
- * - Enhanced bottom sheet modal with better form design
- * - Improved loading states and error handling
- * - Better color scheme and typography throughout
- * - Replaced all gradients with solid colors
- *
- * @component
- * @returns {JSX.Element} The enhanced CoursesScreen component.
- */
-
 import { MaterialIcons } from '@expo/vector-icons';
 import { BottomSheetModal, BottomSheetTextInput, BottomSheetView } from '@gorhom/bottom-sheet';
 import { router } from 'expo-router';
