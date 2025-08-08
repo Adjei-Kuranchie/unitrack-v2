@@ -1,6 +1,7 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { BottomSheetFlatList, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import * as FileSystem from 'expo-file-system';
+import * as Print from 'expo-print';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -106,6 +107,7 @@ const SessionScreen = () => {
 
   //export functionality
   const exportModalRef = useRef<BottomSheetModal>(null);
+
   const exportCSV = async () => {
     try {
       if (!sessionData.attendance.studentList || sessionData.attendance.studentList.length === 0) {
@@ -185,6 +187,119 @@ const SessionScreen = () => {
           icon: 'schedule',
           label: 'Scheduled',
         };
+    }
+  };
+
+  const exportPDF = async () => {
+    try {
+      setIsExporting(true);
+
+      if (!sessionData.attendance.studentList || sessionData.attendance.studentList.length === 0) {
+        alert('No students to export');
+        return;
+      }
+
+      const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h1 { color: #2563eb; text-align: center; }
+            h2 { color: #1e40af; margin-top: 30px; }
+            .header-info { background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+            .info-row { margin: 10px 0; }
+            .label { font-weight: bold; color: #4b5563; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th { background-color: #2563eb; color: white; padding: 12px; text-align: left; }
+            td { padding: 10px; border-bottom: 1px solid #e5e7eb; }
+            tr:nth-child(even) { background-color: #f9fafb; }
+            .footer { margin-top: 40px; text-align: center; color: #6b7280; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <h1>Attendance Report</h1>
+          
+          <div class="header-info">
+            <div class="info-row">
+              <span class="label">Course:</span> ${sessionData.course.courseCode} - ${sessionData.course.courseName}
+            </div>
+            <div class="info-row">
+              <span class="label">Session ID:</span> #${sessionData.id}
+            </div>
+            <div class="info-row">
+              <span class="label">Date:</span> ${startDateTime.date}
+            </div>
+            <div class="info-row">
+              <span class="label">Time:</span> ${startDateTime.time} - ${endDateTime.time}
+            </div>
+            <div class="info-row">
+              <span class="label">Lecturer:</span> ${sessionData.lecturer.firstName} ${sessionData.lecturer.lastName}
+            </div>
+            <div class="info-row">
+              <span class="label">Total Students:</span> ${sessionData.attendance.studentList.length}
+            </div>
+          </div>
+          
+          <h2>Students Present</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Student ID</th>
+                <th>Username</th>
+                <th>Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${sessionData.attendance.studentList
+                .map(
+                  (student, index) => `
+                  <tr>
+                    <td>${index + 1}</td>
+                    <td>${student.IndexNumber || student.username}</td>
+                    <td>${student.username}</td>
+                    <td>${student.email}</td>
+                  </tr>
+                `
+                )
+                .join('')}
+            </tbody>
+          </table>
+          
+          <div class="footer">
+            <p>Generated on ${new Date().toLocaleString()}</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+      const { uri } = await Print.printToFileAsync({ html });
+
+      const dateForFilename = formatDateForFilename(sessionData.startTime);
+      const pdfName = `attendance_${sessionData.course.courseCode}_${dateForFilename}.pdf`;
+
+      const newUri = `${FileSystem.documentDirectory}${pdfName}`;
+
+      // Move/rename the file
+      await FileSystem.moveAsync({
+        from: uri,
+        to: newUri,
+      });
+
+      await Sharing.shareAsync(newUri, {
+        mimeType: 'application/pdf',
+        dialogTitle: 'Export Attendance Report',
+        UTI: 'com.adobe.pdf',
+      });
+
+      exportModalRef.current?.dismiss();
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      alert('Failed to export PDF. Please try again.');
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -324,7 +439,9 @@ const SessionScreen = () => {
                             <MaterialIcons name="check" size={20} color="white" />
                           </View>
                           <View className="flex-1">
-                            <Text className="font-semibold text-gray-900">{student.username}</Text>
+                            <Text className="font-semibold text-gray-900">
+                              {student.IndexNumber ?? student.username}
+                            </Text>
                             <Text className="text-sm text-gray-500">{student.email}</Text>
                           </View>
                         </View>
@@ -481,20 +598,31 @@ const SessionScreen = () => {
                   <Text className="text-lg text-gray-600">Cancel</Text>
                 </TouchableOpacity>
                 <Text className="text-xl font-bold text-gray-900">Export Attendance</Text>
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => {
-                    exportCSV();
-                    exportModalRef.current?.dismiss();
-                  }}
-                  disabled={isLoading}
-                  className={`rounded-lg bg-blue-500 px-4 py-2 ${isLoading ? 'opacity-50' : ''}`}>
-                  {isLoading ? (
-                    <ActivityIndicator size="small" color="white" />
-                  ) : (
-                    <Text className="font-semibold text-white">Export CSV</Text>
-                  )}
-                </TouchableOpacity>
+                <View className="flex-row gap-2">
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={exportCSV}
+                    disabled={isExporting}
+                    className={`rounded-lg bg-blue-500 px-4 py-2 ${isExporting ? 'opacity-50' : ''}`}>
+                    {isExporting ? (
+                      <ActivityIndicator size="small" color="white" />
+                    ) : (
+                      <Text className="font-semibold text-white">CSV</Text>
+                    )}
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={exportPDF}
+                    disabled={isExporting}
+                    className={`rounded-lg bg-green-500 px-4 py-2 ${isExporting ? 'opacity-50' : ''}`}>
+                    {isExporting ? (
+                      <ActivityIndicator size="small" color="white" />
+                    ) : (
+                      <Text className="font-semibold text-white">PDF</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
               </View>
 
               <BottomSheetFlatList

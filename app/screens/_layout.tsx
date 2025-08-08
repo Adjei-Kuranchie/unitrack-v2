@@ -45,6 +45,12 @@ export default function ScreensLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="(legal)/legal-notice"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

@@ -227,6 +227,16 @@ export default function SignInScreen() {
                   <Text className="text-base font-bold text-blue-600">Create New Account</Text>
                 </TouchableOpacity>
               </View>
+
+              {/* Legal Notice Footer - Add this */}
+              <View className="mt-10 items-center pb-8">
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => router.push('/screens/(legal)/legal-notice')}
+                  disabled={isLoading}>
+                  <Text className="text-sm text-gray-500">Privacy Policy & Terms of Service</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </ScrollView>

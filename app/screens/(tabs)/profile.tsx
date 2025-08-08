@@ -417,18 +417,36 @@ export default function ProfileScreen() {
         <View className="mx-4 mt-6 overflow-hidden rounded-2xl bg-white shadow-lg">
           <View className="border-b border-gray-100 px-6 py-4">
             <View className="flex-row items-center">
-              <View className="mr-3 rounded-full bg-red-100 p-2">
-                <MaterialIcons name="settings" size={20} color="#ef4444" />
+              <View className="mr-3 rounded-full bg-orange-100 p-2">
+                <MaterialIcons name="settings" size={20} color="#f97316" />
               </View>
-              <Text className="text-xl font-bold text-gray-900">Account Actions</Text>
+              <Text className="text-xl font-bold text-gray-900">Account & Settings</Text>
             </View>
           </View>
 
           <View className="px-6 py-4">
+            {/* Legal & Policies Link */}
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => router.push('/screens/(legal)/legal-notice')}
+              className="mb-3 flex-row items-center justify-between rounded-xl border border-gray-200 bg-gray-50 p-4">
+              <View className="flex-row items-center">
+                <View className="mr-3 rounded-full bg-blue-100 p-2">
+                  <MaterialIcons name="policy" size={20} color="#3b82f6" />
+                </View>
+                <View>
+                  <Text className="text-base font-semibold text-gray-900">Legal & Policies</Text>
+                  <Text className="text-sm text-gray-500">Privacy, Terms & About</Text>
+                </View>
+              </View>
+              <MaterialIcons name="chevron-right" size={24} color="#9ca3af" />
+            </TouchableOpacity>
+
+            {/* Sign Out Button */}
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={handleSignOut}
-              className="items-center rounded-xl bg-red-600 py-4 shadow-sm">
+              className="mt-4 items-center rounded-xl bg-red-600 py-4 shadow-sm">
               <View className="flex-row items-center">
                 <MaterialIcons name="logout" size={20} color="white" />
                 <Text className="ml-2 text-base font-semibold text-white">Sign Out</Text>
@@ -436,7 +454,6 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </View>
         </View>
-
         {/* Footer */}
         <View className="items-center px-6 py-8">
           <View className="flex-row items-center">

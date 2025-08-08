@@ -289,12 +289,18 @@ export default function RegisterScreen() {
               </TouchableOpacity>
 
               {/* Terms */}
-              {/* 
-              <Text className="mt-6 text-center text-xs text-gray-500">
-                By creating an account, you agree to our{'\n'}
-                <Text className="text-blue-600">Terms of Service</Text> and{' '}
-                <Text className="text-blue-600">Privacy Policy</Text>
-              </Text> */}
+              <TouchableOpacity
+                className="mt-6"
+                activeOpacity={0.7}
+                onPress={() => router.push('/screens/(legal)/legal-notice')}
+                disabled={isLoading}>
+                <Text className="text-center text-xs text-gray-500">
+                  By creating an account, you agree to our{'\n'}
+                  <Text className="text-blue-600 underline">
+                    Terms of Service and Privacy Policy
+                  </Text>
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
         </ScrollView>

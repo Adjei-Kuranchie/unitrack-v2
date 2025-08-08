@@ -3539,6 +3539,11 @@ expo-modules-core@2.4.2:
   dependencies:
     invariant "^2.2.4"
 
+expo-print@~14.1.4:
+  version "14.1.4"
+  resolved "https://registry.yarnpkg.com/expo-print/-/expo-print-14.1.4.tgz#ff184e1efbc3c61ca896894e85f0e842d96940ba"
+  integrity sha512-qcXdvgwtjgFxX92pd3vdZXZRiFAMysVrCJWrPQvZOSw9OjxeczTOUjcAXRdAC2qFki8Gq/eCnKozSxYN5QCFxw==
+
 expo-router@~5.1.3:
   version "5.1.3"
   resolved "https://registry.yarnpkg.com/expo-router/-/expo-router-5.1.3.tgz#3d3af1fb91a836e5d7ec3763a833a300e56440cf"
@@ -5814,6 +5819,11 @@ react-native-gesture-handler@~2.24.0:
     "@egjs/hammerjs" "^2.0.17"
     hoist-non-react-statics "^3.3.0"
     invariant "^2.2.4"
+
+react-native-html-to-pdf@^0.12.0:
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/react-native-html-to-pdf/-/react-native-html-to-pdf-0.12.0.tgz#2b467296f85c9c9783a7288b19722a7028dcbcb8"
+  integrity sha512-Yb5WO9SfF86s5Yv9PqXQ7fZDr9zZOJ+6jtweT9zFLraPNHWX7pSxe2dSkeg3cGiNrib65ZXGN6ksHymfYLFSSg==
 
 react-native-is-edge-to-edge@1.1.7:
   version "1.1.7"
