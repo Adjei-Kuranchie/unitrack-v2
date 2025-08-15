@@ -104,7 +104,7 @@ const CoursesScreen = () => {
       return colors[index];
     };
 
-    const cardColor = getCardColor(courseCode);
+    const cardColor = getCardColor(courseName);
 
     return (
       <TouchableOpacity

@@ -110,6 +110,11 @@ const AttendanceScreen = () => {
     const { date } = formatDateTime(record.date);
     const { time } = formatDateTime(record.date);
 
+    // Check if current user was present in this session
+    const wasPresent = record.studentList.some(
+      (student) => student.username === user?.username || student.email === user?.email
+    );
+
     return (
       <View
         key={recordId}
@@ -125,10 +130,14 @@ const AttendanceScreen = () => {
               <Text className="text-xs text-gray-500">{time}</Text>
             </View>
           </View>
-          <View className="rounded-full bg-green-100 px-3 py-1">
+          <View className={`rounded-full px-3 py-1 ${wasPresent ? 'bg-green-100' : 'bg-red-100'}`}>
             <View className="flex-row items-center">
-              <View className="mr-1 h-2 w-2 rounded-full bg-green-500"></View>
-              <Text className="text-xs font-medium text-green-700">Present</Text>
+              <View
+                className={`mr-1 h-2 w-2 rounded-full ${wasPresent ? 'bg-green-500' : 'bg-red-500'}`}></View>
+              <Text
+                className={`text-xs font-medium ${wasPresent ? 'text-green-700' : 'text-red-700'}`}>
+                {wasPresent ? 'Present' : 'Absent'}
+              </Text>
             </View>
           </View>
         </View>

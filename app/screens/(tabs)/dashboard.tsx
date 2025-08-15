@@ -255,7 +255,7 @@ export default function DashboardScreen() {
               <QuickActionCard
                 icon="qr-code-scanner"
                 label="Mark Attendance"
-                description="Scan QR code to mark your attendance"
+                description="Select course to mark your attendance"
                 color="bg-orange-500"
                 onPress={() => router.push('/screens/(tabs)/attendance')}
               />

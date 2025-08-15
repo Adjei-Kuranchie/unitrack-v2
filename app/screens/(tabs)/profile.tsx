@@ -1,10 +1,9 @@
 /**
  * Enhanced ProfileScreen component with modern UI/UX improvements matching CoursesScreen style.
  *
- * New Features:
+ * Features:
  * - Modern solid color header with user avatar and role badge
  * - Enhanced profile cards with better visual hierarchy and icons
- * - Improved edit mode with modern form styling
  * - Better loading states and error handling
  * - Enhanced action buttons with icons
  * - Improved color scheme and typography throughout
@@ -18,80 +17,71 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useApiStore } from '~/store/apiStore';
 import { useAuthStore } from '~/store/authStore';
 
-interface EditableField {
+interface ProfileField {
   key: string;
   label: string;
   value: string;
-  editable: boolean;
   icon: string;
-  placeholder?: string;
 }
 
 export default function ProfileScreen() {
   const { user, signOut, token, role } = useAuthStore();
-  const { updateUser, fetchUserProfile, isLoading, error, clearError } = useApiStore();
+  const {
+    fetchUserProfile,
+    isLoading,
+    error,
+    clearError,
+    courses,
+    sessions,
+    attendance,
+    fetchCourses,
+    fetchSessions,
+    fetchAttendance,
+  } = useApiStore();
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedFields, setEditedFields] = useState<Record<string, string>>({});
   const [profileLoading, setProfileLoading] = useState(false);
   const [isStudent, setIsStudent] = useState(user?.role === 'STUDENT');
 
-  // Enhanced profile fields configuration with icons
-  const profileFields: EditableField[] = [
+  // Profile fields configuration with icons
+  const profileFields: ProfileField[] = [
     {
       key: 'firstName',
       label: 'First Name',
       value: user?.firstName || '',
-      editable: true,
       icon: 'person',
-      placeholder: 'Enter your first name',
     },
     {
       key: 'lastName',
       label: 'Last Name',
       value: user?.lastName || '',
-      editable: true,
       icon: 'person',
-      placeholder: 'Enter your last name',
     },
     {
       key: 'email',
       label: 'Email Address',
       value: user?.email || '',
-      editable: false,
       icon: 'email',
     },
     {
       key: 'username',
       label: 'Username',
       value: user?.username || '',
-      editable: false,
       icon: 'account-circle',
     },
     {
       key: 'program',
       label: 'Program',
       value: user?.program || '',
-      editable: false,
       icon: 'school',
     },
     {
       key: 'IndexNumber',
       label: 'Index Number',
       value: user?.IndexNumber || '',
-      editable: false,
       icon: 'badge',
     },
   ];
@@ -117,6 +107,15 @@ export default function ProfileScreen() {
     }
   }, [error]);
 
+  useEffect(() => {
+    if (token && isStudent) {
+      // Fetch academic data for students
+      Promise.all([fetchCourses(), fetchSessions(), fetchAttendance()]).catch((err) => {
+        console.error('Failed to fetch academic data:', err);
+      });
+    }
+  }, [token, isStudent]);
+
   const loadUserProfile = async () => {
     if (!token) return;
 
@@ -127,36 +126,6 @@ export default function ProfileScreen() {
       console.error('Failed to load user profile:', err);
     } finally {
       setProfileLoading(false);
-    }
-  };
-
-  const handleEdit = () => {
-    setIsEditing(true);
-    const initialFields: Record<string, string> = {};
-    profileFields.forEach((field) => {
-      if (field.editable) {
-        initialFields[field.key] = field.value;
-      }
-    });
-    setEditedFields(initialFields);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setEditedFields({});
-  };
-
-  const handleSave = async () => {
-    try {
-      await updateUser({
-        id: user?.id,
-        ...editedFields,
-      });
-      setIsEditing(false);
-      setEditedFields({});
-      Alert.alert('Success', 'Profile updated successfully');
-    } catch (err) {
-      Alert.alert('Error', 'Failed to update profile');
     }
   };
 
@@ -174,13 +143,6 @@ export default function ProfileScreen() {
         },
       },
     ]);
-  };
-
-  const updateField = (key: string, value: string) => {
-    setEditedFields((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
   };
 
   const getUserInitials = () => {
@@ -206,7 +168,7 @@ export default function ProfileScreen() {
   if (!token) {
     return (
       <View className="flex-1 bg-slate-50">
-        <View className="bg-red-500 px-4 pb-6 pt-4">
+        <View className="bg-red-500 px-4 pb-6 pt-14">
           <View className="flex-row items-center justify-between">
             <View className="flex-1">
               <Text className="text-2xl font-bold text-white">Profile</Text>
@@ -233,7 +195,7 @@ export default function ProfileScreen() {
   if (profileLoading) {
     return (
       <View className="flex-1 bg-slate-50">
-        <View className="bg-blue-600 px-4 pb-6 pt-4">
+        <View className="bg-blue-600 px-4 pb-6 pt-14">
           <View className="flex-row items-center justify-between">
             <View className="flex-1">
               <Text className="text-2xl font-bold text-white">Profile</Text>
@@ -258,7 +220,7 @@ export default function ProfileScreen() {
   if (!user) {
     return (
       <View className="flex-1 bg-slate-50">
-        <View className="bg-red-500 px-4 pb-6 pt-4">
+        <View className="bg-red-500 px-4 pb-6 pt-14">
           <View className="flex-row items-center justify-between">
             <View className="flex-1">
               <Text className="text-2xl font-bold text-white">Profile</Text>
@@ -334,84 +296,68 @@ export default function ProfileScreen() {
 
         {/* Profile Information Card */}
         <View className="mx-4 mt-6 overflow-hidden rounded-2xl bg-white shadow-lg">
-          <View className="border-b border-gray-100 px-6 py-4">
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center">
-                <View className="mr-3 rounded-full bg-blue-100 p-2">
-                  <MaterialIcons name="info" size={20} color="#3b82f6" />
-                </View>
-                <Text className="text-xl font-bold text-gray-900">Personal Information</Text>
+          <View className="border-b border-gray-100 bg-gray-50 px-6 py-4">
+            <View className="flex-row items-center">
+              <View className="mr-3 rounded-lg bg-blue-600 p-2">
+                <MaterialIcons name="badge" size={20} color="white" />
               </View>
-              {!isEditing ? (
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={handleEdit}
-                  className="rounded-xl bg-blue-600 px-4 py-2 shadow-sm">
-                  <View className="flex-row items-center">
-                    <MaterialIcons name="edit" size={16} color="white" />
-                    <Text className="ml-1 font-medium text-white">Edit</Text>
-                  </View>
-                </TouchableOpacity>
-              ) : (
-                <View className="flex-col gap-2">
-                  <TouchableOpacity
-                    activeOpacity={0.7}
-                    onPress={handleCancel}
-                    className="rounded-xl bg-gray-500 px-4 py-2">
-                    <View className="flex-row items-center">
-                      <MaterialIcons name="close" size={16} color="white" />
-                      <Text className="ml-1 font-medium text-white">Cancel</Text>
-                    </View>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    activeOpacity={0.7}
-                    onPress={handleSave}
-                    className="min-w-[80px] items-center rounded-xl bg-green-600 px-4 py-2">
-                    {isLoading ? (
-                      <ActivityIndicator color="#ffffff" size="small" />
-                    ) : (
-                      <View className="flex-row items-center">
-                        <MaterialIcons name="check" size={16} color="white" />
-                        <Text className="ml-1 font-medium text-white">Save</Text>
-                      </View>
-                    )}
-                  </TouchableOpacity>
-                </View>
-              )}
+              <Text className="text-lg font-bold text-gray-900">Personal Information</Text>
             </View>
           </View>
 
-          <View className="px-6 py-4">
-            {filteredFields.map((field, index) => (
-              <View
-                key={field.key}
-                className={`${index !== filteredFields.length - 1 ? 'mb-6' : ''}`}>
-                <View className="mb-3 flex-row items-center">
-                  <View className="mr-3 rounded-full bg-gray-100 p-2">
-                    <MaterialIcons name={field.icon as any} size={16} color="#6b7280" />
+          <View className="p-6">
+            <View className="flex-row flex-wrap">
+              {filteredFields.map((field, index) => (
+                <View
+                  key={field.key}
+                  className={`${
+                    field.key === 'email' || field.key === 'username' ? 'w-full' : 'w-1/2'
+                  } ${index < filteredFields.length - 2 ? 'mb-6' : ''} ${
+                    index % 2 === 0 ? 'pr-2' : 'pl-2'
+                  }`}>
+                  <View className="rounded-xl bg-gray-50 p-4">
+                    <View className="mb-2 flex-row items-center">
+                      <MaterialIcons name={field.icon as any} size={16} color="#6b7280" />
+                      <Text className="ml-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                        {field.label}
+                      </Text>
+                    </View>
+                    <Text className="text-sm font-semibold text-gray-900" numberOfLines={1}>
+                      {field.value || 'N/A'}
+                    </Text>
                   </View>
-                  <Text className="text-base font-semibold text-gray-900">{field.label}</Text>
                 </View>
-
-                {isEditing && field.editable ? (
-                  <View className="rounded-xl border border-blue-200 bg-blue-50 p-4">
-                    <TextInput
-                      className="text-base text-gray-900"
-                      value={editedFields[field.key] || field.value}
-                      onChangeText={(text) => updateField(field.key, text)}
-                      placeholder={field.placeholder}
-                      placeholderTextColor="#9ca3af"
-                    />
-                  </View>
-                ) : (
-                  <View className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                    <Text className="text-base text-gray-900">{field.value || 'Not provided'}</Text>
-                  </View>
-                )}
-              </View>
-            ))}
+              ))}
+            </View>
           </View>
         </View>
+        {/* Quick Stats Card (for Students) */}
+        {isStudent && (
+          <View className="mx-4 mt-6 overflow-hidden rounded-2xl bg-blue-500 p-6 shadow-lg">
+            <View className="mb-4 flex-row items-center">
+              <View className="mr-3 rounded-full bg-white/20 p-2">
+                <MaterialIcons name="insights" size={20} color="white" />
+              </View>
+              <Text className="text-xl font-bold text-white">Academic Overview</Text>
+            </View>
+            <View className="flex-row justify-around">
+              <View className="items-center">
+                <Text className="text-2xl font-bold text-white">{courses.length}</Text>
+                <Text className="text-sm text-white/80">Courses</Text>
+              </View>
+              <View className="items-center">
+                <Text className="text-2xl font-bold text-white">{attendance.length}</Text>
+                <Text className="text-sm text-white/80">Attendance</Text>
+              </View>
+              <View className="items-center">
+                <Text className="text-2xl font-bold text-white">
+                  {sessions.filter((s) => s.status === 'ACTIVE').length}
+                </Text>
+                <Text className="text-sm text-white/80">Active Sessions</Text>
+              </View>
+            </View>
+          </View>
+        )}
 
         {/* Account Actions Card */}
         <View className="mx-4 mt-6 overflow-hidden rounded-2xl bg-white shadow-lg">
@@ -425,6 +371,28 @@ export default function ProfileScreen() {
           </View>
 
           <View className="px-6 py-4">
+            {/* Refresh Profile Link */}
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={loadUserProfile}
+              disabled={isLoading}
+              className="mb-3 flex-row items-center justify-between rounded-xl border border-gray-200 bg-gray-50 p-4">
+              <View className="flex-row items-center">
+                <View className="mr-3 rounded-full bg-green-100 p-2">
+                  <MaterialIcons name="refresh" size={20} color="#10b981" />
+                </View>
+                <View>
+                  <Text className="text-base font-semibold text-gray-900">Refresh Profile</Text>
+                  <Text className="text-sm text-gray-500">Update your information</Text>
+                </View>
+              </View>
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#6b7280" />
+              ) : (
+                <MaterialIcons name="chevron-right" size={24} color="#9ca3af" />
+              )}
+            </TouchableOpacity>
+
             {/* Legal & Policies Link */}
             <TouchableOpacity
               activeOpacity={0.7}
@@ -454,6 +422,7 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </View>
         </View>
+
         {/* Footer */}
         <View className="items-center px-6 py-8">
           <View className="flex-row items-center">

@@ -36,8 +36,9 @@ export default function RegisterScreen() {
 
   const validateForm = () => {
     const { username, password, firstName, lastName, email } = formData;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = new RegExp('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$');
 
+    // Check if all fields are filled
     if (
       !username.trim() ||
       !password.trim() ||
@@ -55,9 +56,10 @@ export default function RegisterScreen() {
       return false;
     }
 
-    if (password.length < 6) {
+    // Validate email format
+    if (!emailRegex.test(email)) {
       showToast(
-        'Password must be at least 6 characters',
+        'Please enter a valid email address',
         3000,
         true,
         { backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8 },
@@ -66,9 +68,139 @@ export default function RegisterScreen() {
       return false;
     }
 
-    if (!emailRegex.test(email)) {
+    // Password minimum length
+    if (password.length < 12) {
       showToast(
-        'Please enter a valid email address',
+        'Password must be at least 12 characters',
+        3000,
+        true,
+        { backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8 },
+        { color: '#DC2626', fontSize: 14, fontWeight: '500' }
+      );
+      return false;
+    }
+
+    // Password complexity requirements
+    const hasUpperCase = new RegExp('[A-Z]').test(password);
+    const hasLowerCase = new RegExp('[a-z]').test(password);
+    const hasNumber = new RegExp('[0-9]').test(password);
+    const hasSpecialChar = new RegExp('[!@#$%^&*()\\-_=+\```math\```{}|;:,.<>?/]').test(password);
+    if (!hasUpperCase) {
+      showToast(
+        'Password must contain at least 1 uppercase letter',
+        3000,
+        true,
+        { backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8 },
+        { color: '#DC2626', fontSize: 14, fontWeight: '500' }
+      );
+      return false;
+    }
+
+    if (!hasLowerCase) {
+      showToast(
+        'Password must contain at least 1 lowercase letter',
+        3000,
+        true,
+        { backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8 },
+        { color: '#DC2626', fontSize: 14, fontWeight: '500' }
+      );
+      return false;
+    }
+
+    if (!hasNumber) {
+      showToast(
+        'Password must contain at least 1 number',
+        3000,
+        true,
+        { backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8 },
+        { color: '#DC2626', fontSize: 14, fontWeight: '500' }
+      );
+      return false;
+    }
+
+    if (!hasSpecialChar) {
+      showToast(
+        'Password must contain at least 1 special character',
+        3000,
+        true,
+        { backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8 },
+        { color: '#DC2626', fontSize: 14, fontWeight: '500' }
+      );
+      return false;
+    }
+
+    // Check if password is entirely numeric
+    if (new RegExp('^\\d+$').test(password)) {
+      showToast(
+        'Password cannot be entirely numeric',
+        3000,
+        true,
+        { backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8 },
+        { color: '#DC2626', fontSize: 14, fontWeight: '500' }
+      );
+      return false;
+    }
+
+    // Check for personal information in password (case-insensitive)
+    const passwordLower = password.toLowerCase();
+    const usernameLower = username.trim().toLowerCase();
+    const firstNameLower = firstName.trim().toLowerCase();
+    const lastNameLower = lastName.trim().toLowerCase();
+    const emailLocalPart = email.split('@')[0].toLowerCase();
+
+    if (
+      (usernameLower && passwordLower.includes(usernameLower)) ||
+      (firstNameLower && passwordLower.includes(firstNameLower)) ||
+      (lastNameLower && passwordLower.includes(lastNameLower)) ||
+      (emailLocalPart && passwordLower.includes(emailLocalPart))
+    ) {
+      showToast(
+        'Password cannot contain your name, username, or email',
+        3000,
+        true,
+        { backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8 },
+        { color: '#DC2626', fontSize: 14, fontWeight: '500' }
+      );
+      return false;
+    }
+
+    // Check for common/weak passwords
+    const commonPasswords = [
+      'password123',
+      'password1234',
+      'password12345',
+      '123456',
+      '12345678',
+      '123456789',
+      '1234567890',
+      'qwerty',
+      'qwerty123',
+      'qwertyuiop',
+      'abc123',
+      'abc1234',
+      'abcdef',
+      'admin123',
+      'admin1234',
+      'letmein',
+      'welcome',
+      'welcome123',
+      'monkey',
+      'dragon',
+      'master',
+      '111111',
+      '000000',
+      '123123',
+      'iloveyou',
+      'sunshine',
+      'princess',
+      'football',
+      'baseball',
+      'password',
+    ];
+
+    if (commonPasswords.includes(passwordLower)) {
+      showToast(
+        'Password is too common. Please choose a stronger password',
         3000,
         true,
         { backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8 },
