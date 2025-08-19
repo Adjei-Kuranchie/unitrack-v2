@@ -279,7 +279,7 @@ const AttendanceScreen = () => {
                   {filteredSessions.map((session) => (
                     <Picker.Item
                       key={session.id}
-                      label={`${session.course.courseCode}: ${session.course.courseName}`}
+                      label={`${session.course.courseCode}: ${session.course.courseName} - ${session.attendance.lecturer}`}
                       value={session.id}
                     />
                   ))}

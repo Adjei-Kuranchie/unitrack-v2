@@ -282,7 +282,12 @@ export const useApiStore = create<ApiState>((set, get) => ({
 
       if (!response.ok) {
         console.log('Response not OK:', response.status, response.statusText);
-        return;
+        const errorText = await response.text();
+        set({
+          error: errorText || 'Failed to mark attendance',
+          isLoading: false,
+        });
+        throw new Error(errorText || 'Failed to mark attendance');
       }
 
       // Add a small delay to ensure backend processing completes
