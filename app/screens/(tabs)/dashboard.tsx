@@ -132,7 +132,7 @@ export default function DashboardScreen() {
             <View className="mt-2 flex-row items-center">
               <View className="rounded-full bg-white/20 px-3 py-1">
                 <Text className="text-xs font-medium text-white">
-                  {isLecturer ? 'Lecturer' : 'Student'}
+                  {isLecturer ? 'Lecturer' : user?.username || 'Student'}
                 </Text>
               </View>
             </View>

@@ -55,7 +55,7 @@ interface AuthState {
   token: string | null;
   isLoading: boolean;
   error: string | null;
-  signIn: (username: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
   signOut: () => void;
   setUser: (user: any) => void;
   register: (userData: RegisterData) => Promise<void>;

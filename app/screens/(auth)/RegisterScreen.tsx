@@ -1,7 +1,7 @@
 import { Feather, MaterialIcons } from '@expo/vector-icons';
 import { showToast } from 'au-react-native-toast';
 import { router } from 'expo-router';
-import React, { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -34,8 +34,14 @@ export default function RegisterScreen() {
   const { register, isLoading, error, clearError } = useAuthStore();
   const scrollViewRef = useRef<ScrollView>(null);
 
+  // Helper function to validate index number format
+  const validateIndexNumber = (indexNumber: string) => {
+    const regex = /^[A-Za-z]{2}\/[A-Za-z]{3}\/\d{2}\/\d{4}$/;
+    return regex.test(indexNumber);
+  };
+
   const validateForm = () => {
-    const { username, password, firstName, lastName, email } = formData;
+    const { username, password, firstName, lastName, email, role } = formData;
     const emailRegex = new RegExp('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$');
 
     // Check if all fields are filled
@@ -68,6 +74,20 @@ export default function RegisterScreen() {
       return false;
     }
 
+    // Validate username/index number based on role
+    if (role === 'STUDENT') {
+      if (!validateIndexNumber(username)) {
+        showToast(
+          'Index number must be in format: XX/XXX/XX/XXXX (e.g., AB/123/45/6789)',
+          3000,
+          true,
+          { backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8 },
+          { color: '#DC2626', fontSize: 14, fontWeight: '500' }
+        );
+        return false;
+      }
+    }
+
     // Password minimum length
     if (password.length < 12) {
       showToast(
@@ -84,7 +104,9 @@ export default function RegisterScreen() {
     const hasUpperCase = new RegExp('[A-Z]').test(password);
     const hasLowerCase = new RegExp('[a-z]').test(password);
     const hasNumber = new RegExp('[0-9]').test(password);
-    const hasSpecialChar = new RegExp('[!@#$%^&*()\\-_=+\```math\```{}|;:,.<>?/]').test(password);
+    const hasSpecialChar = new RegExp('[!@#$%^&*()\\-_=+{}|;:,.<>?/]').test(password);
+
+    // Check if password contains at least one uppercase letter
     if (!hasUpperCase) {
       showToast(
         'Password must contain at least 1 uppercase letter',
@@ -96,6 +118,7 @@ export default function RegisterScreen() {
       return false;
     }
 
+    // Check if password contains at least one lowercase letter
     if (!hasLowerCase) {
       showToast(
         'Password must contain at least 1 lowercase letter',
@@ -107,6 +130,7 @@ export default function RegisterScreen() {
       return false;
     }
 
+    // Check if password contains at least one number
     if (!hasNumber) {
       showToast(
         'Password must contain at least 1 number',
@@ -117,7 +141,7 @@ export default function RegisterScreen() {
       );
       return false;
     }
-
+    // Check if password contains at least one special character
     if (!hasSpecialChar) {
       showToast(
         'Password must contain at least 1 special character',
@@ -241,11 +265,15 @@ export default function RegisterScreen() {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (error) {
       Alert.alert('Registration Error', error, [{ text: 'OK', onPress: clearError }]);
     }
   }, [error]);
+
+  // Conditional label and placeholder based on role
+  const usernameLabel = formData.role === 'STUDENT' ? 'Index Number' : 'Username';
+  const usernamePlaceholder = formData.role === 'STUDENT' ? 'e.g., PS/CSC/21/0001' : 'johndoe123';
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
@@ -318,11 +346,11 @@ export default function RegisterScreen() {
               />
 
               <InputField
-                label="Username"
+                label={usernameLabel}
                 value={formData.username}
                 onChangeText={(text: string) => setFormData({ ...formData, username: text.trim() })}
-                placeholder="johndoe123"
-                autoCapitalize="none"
+                placeholder={usernamePlaceholder}
+                autoCapitalize={formData.role === 'STUDENT' ? 'characters' : 'none'}
                 fieldName="username"
                 icon="person"
               />

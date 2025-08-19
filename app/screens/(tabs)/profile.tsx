@@ -68,21 +68,15 @@ export default function ProfileScreen() {
     },
     {
       key: 'username',
-      label: 'Username',
+      label: isStudent ? 'Index Number' : 'Username', // Conditional label based on role
       value: user?.username || '',
-      icon: 'account-circle',
+      icon: isStudent ? 'badge' : 'account-circle', // Conditional icon based on role
     },
     {
       key: 'program',
       label: 'Program',
       value: user?.program || '',
       icon: 'school',
-    },
-    {
-      key: 'IndexNumber',
-      label: 'Index Number',
-      value: user?.IndexNumber || '',
-      icon: 'badge',
     },
   ];
 
@@ -91,7 +85,7 @@ export default function ProfileScreen() {
   }, [role]);
 
   const filteredFields = !isStudent
-    ? profileFields.filter((f) => f.key !== 'program' && f.key !== 'IndexNumber')
+    ? profileFields.filter((f) => f.key !== 'program')
     : profileFields;
 
   useEffect(() => {
@@ -311,9 +305,11 @@ export default function ProfileScreen() {
                 <View
                   key={field.key}
                   className={`${
-                    field.key === 'email' || field.key === 'username' ? 'w-full' : 'w-1/2'
-                  } ${index < filteredFields.length - 2 ? 'mb-6' : ''} ${
-                    index % 2 === 0 ? 'pr-2' : 'pl-2'
+                    field.key === 'email' || field.key === 'username' || field.key === 'program'
+                      ? 'w-full'
+                      : 'w-1/2'
+                  } ${index < filteredFields.length - 1 ? 'mb-6' : ''} ${
+                    index % 2 === 0 ? 'pr-2' : ''
                   }`}>
                   <View className="rounded-xl bg-gray-50 p-4">
                     <View className="mb-2 flex-row items-center">
@@ -331,6 +327,7 @@ export default function ProfileScreen() {
             </View>
           </View>
         </View>
+
         {/* Quick Stats Card (for Students) */}
         {isStudent && (
           <View className="mx-4 mt-6 overflow-hidden rounded-2xl bg-blue-500 p-6 shadow-lg">

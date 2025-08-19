@@ -18,7 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '~/store/authStore';
 
 export default function SignInScreen() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
@@ -27,10 +27,11 @@ export default function SignInScreen() {
 
   const handleSignIn = async () => {
     Keyboard.dismiss();
+    const emailRegex = new RegExp('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$');
 
-    if (!username.trim() || !password.trim()) {
+    if (!email.trim() || !password.trim()) {
       showToast(
-        'Please enter your username and password',
+        'Please enter your email and password',
         3000,
         true,
         {
@@ -48,9 +49,20 @@ export default function SignInScreen() {
       return;
     }
 
-    await signIn(username.trim(), password.trim());
+    if (!emailRegex.test(email.trim())) {
+      showToast(
+        'Please enter a valid email address',
+        3000,
+        true,
+        { backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8 },
+        { color: '#DC2626', fontSize: 14, fontWeight: '500' }
+      );
+      return false;
+    }
 
-    const { user, resMessage } = useAuthStore.getState();
+    await signIn(email.trim(), password.trim());
+
+    const { resMessage } = useAuthStore.getState();
     if (resMessage) {
       showToast(
         'Welcome back!',
@@ -127,29 +139,30 @@ export default function SignInScreen() {
 
             {/* Form Section */}
             <View className="space-y-5">
-              {/* Username Field */}
+              {/* Email Field */}
               <View>
-                <Text className="mb-3 ml-2 text-sm font-semibold text-gray-700">Username</Text>
+                <Text className="mb-3 ml-2 text-sm font-semibold text-gray-700">Email</Text>
                 <View className="relative">
                   <View className="absolute left-5 top-5 z-10">
                     <Feather
-                      name="user"
+                      name="mail"
                       size={22}
-                      color={focusedField === 'username' ? '#3B82F6' : '#9CA3AF'}
+                      color={focusedField === 'email' ? '#3B82F6' : '#9CA3AF'}
                     />
                   </View>
                   <TextInput
-                    className={`${getInputStyle('username')} pl-14 text-base`}
-                    placeholder="Enter your username"
+                    className={`${getInputStyle('email')} pl-14 text-base`}
+                    placeholder="Enter your email"
                     placeholderTextColor="#9CA3AF"
-                    value={username}
-                    onChangeText={setUsername}
-                    onFocus={() => setFocusedField('username')}
+                    value={email}
+                    onChangeText={setEmail}
+                    onFocus={() => setFocusedField('email')}
                     onBlur={() => setFocusedField(null)}
                     autoCapitalize="none"
                     autoCorrect={false}
                     editable={!isLoading}
                     returnKeyType="next"
+                    keyboardType="email-address"
                   />
                 </View>
               </View>

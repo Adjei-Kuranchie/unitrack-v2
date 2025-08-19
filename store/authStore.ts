@@ -36,7 +36,7 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       error: null,
 
-      signIn: async (username: string, password: string) => {
+      signIn: async (email: string, password: string) => {
         set({ isLoading: true, error: null });
 
         try {
@@ -45,7 +45,7 @@ export const useAuthStore = create<AuthState>()(
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ username, password }),
+            body: JSON.stringify({ email, password }),
           });
 
           if (!response.ok) {
