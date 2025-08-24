@@ -242,21 +242,13 @@ export default function RegisterScreen() {
     if (!validateForm()) return;
 
     await register(formData);
-    //TODO: Uncomment the following line to navigate to OTP screen after registration when implemented
-    // router.push({
-    //   pathname: '/screens/(auth)/OTPScreen',
-    //   params: {
-    //     verificationType: 'registration',
-    //     email: formData.email,
-    //   },
-    // });
 
     const { error: registrationError } = useAuthStore.getState();
 
     if (!registrationError) {
       showToast(
-        'Account created successfully!',
-        3000,
+        'Check mail to verify your account!',
+        7000,
         true,
         { backgroundColor: '#D1FAE5', padding: 12, borderRadius: 8 },
         { color: '#059669', fontSize: 14, fontWeight: '500' }
