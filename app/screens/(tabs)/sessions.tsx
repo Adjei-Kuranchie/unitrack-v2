@@ -15,7 +15,6 @@
  *
  * @component
  */
-
 import { Ionicons } from '@expo/vector-icons';
 import { showToast } from 'au-react-native-toast';
 import * as Location from 'expo-location';
@@ -45,6 +44,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState('');
+  const [sessionTimeMinutes, setSessionTimeMinutes] = useState(300); // Default 5 hours in minutes
   const [locationError, setLocationError] = useState<string | null>(null);
   const [location, setLocation] = useState<{ latitude: number; longitude: number }>();
   const [searchQuery, setSearchQuery] = useState('');
@@ -67,6 +67,19 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
     loadData();
     requestLocationPermission();
   }, []);
+
+  // Convert minutes to seconds for the API
+  const convertMinutesToSeconds = (minutes: number): number => {
+    return minutes * 60;
+  };
+
+  // Predefined time options in minutes
+  const timeOptions = [
+    { label: '5', value: 5 },
+    { label: '10', value: 10 },
+    { label: '15', value: 15 },
+    { label: '20', value: 20 },
+  ];
 
   const loadData = async () => {
     await Promise.all([fetchSessions(), fetchCourses()]);
@@ -91,14 +104,30 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
       return;
     }
 
+    if (sessionTimeMinutes <= 0) {
+      showToast(
+        'Please enter a valid session time.',
+        3000,
+        true,
+        { backgroundColor: 'pink', padding: 5 },
+        { color: 'red', fontSize: 15 }
+      );
+      return;
+    }
+
     try {
       if (!location) {
         Alert.alert('Error', 'Location is required to create a session');
         return;
       }
-      await createSession({ courseName: selectedCourse, location });
+
+      // Convert minutes to seconds for the API
+      const timeInSeconds = convertMinutesToSeconds(sessionTimeMinutes);
+
+      await createSession({ courseName: selectedCourse, location }, timeInSeconds);
       setShowCreateModal(false);
       setSelectedCourse('');
+      setSessionTimeMinutes(300); // Reset to default
 
       showToast(
         'Session created successfully',
@@ -320,10 +349,10 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
       transparent={true}
       animationType="slide"
       onRequestClose={() => setShowCreateModal(false)}>
-      <View className="flex-1 justify-center bg-black/50 px-4">
+      <View className="flex-1 justify-center bg-black/50 px-4 ">
         <View className="rounded-2xl bg-white shadow-xl">
           {/* Modal Header */}
-          <View className="border-b border-gray-200 p-6">
+          <View className="p-6">
             <View className="flex-row items-center justify-between">
               <TouchableOpacity
                 activeOpacity={0.7}
@@ -352,7 +381,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
           </View>
 
           {/* Location Status in Modal */}
-          <View className="border-b border-gray-200 p-4">
+          <View className="p-4">
             <View className="flex-row items-center">
               <View className={`mr-3 rounded-full p-2 ${location ? 'bg-green-100' : 'bg-red-100'}`}>
                 <Ionicons
@@ -382,45 +411,79 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
             </View>
           </View>
 
-          {/* Course Selection */}
-          <View className="max-h-80 p-6">
-            <Text className="mb-4 text-lg font-semibold text-gray-900">Select Course</Text>
+          <View className="max-h-96 p-6">
+            {/* Session Duration Selection */}
+            <View className="mb-6 flex flex-row justify-between">
+              <Text className="mb-4 text-lg font-semibold text-gray-900">Session Duration</Text>
 
-            <FlatList
-              data={courses}
-              keyExtractor={(item) => item.courseCode}
-              showsVerticalScrollIndicator={false}
-              renderItem={({ item: course }) => (
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  className={`mb-3 rounded-xl border p-4 ${
-                    selectedCourse === course.courseName
-                      ? 'border-indigo-200 bg-indigo-50'
-                      : 'border-gray-200 bg-gray-50'
-                  }`}
-                  onPress={() => setSelectedCourse(course.courseName)}>
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-1">
-                      <Text
-                        className={`font-semibold ${
-                          selectedCourse === course.courseName ? 'text-indigo-700' : 'text-gray-900'
-                        }`}>
-                        {course.courseName}
-                      </Text>
-                      <Text
-                        className={`text-sm ${
-                          selectedCourse === course.courseName ? 'text-indigo-600' : 'text-gray-500'
-                        }`}>
-                        {course.courseCode}
-                      </Text>
+              {/* Time Options Grid */}
+              <View className="flex-row flex-wrap gap-2">
+                {timeOptions.map((option) => (
+                  <TouchableOpacity
+                    key={option.value}
+                    activeOpacity={0.7}
+                    className={`rounded-full border px-3 py-2 ${
+                      sessionTimeMinutes === option.value
+                        ? 'border-indigo-200 bg-indigo-50'
+                        : 'border-gray-200 bg-gray-50'
+                    }`}
+                    onPress={() => setSessionTimeMinutes(option.value)}>
+                    <Text
+                      className={`text-sm ${
+                        sessionTimeMinutes === option.value ? 'text-indigo-700' : 'text-gray-600'
+                      }`}>
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* Course Selection */}
+            <View>
+              <Text className="mb-4 text-lg font-semibold text-gray-900">Select Course</Text>
+
+              <FlatList
+                data={courses}
+                keyExtractor={(item) => item.courseCode}
+                showsVerticalScrollIndicator={false}
+                style={{ maxHeight: 200 }}
+                renderItem={({ item: course }) => (
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    className={`mb-3 rounded-xl border p-4 ${
+                      selectedCourse === course.courseName
+                        ? 'border-indigo-500 bg-indigo-50'
+                        : 'border-gray-200 bg-gray-50'
+                    }`}
+                    onPress={() => setSelectedCourse(course.courseName)}>
+                    <View className="flex-row items-center justify-between">
+                      <View className="flex-1">
+                        <Text
+                          className={`font-semibold ${
+                            selectedCourse === course.courseName
+                              ? 'text-indigo-700'
+                              : 'text-gray-900'
+                          }`}>
+                          {course.courseName}
+                        </Text>
+                        <Text
+                          className={`text-sm ${
+                            selectedCourse === course.courseName
+                              ? 'text-indigo-600'
+                              : 'text-gray-500'
+                          }`}>
+                          {course.courseCode}
+                        </Text>
+                      </View>
+                      {selectedCourse === course.courseName && (
+                        <Ionicons name="checkmark-circle" size={20} color="#6366f1" />
+                      )}
                     </View>
-                    {selectedCourse === course.courseName && (
-                      <Ionicons name="checkmark-circle" size={20} color="#6366f1" />
-                    )}
-                  </View>
-                </TouchableOpacity>
-              )}
-            />
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
           </View>
 
           {/* Modal Footer */}
@@ -435,10 +498,14 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
               <TouchableOpacity
                 activeOpacity={0.7}
                 className={`flex-1 rounded-xl py-4 ${
-                  !selectedCourse.trim() || !location || isLoading ? 'bg-gray-300' : 'bg-indigo-600'
+                  !selectedCourse.trim() || !location || isLoading || sessionTimeMinutes <= 0
+                    ? 'bg-gray-300'
+                    : 'bg-indigo-600'
                 }`}
                 onPress={handleCreateSession}
-                disabled={!selectedCourse.trim() || !location || isLoading}>
+                disabled={
+                  !selectedCourse.trim() || !location || isLoading || sessionTimeMinutes <= 0
+                }>
                 <View className="flex-row items-center justify-center">
                   {isLoading ? (
                     <ActivityIndicator size="small" color="white" />

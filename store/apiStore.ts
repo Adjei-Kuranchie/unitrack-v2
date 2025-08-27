@@ -32,7 +32,7 @@ import Constants from 'expo-constants';
 import uuid from 'react-native-uuid';
 import { create } from 'zustand';
 import { useAuthStore } from '~/store/authStore';
-import { ApiState, Attendance, AttendanceRequest, SessionRequest } from '~/types/app';
+import { ApiState, Attendance, AttendanceRequest } from '~/types/app';
 const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 
 const DEVICE_ID_KEY = 'device_id';
@@ -89,6 +89,8 @@ const getAuthHeaders = async (
 export const useApiStore = create<ApiState>((set, get) => ({
   courses: [],
   sessions: [],
+  activeSessions: [],
+  closedSessions: [],
   attendance: [],
   users: [],
   isLoading: false,
@@ -178,7 +180,7 @@ export const useApiStore = create<ApiState>((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/session`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/session?size=1000`, {
         headers: await getAuthHeaders(),
       });
 
@@ -187,7 +189,7 @@ export const useApiStore = create<ApiState>((set, get) => ({
       }
 
       const sessions = await response.json();
-      set({ sessions, isLoading: false });
+      set({ sessions: sessions.content, isLoading: false });
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'Failed to fetch sessions',
@@ -196,11 +198,56 @@ export const useApiStore = create<ApiState>((set, get) => ({
     }
   },
 
-  createSession: async (sessionReq: SessionRequest) => {
+  fetchActiveSessions: async () => {
     set({ isLoading: true, error: null });
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/session/create`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/session/active`, {
+        headers: await getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch active sessions');
+      }
+
+      const sessions = await response.json();
+      set({ activeSessions: sessions, isLoading: false });
+    } catch (error) {
+      console.log(error);
+      set({
+        error: error instanceof Error ? error.message : 'Failed to fetch active sessions',
+        isLoading: false,
+      });
+    }
+  },
+
+  fetchClosedSessions: async () => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/session/closed`, {
+        headers: await getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch sessions');
+      }
+
+      const sessions = await response.json();
+      set({ closedSessions: sessions, isLoading: false });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Failed to fetch sessions',
+        isLoading: false,
+      });
+    }
+  },
+
+  createSession: async (sessionReq, time = 300) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/session/create?time=${time}`, {
         method: 'POST',
         headers: await getAuthHeaders(),
         body: JSON.stringify(sessionReq),

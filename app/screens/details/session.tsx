@@ -23,7 +23,7 @@ const SessionScreen = () => {
   const { session } = useLocalSearchParams();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { isLoading, fetchSessions, sessions } = useApiStore();
+  const { isLoading, fetchActiveSessions, activeSessions } = useApiStore();
 
   // Parse initial session data
   const initialSessionData: Session = JSON.parse(session as string);
@@ -40,12 +40,12 @@ const SessionScreen = () => {
 
   // Function to update session data from store
   const updateSessionData = useCallback(() => {
-    const updatedSession = sessions.find((s) => s.id === sessionData.id);
+    const updatedSession = activeSessions.find((s) => s.id === sessionData.id);
     if (updatedSession) {
       setSessionData(updatedSession);
       setLastUpdated(new Date());
     }
-  }, [sessions, sessionData.id]);
+  }, [activeSessions, sessionData.id]);
 
   // Real-time updates
   useEffect(() => {
@@ -56,7 +56,7 @@ const SessionScreen = () => {
     const fetchAndUpdate = async () => {
       setIsUpdating(true);
       try {
-        await fetchSessions();
+        await fetchActiveSessions();
         updateSessionData();
       } catch (error) {
         console.error('Failed to update session:', error);
@@ -72,13 +72,13 @@ const SessionScreen = () => {
     const interval = setInterval(fetchAndUpdate, 5000); // 5 seconds for better real-time feel
 
     return () => clearInterval(interval);
-  }, [fetchSessions, updateSessionData, sessionData.status]);
+  }, [fetchActiveSessions, updateSessionData, sessionData.status]);
 
   // Manual refresh
   const onRefresh = async () => {
     setRefreshing(true);
     try {
-      await fetchSessions();
+      await fetchActiveSessions();
       updateSessionData();
     } catch (error) {
       console.error('Error refreshing:', error);

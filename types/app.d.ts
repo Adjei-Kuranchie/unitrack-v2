@@ -183,6 +183,8 @@ interface Attendance {
 interface ApiState {
   courses: Course[];
   sessions: Session[];
+  activeSessions: Session[];
+  closedSessions: Session[];
   attendance: Attendance[];
   users: any[];
   isLoading: boolean;
@@ -194,7 +196,9 @@ interface ApiState {
 
   // Session actions
   fetchSessions: () => Promise<void>;
-  createSession: (sessionReq: SessionRequest) => Promise<void>;
+  fetchActiveSessions: () => Promise<void>;
+  fetchClosedSessions: () => Promise<void>;
+  createSession: (sessionReq: SessionRequest, time?: number) => Promise<void>;
 
   // Attendance actions
   fetchAttendance: () => Promise<void>;

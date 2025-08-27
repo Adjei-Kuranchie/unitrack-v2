@@ -22,7 +22,7 @@ const CourseDetails = () => {
   const [recordSessions, setRecordSessions] = useState<Attendance[]>([]);
   const [isLoadingSessions, setIsLoadingSessions] = useState(false);
 
-  const { sessions, fetchSessions, attendance } = useApiStore();
+  const { sessions, fetchSessions } = useApiStore();
   const { user } = useAuthStore();
 
   const course: Course | undefined =
@@ -38,10 +38,12 @@ const CourseDetails = () => {
 
   const filterRecordSessions = () => {
     if (!course) return;
-    const filteredAttendance = attendance.filter(
+
+    const allAttendance = sessions.map((session) => session.attendance);
+
+    const filteredAttendance = allAttendance.filter(
       (record) => record.courseName === course.courseName
     );
-
     // Sort by date, newest first
     const sortedAttendance = filteredAttendance.sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -164,11 +166,6 @@ const CourseDetails = () => {
             {record.lecturer && (
               <Text className="mt-2 text-xs text-gray-500">Lecturer: {record.lecturer}</Text>
             )}
-
-            {/* Student count info */}
-            <Text className="mt-1 text-xs text-gray-500">
-              {record.studentList?.length || 0} students attended
-            </Text>
           </View>
         </View>
       </TouchableOpacity>

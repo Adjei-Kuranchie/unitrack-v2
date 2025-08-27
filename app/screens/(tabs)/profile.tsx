@@ -36,10 +36,10 @@ export default function ProfileScreen() {
     error,
     clearError,
     courses,
-    sessions,
+    activeSessions,
     attendance,
     fetchCourses,
-    fetchSessions,
+    fetchActiveSessions,
     fetchAttendance,
   } = useApiStore();
 
@@ -110,7 +110,7 @@ export default function ProfileScreen() {
   useEffect(() => {
     if (token && isStudent) {
       // Fetch academic data for students
-      Promise.all([fetchCourses(), fetchSessions(), fetchAttendance()]).catch((err) => {
+      Promise.all([fetchCourses(), fetchActiveSessions(), fetchAttendance()]).catch((err) => {
         console.error('Failed to fetch academic data:', err);
       });
     }
@@ -351,9 +351,7 @@ export default function ProfileScreen() {
                 <Text className="text-sm text-white/80">Attendance</Text>
               </View>
               <View className="items-center">
-                <Text className="text-2xl font-bold text-white">
-                  {sessions.filter((s) => s.status === 'ACTIVE').length}
-                </Text>
+                <Text className="text-2xl font-bold text-white">{activeSessions.length}</Text>
                 <Text className="text-sm text-white/80">Active Sessions</Text>
               </View>
             </View>

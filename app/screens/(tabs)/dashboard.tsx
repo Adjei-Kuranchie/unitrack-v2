@@ -20,13 +20,21 @@ export default function DashboardScreen() {
   const [profileLoading, setProfileLoading] = useState<boolean>(false);
 
   const signOut = useAuthStore((state) => state.signOut);
-  const { courses, sessions, attendance, isLoading, fetchCourses, fetchSessions, fetchAttendance } =
-    useApiStore();
+  const {
+    courses,
+    sessions,
+    activeSessions,
+    attendance,
+    isLoading,
+    fetchCourses,
+    fetchActiveSessions,
+    fetchAttendance,
+  } = useApiStore();
 
   const isLecturer = role === 'LECTURER';
 
   useEffect(() => {
-    Promise.all([fetchCourses(), fetchSessions(), fetchAttendance()]);
+    Promise.all([fetchCourses(), fetchActiveSessions(), fetchAttendance()]);
   }, []);
 
   useEffect(() => {
@@ -114,7 +122,6 @@ export default function DashboardScreen() {
     .slice(0, 3);
 
   // Calculate active sessions
-  const activeSessions = sessions.filter((s) => s.status === 'ACTIVE').length;
   const myCourses = isLecturer
     ? courses.filter((c) => c.lecturerId === user?.id).length
     : courses.length;
@@ -210,7 +217,7 @@ export default function DashboardScreen() {
               <View className="mb-2 rounded-full bg-green-100 p-3">
                 <Ionicons name="checkmark-circle" size={24} color="#10b981" />
               </View>
-              <Text className="text-xl font-bold text-gray-900">{activeSessions}</Text>
+              <Text className="text-xl font-bold text-gray-900">{activeSessions.length}</Text>
               <Text className="text-xs text-gray-500">Active</Text>
             </View>
             <View className="items-center">

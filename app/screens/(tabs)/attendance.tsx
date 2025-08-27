@@ -6,15 +6,17 @@ import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 
 import { formatDateTime } from '~/lib/utils';
 import { useApiStore } from '~/store/apiStore';
 import { useAuthStore } from '~/store/authStore';
-import { Attendance } from '~/types/app';
+import { Attendance, Course } from '~/types/app';
 
 const AttendanceScreen = () => {
   const {
-    sessions,
+    activeSessions, // New state for active sessions
     attendance,
     isLoading,
     error,
+    sessions,
     fetchSessions,
+    fetchActiveSessions, // New function for active sessions
     fetchAttendance,
     markAttendance,
     clearError,
@@ -29,20 +31,20 @@ const AttendanceScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const IndexNumber = user?.IndexNumber;
-  const filteredSessions = sessions.filter((session) => session.status === 'ACTIVE');
+
   useEffect(() => {
     Promise.all([requestLocationPermission(), loadInitialData()]);
 
     // Check for new sessions after 5 seconds
     const timer = setTimeout(() => {
-      fetchSessions();
+      fetchActiveSessions(); // Changed to fetch active sessions
     }, 5000);
 
     return () => clearTimeout(timer);
   }, []);
 
   const loadInitialData = async () => {
-    await fetchSessions();
+    await fetchActiveSessions(); // Changed to fetch active sessions
     await fetchAttendance();
   };
 
@@ -102,7 +104,7 @@ const AttendanceScreen = () => {
     }
   };
 
-  const renderAttendanceRecord = (record: Attendance, index: number) => {
+  const renderAttendanceRecord = (record: Attendance, index: number, course: Course) => {
     const recordId = String(index);
     const lecturer = String(record.lecturer);
     const studentId = IndexNumber ? String(IndexNumber) : null;
@@ -148,7 +150,9 @@ const AttendanceScreen = () => {
           </View>
           <View className="flex-1">
             <Text className="text-sm font-medium capitalize text-gray-800">{lecturer}</Text>
-            <Text className="text-xs text-gray-500">Lecturer</Text>
+            <Text className="text-xs text-gray-500">
+              {course.courseCode} - {course.courseName}
+            </Text>
           </View>
         </View>
 
@@ -275,7 +279,8 @@ const AttendanceScreen = () => {
                   onValueChange={(itemValue) => setSelectedSession(itemValue)}
                   enabled={!marking}>
                   <Picker.Item label="Choose an active session" value={null} />
-                  {filteredSessions.map((session) => (
+                  {/* Directly use activeSessions from store */}
+                  {activeSessions.map((session) => (
                     <Picker.Item
                       key={session.id}
                       label={`${session.course.courseCode}: ${session.course.courseName} - ${session.attendance.lecturer}`}
@@ -338,11 +343,13 @@ const AttendanceScreen = () => {
               </View>
               <Text className="text-gray-600">Loading attendance records...</Text>
             </View>
-          ) : Array.isArray(attendance) && attendance.length > 0 ? (
+          ) : Array.isArray(sessions) && sessions.length > 0 ? (
             <View className="mt-4">
-              {attendance
-                .slice(0, 11)
-                .map((record, index) => renderAttendanceRecord(record, index))}
+              {sessions
+                .map((record, index) =>
+                  renderAttendanceRecord(record.attendance, index, record.course)
+                )
+                .reverse()}
             </View>
           ) : (
             <View className="items-center py-12">
