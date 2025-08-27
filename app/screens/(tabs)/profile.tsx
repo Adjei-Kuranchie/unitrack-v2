@@ -73,10 +73,16 @@ export default function ProfileScreen() {
       icon: isStudent ? 'badge' : 'account-circle', // Conditional icon based on role
     },
     {
+      key: 'department',
+      label: 'Department',
+      value: user?.department || '',
+      icon: 'school',
+    },
+    {
       key: 'program',
       label: 'Program',
       value: user?.program || '',
-      icon: 'school',
+      icon: 'menu-book',
     },
   ];
 
@@ -305,9 +311,7 @@ export default function ProfileScreen() {
                 <View
                   key={field.key}
                   className={`${
-                    field.key === 'email' || field.key === 'username' || field.key === 'program'
-                      ? 'w-full'
-                      : 'w-1/2'
+                    field.key === 'email' || field.key === 'username' ? 'w-full' : 'w-1/2'
                   } ${index < filteredFields.length - 1 ? 'mb-6' : ''} ${
                     index % 2 === 0 ? 'pr-2' : ''
                   }`}>
@@ -319,7 +323,7 @@ export default function ProfileScreen() {
                       </Text>
                     </View>
                     <Text className="text-sm font-semibold text-gray-900" numberOfLines={1}>
-                      {field.value || 'N/A'}
+                      {field.value}
                     </Text>
                   </View>
                 </View>

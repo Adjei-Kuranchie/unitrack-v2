@@ -480,7 +480,6 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
       </View>
     );
   }
-
   return (
     <View className="flex-1 bg-slate-50">
       {/* Enhanced Header matching CoursesScreen */}

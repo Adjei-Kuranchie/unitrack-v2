@@ -30,7 +30,6 @@ const AttendanceScreen = () => {
 
   const IndexNumber = user?.IndexNumber;
   const filteredSessions = sessions.filter((session) => session.status === 'ACTIVE');
-
   useEffect(() => {
     Promise.all([requestLocationPermission(), loadInitialData()]);
 

@@ -89,9 +89,9 @@ export default function RegisterScreen() {
     }
 
     // Password minimum length
-    if (password.length < 12) {
+    if (password.length < 9) {
       showToast(
-        'Password must be at least 12 characters',
+        'Password must be at least 9 characters',
         3000,
         true,
         { backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8 },
@@ -247,7 +247,7 @@ export default function RegisterScreen() {
 
     if (!registrationError) {
       showToast(
-        'Check mail to verify your account!',
+        'Check your mail or your spam to verify your account!',
         7000,
         true,
         { backgroundColor: '#D1FAE5', padding: 12, borderRadius: 8 },

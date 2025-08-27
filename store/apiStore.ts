@@ -275,13 +275,8 @@ export const useApiStore = create<ApiState>((set, get) => ({
         body: JSON.stringify(attendanceReq),
       });
 
-      // console.log('Request body:', JSON.stringify(attendanceReq));
-      // console.log('Request headers:', await getAuthHeaders(true));
-      // console.log('Response status:', response.status);
-      // console.log('Response body:', await response.text());
-
       if (!response.ok) {
-        console.log('Response not OK:', response.status, response.statusText);
+        // console.log('Response not OK:', response.status, response.statusText);
         const errorText = await response.text();
         set({
           error: errorText || 'Failed to mark attendance',
