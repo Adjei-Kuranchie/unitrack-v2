@@ -97,9 +97,39 @@ export const useAuthStore = create<AuthState>()(
       setUser: (userData) => {
         set({ user: userData });
       },
+
       signOut: () => {
         set({ user: null, token: null, role: null, resMessage: null, error: null });
       },
+
+      forgotPassword: async (email) => {
+        set({ isLoading: true, error: null });
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email }), // ← Changed: Wrap email in object
+          });
+
+          const responseText = await response.text(); // Get text response
+
+          if (!response.ok) {
+            throw new Error(responseText || 'Password Reset failed');
+          }
+
+          set({ isLoading: false });
+          return true 
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Password Reset failed',
+            isLoading: false,
+          });
+          return false 
+        }
+},
 
       clearError: () => {
         set({ error: null });

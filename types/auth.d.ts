@@ -59,6 +59,7 @@ interface AuthState {
   signOut: () => void;
   setUser: (user: any) => void;
   register: (userData: RegisterData) => Promise<void>;
+  forgotPassword : (email:string) => Promise<boolean>;
   clearError: () => void;
 }
 

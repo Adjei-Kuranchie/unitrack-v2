@@ -16,7 +16,7 @@ export default function ScreensLayout() {
         }}
       />
       <Stack.Screen
-        name="(auth)/OTPScreen"
+        name="(auth)/ForgotPasswordScreen"
         options={{
           headerShown: false,
         }}

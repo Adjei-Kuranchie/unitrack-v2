@@ -34,7 +34,8 @@ import { create } from 'zustand';
 import { useAuthStore } from '~/store/authStore';
 import { ApiState, Attendance, AttendanceRequest } from '~/types/app';
 const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
-
+import * as SecureStore from "expo-secure-store"
+;
 const DEVICE_ID_KEY = 'device_id';
 
 /**
@@ -43,12 +44,12 @@ const DEVICE_ID_KEY = 'device_id';
  */
 const getDeviceId = async (): Promise<string> => {
   try {
-    let deviceId = await AsyncStorage.getItem(DEVICE_ID_KEY);
+    let deviceId = await SecureStore.getItemAsync(DEVICE_ID_KEY);
 
     if (!deviceId) {
       deviceId = uuid.v4();
 
-      await AsyncStorage.setItem(DEVICE_ID_KEY, deviceId);
+      await SecureStore.setItemAsync(DEVICE_ID_KEY, deviceId);
     }
 
     return deviceId;

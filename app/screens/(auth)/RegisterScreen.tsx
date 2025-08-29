@@ -40,6 +40,30 @@ export default function RegisterScreen() {
     return regex.test(indexNumber);
   };
 
+  // Password validation checks
+  const getPasswordChecks = (password: string) => {
+    const passwordLower = password.toLowerCase();
+    const firstNameLower = formData.firstName.trim().toLowerCase();
+    const lastNameLower = formData.lastName.trim().toLowerCase();
+    const usernameLower = formData.username.trim().toLowerCase();
+    const emailLocalPart = formData.email.split('@')[0].toLowerCase();
+
+    return {
+      length: password.length >= 9,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /[0-9]/.test(password),
+      special: /[!@#$%^&*()\\-_=+{}|;:,.<>?/]/.test(password),
+      notNumeric: !/^\d+$/.test(password),
+      noPersonalInfo: !(
+        (usernameLower && passwordLower.includes(usernameLower)) ||
+        (firstNameLower && passwordLower.includes(firstNameLower)) ||
+        (lastNameLower && passwordLower.includes(lastNameLower)) ||
+        (emailLocalPart && passwordLower.includes(emailLocalPart))
+      ),
+    };
+  };
+
   const validateForm = () => {
     const { username, password, firstName, lastName, email, role } = formData;
     const emailRegex = new RegExp('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$');
@@ -88,98 +112,13 @@ export default function RegisterScreen() {
       }
     }
 
-    // Password minimum length
-    if (password.length < 9) {
-      showToast(
-        'Password must be at least 9 characters',
-        3000,
-        true,
-        { backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8 },
-        { color: '#DC2626', fontSize: 14, fontWeight: '500' }
-      );
-      return false;
-    }
+    // Get all password checks
+    const checks = getPasswordChecks(password);
 
-    // Password complexity requirements
-    const hasUpperCase = new RegExp('[A-Z]').test(password);
-    const hasLowerCase = new RegExp('[a-z]').test(password);
-    const hasNumber = new RegExp('[0-9]').test(password);
-    const hasSpecialChar = new RegExp('[!@#$%^&*()\\-_=+{}|;:,.<>?/]').test(password);
-
-    // Check if password contains at least one uppercase letter
-    if (!hasUpperCase) {
+    // Check if all password requirements are met
+    if (!Object.values(checks).every((check) => check)) {
       showToast(
-        'Password must contain at least 1 uppercase letter',
-        3000,
-        true,
-        { backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8 },
-        { color: '#DC2626', fontSize: 14, fontWeight: '500' }
-      );
-      return false;
-    }
-
-    // Check if password contains at least one lowercase letter
-    if (!hasLowerCase) {
-      showToast(
-        'Password must contain at least 1 lowercase letter',
-        3000,
-        true,
-        { backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8 },
-        { color: '#DC2626', fontSize: 14, fontWeight: '500' }
-      );
-      return false;
-    }
-
-    // Check if password contains at least one number
-    if (!hasNumber) {
-      showToast(
-        'Password must contain at least 1 number',
-        3000,
-        true,
-        { backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8 },
-        { color: '#DC2626', fontSize: 14, fontWeight: '500' }
-      );
-      return false;
-    }
-    // Check if password contains at least one special character
-    if (!hasSpecialChar) {
-      showToast(
-        'Password must contain at least 1 special character',
-        3000,
-        true,
-        { backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8 },
-        { color: '#DC2626', fontSize: 14, fontWeight: '500' }
-      );
-      return false;
-    }
-
-    // Check if password is entirely numeric
-    if (new RegExp('^\\d+$').test(password)) {
-      showToast(
-        'Password cannot be entirely numeric',
-        3000,
-        true,
-        { backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8 },
-        { color: '#DC2626', fontSize: 14, fontWeight: '500' }
-      );
-      return false;
-    }
-
-    // Check for personal information in password (case-insensitive)
-    const passwordLower = password.toLowerCase();
-    const usernameLower = username.trim().toLowerCase();
-    const firstNameLower = firstName.trim().toLowerCase();
-    const lastNameLower = lastName.trim().toLowerCase();
-    const emailLocalPart = email.split('@')[0].toLowerCase();
-
-    if (
-      (usernameLower && passwordLower.includes(usernameLower)) ||
-      (firstNameLower && passwordLower.includes(firstNameLower)) ||
-      (lastNameLower && passwordLower.includes(lastNameLower)) ||
-      (emailLocalPart && passwordLower.includes(emailLocalPart))
-    ) {
-      showToast(
-        'Password cannot contain your name, username, or email',
+        'Password does not meet all requirements',
         3000,
         true,
         { backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8 },
@@ -222,7 +161,7 @@ export default function RegisterScreen() {
       'password',
     ];
 
-    if (commonPasswords.includes(passwordLower)) {
+    if (commonPasswords.includes(password.toLowerCase())) {
       showToast(
         'Password is too common. Please choose a stronger password',
         3000,
@@ -357,6 +296,8 @@ export default function RegisterScreen() {
                 icon="lock"
                 setShowPassword={setShowPassword}
                 showPassword={showPassword}
+                passwordChecks={getPasswordChecks(formData.password)}
+                showPasswordRequirements={true}
               />
 
               {/* Role Selection */}
@@ -473,6 +414,8 @@ const InputField = ({
   icon,
   setShowPassword,
   showPassword,
+  passwordChecks,
+  showPasswordRequirements,
 }: any) => (
   <View className="mb-5">
     <Text className="mb-2 text-sm font-semibold text-gray-700">{label}</Text>
@@ -502,5 +445,37 @@ const InputField = ({
         </Pressable>
       )}
     </View>
+
+    {/* Password Requirements */}
+    {showPasswordRequirements && fieldName === 'password' && value.length > 0 && (
+      <View className="mt-3 rounded-lg bg-gray-50 p-3">
+        <PasswordRequirement met={passwordChecks.length} text="At least 9 characters" />
+        <PasswordRequirement met={passwordChecks.uppercase} text="At least 1 uppercase letter" />
+        <PasswordRequirement met={passwordChecks.lowercase} text="At least 1 lowercase letter" />
+        <PasswordRequirement met={passwordChecks.number} text="At least 1 number" />
+        <PasswordRequirement
+          met={passwordChecks.special}
+          text="At least 1 special character (!@#$%^&*...)"
+        />
+        <PasswordRequirement met={passwordChecks.notNumeric} text="Not entirely numeric" />
+        <PasswordRequirement
+          met={passwordChecks.noPersonalInfo}
+          text="No personal information (name, email, username)"
+        />
+      </View>
+    )}
+  </View>
+);
+
+const PasswordRequirement = ({ met, text }: { met: boolean; text: string }) => (
+  <View className="mb-1.5 flex-row items-center">
+    <View className="mr-2">
+      {met ? (
+        <Feather name="check-circle" size={16} color="#10B981" />
+      ) : (
+        <Feather name="x-circle" size={16} color="#EF4444" />
+      )}
+    </View>
+    <Text className={`text-xs ${met ? 'text-green-600' : 'text-red-600'}`}>{text}</Text>
   </View>
 );
