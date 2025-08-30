@@ -127,7 +127,7 @@ const SessionScreen: React.FC<SessionScreenProps> = ({ navigation }) => {
       await createSession({ courseName: selectedCourse, location }, timeInSeconds);
       setShowCreateModal(false);
       setSelectedCourse('');
-      setSessionTimeMinutes(300); // Reset to default
+      setSessionTimeMinutes(5); // Reset to default
 
       showToast(
         'Session created successfully',
