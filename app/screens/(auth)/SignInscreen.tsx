@@ -200,10 +200,19 @@ export default function SignInScreen() {
                 </View>
               </View>
 
+              {/* Forgot Password Link */}
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => router.push('/screens/(auth)/ForgotPasswordScreen')}
+                disabled={isLoading}
+                className="self-end">
+                <Text className="text-sm font-medium text-blue-600">Forgot Password?</Text>
+              </TouchableOpacity>
+
               {/* Sign In Button */}
               <TouchableOpacity
                 activeOpacity={0.9}
-                className={`mt-8 overflow-hidden rounded-2xl shadow-lg ${
+                className={`mt-6 overflow-hidden rounded-2xl shadow-lg ${
                   isLoading ? 'opacity-70' : ''
                 }`}
                 onPress={handleSignIn}
@@ -241,7 +250,7 @@ export default function SignInScreen() {
                 </TouchableOpacity>
               </View>
 
-              {/* Legal Notice Footer - Add this */}
+              {/* Legal Notice Footer */}
               <View className="mt-10 items-center pb-8">
                 <TouchableOpacity
                   activeOpacity={0.7}
