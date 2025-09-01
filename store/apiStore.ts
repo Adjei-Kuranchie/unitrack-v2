@@ -36,7 +36,7 @@ import { ApiState, Attendance, AttendanceRequest } from '~/types/app';
 const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 import * as SecureStore from "expo-secure-store"
 ;
-const DEVICE_ID_KEY = 'device_id';
+const DEVICE_ID_KEY = 'UnitrackDeviceId';
 
 /**
  * Gets or generates a unique device ID
@@ -47,7 +47,7 @@ const getDeviceId = async (): Promise<string> => {
     let deviceId = await SecureStore.getItemAsync(DEVICE_ID_KEY);
 
     if (!deviceId) {
-      deviceId = uuid.v4();
+      deviceId = uuid.v4() as string;
 
       await SecureStore.setItemAsync(DEVICE_ID_KEY, deviceId);
     }
